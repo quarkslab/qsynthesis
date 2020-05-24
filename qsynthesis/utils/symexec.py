@@ -6,7 +6,7 @@ from triton import ARCH, CALLBACK, MODE, MemoryAccess, Instruction, AST_REPRESEN
 from triton import TritonContext
 
 # qsynthesis deps
-from qsynthesis.texsearch.tritonioast import TritonIOAst
+from qsynthesis.tritonast import TritonAst
 
 
 Register = TypeVar("Register")  # Triton Register type
@@ -140,7 +140,7 @@ class SimpleSymExec:
         comment = f"reg_{reg.getName()}_at_{self.ctx.getConcreteRegisterValue(self.ins_ptr_reg)}"
         self.symbolize_register(reg, 0, comment)
 
-    def get_register_ioast(self, reg_name: Union[str, Register]) -> TritonIOAst:
+    def get_register_ast(self, reg_name: Union[str, Register]) -> TritonAst:
         reg = getattr(self.ctx.registers, reg_name) if isinstance(reg_name, str) else reg_name
         reg_se = self.ctx.getSymbolicRegister(reg)
         actx = self.ctx.getAstContext()
@@ -148,9 +148,9 @@ class SimpleSymExec:
             e = actx.bv(self.ctx.getConcreteRegisterValue(reg), reg.getBitSize())
         else:
             e = actx.unroll(reg_se.getAst())
-        return TritonIOAst.make_ast(self.ctx, e)
+        return TritonAst.make_ast(self.ctx, e)
 
-    def get_memory_ioast(self, addr: int, size: int):
+    def get_memory_ast(self, addr: int, size: int):
         raise NotImplementedError("getting AST of memory not implemented yet")
 
     def symbolize_register(self, reg, value, comment):

@@ -1,6 +1,6 @@
 import pickle
 from pathlib import Path
-from qsynthesis.common.abstract_grammar import Grammar
+from qsynthesis.grammar import TritonGrammar
 import logging
 
 from typing import Optional, List, Dict, Union, Generator, Tuple, Any, TypeVar
@@ -9,8 +9,8 @@ from time import time
 Expr = TypeVar('Expr')  # Expression type in the associated grammar
 
 
-class LKPTable:
-    def __init__(self, gr: Grammar, inputs: Union[int, List[Dict[Any, Any]]], f_name: str = ""):
+class LookupTable:
+    def __init__(self, gr: TritonGrammar, inputs: Union[int, List[Dict[Any, Any]]], f_name: str = ""):
         self._name = Path(f_name)
         self.lookup_table = {}
         self.grammar = gr
@@ -145,12 +145,12 @@ class LKPTable:
             pickle.dump(self.lookup_table, f)
 
     @staticmethod
-    def load(file: Union[Path, str], grammar_class) -> 'LKPTable':
+    def load(file: Union[Path, str], grammar_class) -> 'LookupTable':
         f = Path(file)
         with open(f, 'rb') as f:
             gr = grammar_class.from_dict(pickle.load(f))
             inp_l = pickle.load(f)
             inputs = grammar_class.load_inputs(inp_l)
-            lkp = LKPTable(gr, inputs, f.name)
+            lkp = LookupTable(gr, inputs, f.name)
             lkp.lookup_table = pickle.load(f)
             return lkp
