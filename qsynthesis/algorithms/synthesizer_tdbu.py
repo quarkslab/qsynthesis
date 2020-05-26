@@ -6,7 +6,7 @@ from enum import IntEnum
 from orderedset import OrderedSet
 
 from qsynthesis.tritonast import TritonAst
-from qsynthesis.algorithms.synthesizer_base import TritonSynthesizerBase
+from qsynthesis.algorithms.synthesizer_base import SynthesizerBase
 
 AstType = IntEnum("AstNode", {k: v for k, v in triton.AST_NODE.__dict__.items() if isinstance(v, int)})
 
@@ -16,7 +16,7 @@ class YieldT(IntEnum):
     BottomUp = 2
 
 
-class TritonTDBUSynthesizer(TritonSynthesizerBase):
+class TopDownBottomUpSynthesizer(SynthesizerBase):
     """
     Synthesize with Top-Down then Bottom-Up AST search based on
     Triton AST.
@@ -24,7 +24,7 @@ class TritonTDBUSynthesizer(TritonSynthesizerBase):
     """
 
     def __init__(self, ltms: List[LookupTable], only_first_match: bool = False):
-        super(TritonTDBUSynthesizer, self).__init__(ltms, only_first_match)
+        super(TopDownBottomUpSynthesizer, self).__init__(ltms, only_first_match)
         self.total_repl_td = 0
         self.total_repl_bu = 0
 

@@ -7,7 +7,7 @@ from qsynthesis.lookuptable import LookupTable
 from qsynthesis.tritonast import TritonAst
 
 
-class TritonSynthesizerBase:
+class SynthesizerBase:
     """
     Synthesize with Top-Down ONLY AST search based on Triton AST.
     This synthesis mechanism always converges
