@@ -5,10 +5,10 @@ from enum import IntEnum
 
 from qsynthesis.lookuptable import LookupTable
 from qsynthesis.tritonast import TritonAst
-from qsynthesis.algorithms.synthesizer_base import TritonSynthesizerBase
+from qsynthesis.algorithms.synthesizer_base import SynthesizerBase
 
 
-class TritonTDSynthesizer(TritonSynthesizerBase):
+class TopDownSynthesizer(SynthesizerBase):
     """
     Synthesize with Top-Down ONLY AST search based on Triton AST.
     This synthesis mechanism always converges

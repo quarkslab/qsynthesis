@@ -4,13 +4,13 @@ import triton
 from enum import IntEnum
 
 from qsynthesis.tritonast import TritonAst
-from qsynthesis.algorithms.synthesizer_tdbu import TritonTDBUSynthesizer, YieldT
+from qsynthesis.algorithms.synthesizer_tdbu import TopDownBottomUpSynthesizer, YieldT
 
 
 AstType = IntEnum("AstNode", {k: v for k, v in triton.AST_NODE.__dict__.items() if isinstance(v, int)})
 
 
-class TritonPlaceHolderSynthesizer(TritonTDBUSynthesizer):
+class PlaceHolderSynthesizer(TopDownBottomUpSynthesizer):
     """
     Synthesize with Top-Down then Bottom-Up AST search based on
     Triton AST.

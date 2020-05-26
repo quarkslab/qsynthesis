@@ -1,2 +1,2 @@
-from .synthesizer_td import TritonTDSynthesizer
-from .synthesizer_plhld import TritonPlaceHolderSynthesizer
+from .synthesizer_td import TopDownSynthesizer
+from .synthesizer_plhld import PlaceHolderSynthesizer
