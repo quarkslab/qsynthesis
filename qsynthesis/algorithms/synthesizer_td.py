@@ -14,7 +14,7 @@ class TopDownSynthesizer(SynthesizerBase):
     This synthesis mechanism always converges
     """
 
-    def synthesize(self, ioast: TritonAst) -> Tuple[TritonAst, bool]:
+    def synthesize(self, ioast: TritonAst, check_sem: bool = False) -> Tuple[TritonAst, bool]:
         ioast = ioast.duplicate()  # Make a copy of the AST to to modify it
         self.expr_cache = {}
         self.eval_cache = {}
@@ -35,7 +35,7 @@ class TopDownSynthesizer(SynthesizerBase):
 
                 logging.debug(f"try synthesis lookup: {cur_ast.pp_str} [{cur_ast.var_num}]")
 
-                synt_res = self.try_synthesis_lookup(cur_ast)
+                synt_res = self.try_synthesis_lookup(cur_ast, check_sem)
 
                 if synt_res is not None:
                     has_been_synthesized = True

@@ -28,7 +28,7 @@ class TopDownBottomUpSynthesizer(SynthesizerBase):
         self.total_repl_td = 0
         self.total_repl_bu = 0
 
-    def synthesize(self, ioast: TritonAst) -> Tuple[TritonAst, bool]:
+    def synthesize(self, ioast: TritonAst, check_sem: bool = False) -> Tuple[TritonAst, bool]:
         ioast = ioast.duplicate()  # Make a copy of the ast not tamper it
         self.expr_cache = {}
         self.eval_cache = {}
@@ -51,7 +51,7 @@ class TopDownBottomUpSynthesizer(SynthesizerBase):
 
             else:  # Try synthesizing expression
                 logging.debug(f"try synthesis lookup: {cur_expr.pp_str if cur_expr.node_count < 50 else 'too large'}")
-                synt_res = self.try_synthesis_lookup(cur_expr)
+                synt_res = self.try_synthesis_lookup(cur_expr, check_sem)
                 if synt_res is not None:
                     expr_modified = True
                 new_expr_to_send = synt_res  # Send the result to the generator (thus either new expr or None)

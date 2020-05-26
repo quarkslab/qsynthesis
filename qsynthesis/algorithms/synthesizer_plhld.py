@@ -17,7 +17,7 @@ class PlaceHolderSynthesizer(TopDownBottomUpSynthesizer):
     This synthesis mechanism always converges
     """
 
-    def synthesize(self, ioast: TritonAst) -> Tuple[TritonAst, bool]:
+    def synthesize(self, ioast: TritonAst, check_sem: bool = False) -> Tuple[TritonAst, bool]:
         self.expr_cache = {}
         self.eval_cache = {}
         self.call_to_eval = 0
@@ -51,7 +51,7 @@ class PlaceHolderSynthesizer(TopDownBottomUpSynthesizer):
 
             # Try synthesizing expression
             logging.debug(f"[phldr] try synthesis lookup: {cur_ast.pp_str if cur_ast.node_count < 50 else 'too large'} [{cur_ast.node_count}] [{info.name}]")
-            synt_res = self.try_synthesis_lookup(cur_ast)
+            synt_res = self.try_synthesis_lookup(cur_ast, check_sem)
 
             if synt_res is not None:
                 expr_modified = True
