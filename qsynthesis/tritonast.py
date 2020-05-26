@@ -236,6 +236,13 @@ class TritonAst:
             return t
         return rec(exp)
 
+    def duplicate(self) -> 'TritonAst':
+        """
+        Create a new distinct instance of TritonAst
+        """
+        new_expr = self.ast.duplicate(self.expr)
+        return TritonAst.make_ast(self.ctx, new_expr)
+
     def random_sampling(self, n: int) -> List[Tuple[Dict[str, int], int]]:
         """
         Generates a random list of I/O samples

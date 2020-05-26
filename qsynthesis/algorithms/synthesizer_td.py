@@ -15,6 +15,7 @@ class TopDownSynthesizer(SynthesizerBase):
     """
 
     def synthesize(self, ioast: TritonAst) -> Tuple[TritonAst, bool]:
+        ioast = ioast.duplicate()  # Make a copy of the AST to to modify it
         self.expr_cache = {}
         self.eval_cache = {}
         self.call_to_eval = 0
