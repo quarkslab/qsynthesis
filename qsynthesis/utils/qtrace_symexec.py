@@ -11,6 +11,7 @@ from triton import TritonContext
 from qtracedb.trace import Trace, MemAccessType
 from qtracedb.archs import ArchsManager
 
+
 from qsynthesis.utils.symexec import SimpleSymExec, Register
 
 
@@ -53,7 +54,7 @@ class QtraceSymExec(SimpleSymExec):
 
     @property
     def parameter_regs(self) -> List[Register]:
-        return [getattr(self.ctx, x.name.lower()) for x in self.trace_arch.registers_cc]
+        return [getattr(self.ctx.registers, x.name.lower()) for x in self.trace_arch.registers_cc]
 
     @property
     def supported_regs(self) -> List[Register]:
@@ -61,16 +62,15 @@ class QtraceSymExec(SimpleSymExec):
         Map Qtrace-DB supported registers to Triton registers.
         It assumes registers strings exists in Triton in lowercase
         """
-        if self._sup_regs is None:
+        if self._sup_regs is None:  # Lazily compute it. Only done once
             rgs = ArchsManager.get_supported_regs(self.trace_arch)
             self._sup_regs = [getattr(self.ctx.registers, x.name.lower()) for x in rgs]
-        else:
-            return self._sup_regs
+        return self._sup_regs
 
     def _mem_read_callback(self, ctx: TritonContext, ma: MemoryAccess) -> None:
         if not self._capturing:
             return
-
+        #logging.debug(f"READ Triton:{ma} Qtrace-DB:{self.trace.get_memacc_by_instr(self._cur_db_inst)}")
         # Retrieve all addresses of a given mem access
         addrs = self.memacc_to_all_addr(ma)
 
@@ -123,10 +123,11 @@ class QtraceSymExec(SimpleSymExec):
             # Concretize all the memory cell
             addr, size = ma.getAddress(), ma.getSize()
 
-            mems = [x for x in self.trace.get_memacc_by_instr(self._cur_db_inst) if x.kind == MemAccessType.read]
+            mems = [x for x in qtracedb_mas if x.kind == MemAccessType.read]
             if not mems:
                 logging.warning("no memory read for the instruction")
             mapping = {mem.addr + i: mem.data[i] for mem in mems for i in range(len(mem.data))}
+            logging.debug(f"Mem read: Triton:[0x{addr:x}:{size}] Qtrace-DB:[0x{mems[0].addr:x}:{len(mems[0].data)}]")
 
             for index in range(addr, addr + size):
                 if index in mapping:
@@ -172,15 +173,15 @@ class QtraceSymExec(SimpleSymExec):
         """
 
         # Process instructions
-        for qtracedb_inst_id in range(start_id + 1, stop_id):
+        for qtracedb_inst_id in range(start_id, stop_id):
 
             # Save current qtracedb instr into the object in order (to make it accessible from callbacks)
             self._cur_db_inst = self.trace.get_instr(qtracedb_inst_id)
 
             if check_regs:
                 self.sync_registers()
-
-            self.execute(self._cur_db_inst.addr, self._cur_db_inst.opcode)
+            #logging.debug(f"0x{self._cur_db_inst.addr:x} {self._cur_db_inst}")
+            self.execute(opcode=self._cur_db_inst.opcode, addr=self._cur_db_inst.addr)
 
     def sync_registers(self):
         # Find and fix mismatches in registers values
