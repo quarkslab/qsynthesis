@@ -31,7 +31,7 @@ class SynthesizerBase:
         self.cache_hit = 0
         self.eval_count = 0
 
-    def synthesize(self, ioast: TritonAst) -> Tuple[TritonAst, bool]:
+    def synthesize(self, ioast: TritonAst, check_sem: bool = False) -> Tuple[TritonAst, bool]:
         raise NotImplementedError("Should be implemented in children class")
 
     def try_synthesis_lookup(self, cur_ast: TritonAst, check_sem=False) -> Optional[TritonAst]:
