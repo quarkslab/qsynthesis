@@ -145,12 +145,12 @@ class LookupTable:
             pickle.dump(self.lookup_table, f)
 
     @staticmethod
-    def load(file: Union[Path, str], grammar_class) -> 'LookupTable':
+    def load(file: Union[Path, str]) -> 'LookupTable':
         f = Path(file)
         with open(f, 'rb') as f:
-            gr = grammar_class.from_dict(pickle.load(f))
+            gr = TritonGrammar.from_dict(pickle.load(f))
             inp_l = pickle.load(f)
-            inputs = grammar_class.load_inputs(inp_l)
+            inputs = TritonGrammar.load_inputs(inp_l)
             lkp = LookupTable(gr, inputs, f.name)
             lkp.lookup_table = pickle.load(f)
             return lkp
