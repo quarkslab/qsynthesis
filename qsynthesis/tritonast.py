@@ -8,7 +8,7 @@ from enum import IntEnum
 import random
 from functools import reduce
 
-from graph_tool.all import *
+
 
 AstType = IntEnum("AstNode", {k: v for k, v in triton.AST_NODE.__dict__.items() if isinstance(v, int)})
 
@@ -359,7 +359,8 @@ class TritonAst:
                     return
 
     @staticmethod
-    def mk_ast_graph(ast: 'TritonAst', show=True) -> Graph:
+    def mk_ast_graph(ast: 'TritonAst', show=True) -> 'Graph':
+        from graph_tool.all import Graph, interactive_window
         g = Graph(directed=True)
         g.vp['sym'] = g.new_vertex_property('string')
         g.vp['pos'] = g.new_vertex_property('vector<double>')
