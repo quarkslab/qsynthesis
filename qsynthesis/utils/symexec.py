@@ -1,5 +1,5 @@
 # built-in libs
-from typing import List, Set, Iterable, TypeVar, Union
+from typing import List, Set, Iterable, TypeVar, Union, Optional
 
 # third-party libs
 from triton import ARCH, CALLBACK, MODE, MemoryAccess, Instruction, AST_REPRESENTATION
@@ -47,25 +47,26 @@ class SimpleSymExec:
         self.ctx.addCallback(self._reg_write_callback, CALLBACK.SET_CONCRETE_REGISTER_VALUE)
         self.ctx.addCallback(self._reg_read_callback, CALLBACK.GET_CONCRETE_REGISTER_VALUE)
 
+        self.cur_inst = None
+        self.inst_count = 0
+
     @property
     def arch(self):
         return self.ctx.getArchitecture()
 
     @property
     def flags_reg(self):
-        _mapper = {ARCH.X86: self.ctx.registers.eflags,
-                   ARCH.X86_64: self.ctx.registers.eflags,
-                   ARCH.ARM32: self.ctx.registers.cpsr,
-                   ARCH.AARCH64: self.ctx.registers.spsr}  # Not really true for spsr
-        return _mapper[self.arch]
+        _mapper = {ARCH.X86: "eflags", ARCH.X86_64: "eflags", ARCH.ARM32: "cpsr", ARCH.AARCH64: "spsr"}  # Not really true for spsr
+        return getattr(self.ctx.registers, _mapper[self.arch])
 
     @property
     def ins_ptr_reg(self):
-        _mapper = {ARCH.X86: self.ctx.registers.eip,
-                   ARCH.X86_64: self.ctx.registers.rip,
-                   ARCH.ARM32: self.ctx.registers.pc,
-                   ARCH.AARCH64: self.ctx.registers.pc}
-        return _mapper[self.arch]
+        _mapper = {ARCH.X86: "eip", ARCH.X86_64: "rip", ARCH.ARM32: "pc", ARCH.AARCH64: "pc"}
+        return getattr(self.ctx.registers, _mapper[self.arch])
+
+    @property
+    def current_address(self):
+        return self.cur_inst.getAddress()
 
     def turn_on(self) -> None:
         """
@@ -108,7 +109,7 @@ class SimpleSymExec:
         # Symbolize all the memory cells that have not yet been seen
         # Coalesce adjacent bytes and create memory accesses' symvars
         for ma in self.coalesce_bytes_to_mas(new_addrs):
-            comment = "mem_{:#x}_{}".format(ma.getAddress(), ma.getSize())
+            comment = f"mem_0x{ma.getAddress():x}_at_0x{self.current_address:x}_{self.inst_count}"
             symvar = ctx.symbolizeMemory(ma, comment)
 
             self.mem_symvars.append(symvar)
@@ -137,7 +138,7 @@ class SimpleSymExec:
             return
 
         # Symbolize the register
-        comment = f"reg_{reg.getName()}_at_{self.ctx.getConcreteRegisterValue(self.ins_ptr_reg)}"
+        comment = f"reg_{reg.getName()}_at_0x{self.current_address}_{self.inst_count}"
         self.symbolize_register(reg, 0, comment)
 
     def get_register_ast(self, reg_name: Union[str, Register]) -> TritonAst:
@@ -167,11 +168,15 @@ class SimpleSymExec:
         self.reg_id_seen.add(reg.getId())
         self.ctx.setConcreteRegisterValue(reg, value)
 
-    def execute(self, addr: int, opcode: bytes) -> bool:
-        inst = Instruction(addr, opcode)
+    def execute(self, opcode: bytes, addr: Optional[int] = None) -> bool:
+        inst = Instruction(addr, opcode) if addr is not None else Instruction(opcode)
         return self.execute_instruction(inst)
 
     def execute_instruction(self, instr: Instruction) -> bool:
+        # Update object values
+        self.cur_inst = instr
+        self.inst_count += 1
+
         # Process instruction
         self.turn_on()
         r = self.ctx.processing(instr)
