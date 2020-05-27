@@ -69,10 +69,7 @@ class LookupTable:
     def operator_number(self):
         return len(self.grammar.ops)
 
-    def generate(self, depth, max_count=0, unsigned: bool = False):
-        # def to_uint(x):
-        #     return (x if x > 0 else (1 << self._bitsize) + x) if unsigned else x
-
+    def generate(self, depth, max_count=0):
         # convert List of Dict to Dict of List
         import pydffi
         ffi_ctx = pydffi.FFI()
