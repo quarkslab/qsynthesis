@@ -1,0 +1,92 @@
+#!/usr/bin/env python3
+
+import sys
+import argparse
+from orderedset import OrderedSet
+from itertools import permutations, combinations
+import random
+from pathlib import Path
+import logging
+from typing import List
+
+from qsynthesis.grammar import TritonGrammar, BvOp, BoolOp
+from qsynthesis.lookuptable import LookupTable
+
+logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
+
+
+def biased_input_generator(var_num: int, input_number: int, bs: int, random_level: int):
+    vals = [1, 0, -1] + [None] * (max(var_num-3, random_level))
+    all_perms = list(permutations(vals, var_num))
+    return list(map(lambda l: [random.getrandbits(bs) if x is None else x for x in l], random.sample(all_perms, k=input_number)))
+
+
+def operator_generator(nb_operator: int):
+    """ Generate infinite operators set (making sure all combinations  """
+    ops = [BvOp.NOT, BvOp.AND, BvOp.OR, BvOp.XOR, BvOp.NEG, BvOp.ADD, BvOp.MUL, BvOp.SUB]#, BvOp.SDIV]
+    # FIXME: Take random operators among all!
+    while 1:
+        l = list(combinations(ops, nb_operator))
+        random.shuffle(l)
+        yield from l
+
+
+def gen_new(bitsize: int, op_generator, n_vars: int, inputs: List[int], n_inputs: int, random_level: int, max_depth: int, ops=None, uns=False) -> LookupTable:
+    operators = next(op_generator) if ops is None else ops
+    vars = [chr(ord('a')+x) for x in range(n_vars)]
+    if inputs:
+        inputs = [{n: v for n, v in zip(vars, inputs[i:i+len(vars)])} for i in range(0, len(inputs), len(vars))]
+    else:
+        inputs = biased_input_generator(n_vars, n_inputs, bitsize, random_level)
+        inputs = [{n: v for n, v in zip(vars, i)} for i in inputs]
+
+    grammar = TritonGrammar([(x, bitsize) for x in vars], operators)
+
+    ltm = LookupTable(grammar, inputs)
+    try:
+        ltm.generate(depth=max_depth, unsigned=uns)
+    except KeyboardInterrupt:
+        print("Stop required")
+    return ltm
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Creates a lookup table.')
+    parser.add_argument('output_file', type=str, help='destination file where to dump the lookup table')
+    parser.add_argument('--resume', metavar="resume file", type=str,
+                        help='resume resume lookup table generation from given file')
+    parser.add_argument('-bs', '--bitsize', metavar="bitsize", default=64, type=int, help="Bit size of expressions")
+    parser.add_argument('--var-num', default=3, type=int, help="Number of variables")
+    parser.add_argument('--input-num', default=5, type=int, help="Number of inputs")
+    parser.add_argument('--random-level', type=int, default=0, help="Randomness level of inputs 0 means higlhly biased to use corner-case values (0,1,-1)")
+    parser.add_argument('--max-depth', default=5, type=int, help="Maximum depth")
+    parser.add_argument('--op-num', default=5, type=int, help="Operator number")
+    parser.add_argument("-v", "--verbosity", default=0, action="count", help="increase output verbosity")
+    parser.add_argument('-k', default=1, type=int, help="Number of tables to generate")
+    parser.add_argument('--ops', type=str, default='', help='specifying operators to uses')
+    parser.add_argument('--inputs', type=str, default='', help='specifying input vector to use')
+    parser.add_argument("-u", '--unsigned', default=0, action="count", help="compute outputs as unsigned values")
+    args = parser.parse_args()
+
+    if args.verbosity:
+        logging.root.handlers = []
+        logging.basicConfig(level=logging.DEBUG, format='%(message)s')
+
+    if args.resume is not None:
+        pass  # TODO: implementing resume features
+    else:
+        g = operator_generator(args.op_num)
+        out_dir = Path(args.output_file)
+        if not out_dir.exists():
+            out_dir.mkdir()
+
+        ops = [BvOp[x] for x in args.ops.split(",")] if args.ops else None
+        inputs = [int(x) for x in args.inputs.split(",") if x]
+
+        uns = True if args.unsigned else False
+
+        for i in range(args.k):
+            print(f"Generate Table #{i}")
+            lt = gen_new(args.bitsize, g, args.var_num, inputs, args.input_num, args.random_level, args.max_depth, ops, uns)
+
+            lt.dump(Path(args.output_file)/f"{i}.pkl")
