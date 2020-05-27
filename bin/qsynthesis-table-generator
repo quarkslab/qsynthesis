@@ -77,7 +77,7 @@ if __name__ == "__main__":
     else:
         g = operator_generator(args.op_num)
         out_dir = Path(args.output_file)
-        if not out_dir.exists():
+        if not out_dir.exists() and args.k > 1:
             out_dir.mkdir()
 
         ops = [BvOp[x] for x in args.ops.split(",")] if args.ops else None
@@ -89,4 +89,5 @@ if __name__ == "__main__":
             print(f"Generate Table #{i}")
             lt = gen_new(args.bitsize, g, args.var_num, inputs, args.input_num, args.random_level, args.max_depth, ops, uns)
 
-            lt.dump(Path(args.output_file)/f"{i}.pkl")
+            p = out_dir/f"{i}.pkl" if args.k > 1 else out_dir
+            lt.dump(p)
