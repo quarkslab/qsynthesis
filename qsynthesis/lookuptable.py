@@ -10,7 +10,7 @@ Expr = TypeVar('Expr')  # Expression type in the associated grammar
 
 
 class LookupTable:
-    def __init__(self, gr: TritonGrammar, inputs: Union[int, List[Dict[Any, Any]]], f_name: str = ""):
+    def __init__(self, gr: TritonGrammar, inputs: Union[int, List[Dict[str, int]]], f_name: str = ""):
         self._name = Path(f_name)
         self.lookup_table = {}
         self.grammar = gr
@@ -49,7 +49,8 @@ class LookupTable:
 
     def lookup_raw(self, outputs: Union[Tuple[int], List[int]]) -> Optional[str]:
         outputs = outputs if isinstance(outputs, tuple) else tuple(outputs)
-        h = hash(outputs)
+        #h = hash(outputs)
+        h = outputs
         return self.lookup_table.get(h, None)
 
     @property
@@ -69,17 +70,21 @@ class LookupTable:
         return len(self.grammar.ops)
 
     def generate(self, depth, max_count=0, unsigned: bool = False):
-        def to_uint(x):
-            return (x if x > 0 else (1 << self._bitsize) + x) if unsigned else x
-        #inputs = {k.decl().name(): [x.as_long() for x in v] for k, v in self.inputs.items()}
-        # convert z3 to pure str->int values
-        inputs = {k.decl().name(): [inp[k].as_long() for inp in self.inputs] for k in self.inputs[0].keys()}
+        # def to_uint(x):
+        #     return (x if x > 0 else (1 << self._bitsize) + x) if unsigned else x
+
+        # convert List of Dict to Dict of List
+        import pydffi
+        ffi_ctx = pydffi.FFI()
+
+        inputs = {k: [pydffi.ULongLong(ffi_ctx, inp[k]) for inp in self.inputs] for k in self.inputs[0].keys()}
 
         t0 = time()
         worklist: List[Tuple[str, Tuple[int]]] = [(k, v) for k, v in inputs.items()]
-        self.lookup_table = {hash(tuple(v)): k for k, v in inputs.items()}  # initialize lookup table with vars singleton
+        self.lookup_table = {tuple(x.value for x in v): k for k, v in inputs.items()}  # initialize lookup table with vars singleton
         ops = self.grammar.non_terminal_operators
         cur_depth = depth-1
+
         while cur_depth > 0:
             # Start a new depth
             n_items = len(worklist)
@@ -88,18 +93,27 @@ class LookupTable:
 
             for op in ops:  # Iterate over all operators
                 print(f"  op: {op.symbol}")
+
                 if op.arity == 1:
                     for i1 in range(n_items):  # iterate once the list
                         name, vals = worklist[i1]
-                        new_vals = tuple(map(lambda x: to_uint(op.op_py(x)), vals))
-                        h = hash(new_vals)
+                        #new_vals = tuple(map(lambda x: to_uint(op.eval(x)), vals))
+                        new_vals = tuple(map(lambda x: op.eval(x), vals))
+
+                        if any([x < 0 for x in new_vals]):
+                            print(f"ret value {op}: {vals} => {new_vals}")
+
+                        #h = hash(new_vals)
+                        h = new_vals
                         if h not in self.lookup_table:
                             fmt = f"{op.symbol}{name}"
                             logging.debug(f"[add] {fmt}")
+                            h = tuple([(x if isinstance(x, int) else x.value) for x in h])
                             self.lookup_table[h] = fmt
                             worklist.append((fmt, new_vals))  # add it in worklist if not already in LUT
                         else:
                             logging.debug(f"[drop] {op.symbol}{name}  [{self.lookup_table[h]}]")
+
                 else:  # arity is 2
                     blacklist = set()
                     for i1 in range(n_items):
@@ -119,10 +133,17 @@ class LookupTable:
                             if fmt in blacklist:
                                 continue
 
-                            new_vals = tuple(map(lambda x: to_uint(op.op_py(*x)), zip(vals1, vals2)))  # compute new vals
-                            h = hash(new_vals)
+                            #new_vals = tuple(map(lambda x: to_uint(op.eval(*x)), zip(vals1, vals2)))  # compute new vals
+                            new_vals = tuple(map(lambda x: op.eval(*x), zip(vals1, vals2)))  # compute new vals
+
+                            if any([x < 0 for x in new_vals]):
+                                print(f"ret value {op}: {vals1} {vals2} => {new_vals}")
+
+                            #h = hash(new_vals)
+                            h = new_vals
                             if h not in self.lookup_table:
                                 logging.debug(f"[add] {fmt}")
+                                h = tuple([(x if isinstance(x, int) else x.value) for x in h])  # Strip pydffi before adding
                                 self.lookup_table[h] = fmt
                                 worklist.append((fmt, new_vals))
 
@@ -139,9 +160,16 @@ class LookupTable:
         print(f"Depth {depth - cur_depth} (size:{len(worklist)}) (Time:{int(t/60)}m{t%60:.5f}s)")
 
     def dump(self, file: Union[Path, str]) -> None:
+        print(f"Start dumping lookup table: {len(self.lookup_table)} entries")
         with open(file, 'wb') as f:
             pickle.dump(self.grammar.to_dict(), f)
             pickle.dump(self.grammar.dump_inputs(self.inputs), f)
+
+            # for key in self.lookup_table.keys():  # Strip all pydffi objects
+            #     v = self.lookup_table.pop(key)
+            #     nvals = tuple([(x if isinstance(x, int) else x.value) for x in key])
+            #     self.lookup_table[nvals] = v
+
             pickle.dump(self.lookup_table, f)
 
     @staticmethod
