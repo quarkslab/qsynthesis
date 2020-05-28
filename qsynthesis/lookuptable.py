@@ -69,6 +69,10 @@ class LookupTable:
     def operator_number(self):
         return len(self.grammar.ops)
 
+    @staticmethod
+    def hash(self, outs) -> Tuple[int]:
+        return tuple((x if isinstance(x, int) else x.value) for x in outs) # Strip pydffi before adding
+
     def generate(self, depth, max_count=0):
         # convert List of Dict to Dict of List
         import pydffi
@@ -100,12 +104,10 @@ class LookupTable:
                         if any([x < 0 for x in new_vals]):
                             print(f"ret value {op}: {vals} => {new_vals}")
 
-                        #h = hash(new_vals)
-                        h = new_vals
+                        h = self.hash(new_vals)
                         if h not in self.lookup_table:
                             fmt = f"{op.symbol}{name}"
-                            logging.debug(f"[add] {fmt}")
-                            h = tuple([(x if isinstance(x, int) else x.value) for x in h])
+                            logging.debug(f"[add] {fmt: <20} {h}")
                             self.lookup_table[h] = fmt
                             worklist.append((fmt, new_vals))  # add it in worklist if not already in LUT
                         else:
@@ -137,10 +139,9 @@ class LookupTable:
                                 print(f"ret value {op}: {vals1} {vals2} => {new_vals}")
 
                             #h = hash(new_vals)
-                            h = new_vals
+                            h = self.hash(new_vals)
                             if h not in self.lookup_table:
-                                logging.debug(f"[add] {fmt}")
-                                h = tuple([(x if isinstance(x, int) else x.value) for x in h])  # Strip pydffi before adding
+                                logging.debug(f"[add] {fmt: <20} {h}")
                                 self.lookup_table[h] = fmt
                                 worklist.append((fmt, new_vals))
 
