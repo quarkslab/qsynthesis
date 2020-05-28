@@ -1,0 +1,121 @@
+#!/usr/bin/env python3
+
+import sys
+import argparse
+from orderedset import OrderedSet
+from itertools import permutations, combinations
+import random
+from pathlib import Path
+import logging
+from typing import List
+import click
+
+from qsynthesis.grammar import TritonGrammar, BvOp, BoolOp
+from qsynthesis.lookuptable import LookupTable
+
+logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
+
+CONTEXT_SETTINGS = dict(
+        help_option_names=['-h', '--help']
+    #default_map={'runserver': {'port': 5000}}
+)
+
+def biased_input_generator(var_num: int, input_number: int, bs: int, random_level: int):
+    vals = [1, 0, -1] + [None] * (max(var_num-3, random_level))
+    all_perms = list(permutations(vals, var_num))
+    return list(map(lambda l: [random.getrandbits(bs) if x is None else x for x in l], random.sample(all_perms, k=input_number)))
+
+
+def operator_generator(nb_operator: int):
+    """ Generate infinite operators set (making sure all combinations  """
+    ops = [BvOp.NOT, BvOp.AND, BvOp.OR, BvOp.XOR, BvOp.NEG, BvOp.ADD, BvOp.MUL, BvOp.SUB]#, BvOp.SDIV]
+    # FIXME: Take random operators among all!
+    while 1:
+        l = list(combinations(ops, nb_operator))
+        random.shuffle(l)
+        yield from l
+
+
+def gen_new(bitsize: int, op_generator, n_vars: int, inputs: List[int], n_inputs: int, random_level: int, max_depth: int, ops=None) -> LookupTable:
+    operators = next(op_generator) if ops is None else ops
+    vars = [chr(ord('a')+x) for x in range(n_vars)]
+    if inputs:
+        inputs = [{n: v for n, v in zip(vars, inputs[i:i+len(vars)])} for i in range(0, len(inputs), len(vars))]
+    else:
+        inputs = biased_input_generator(n_vars, n_inputs, bitsize, random_level)
+        inputs = [{n: v for n, v in zip(vars, i)} for i in inputs]
+
+    grammar = TritonGrammar([(x, bitsize) for x in vars], operators)
+
+    ltm = LookupTable(grammar, inputs)
+    try:
+        ltm.generate(depth=max_depth)
+    except KeyboardInterrupt:
+        print("Stop required")
+    return ltm
+
+
+@click.group(context_settings={'help_option_names': ['-h', '--help']})
+def main():
+    pass
+
+
+@main.command(name="generate")
+@click.argument('output_file', type=str)
+@click.option('--resume', metavar="resume file", type=str, help='resume resume lookup table generation from given file')
+@click.option('-bs', '--bitsize', metavar="bitsize", default=64, type=int, help="Bit size of expressions")
+@click.option('--var-num', default=3, type=int, help="Number of variables")
+@click.option('--input-num', default=5, type=int, help="Number of inputs")
+@click.option('--random-level', type=int, default=0, help="Randomness level of inputs 0 means higlhly biased to use corner-case values (0,1,-1)")
+@click.option('--max-depth', default=5, type=int, help="Maximum depth")
+@click.option('--op-num', default=5, type=int, help="Operator number")
+@click.option("-v", "--verbosity", default=0, count=True, help="increase output verbosity")
+@click.option('-k', default=1, type=int, help="Number of tables to generate")
+@click.option('--ops', type=str, default='', help='specifying operators to uses')
+@click.option('--inputs', type=str, default='', help='specifying input vector to use')
+def generate_command(output_file, resume, bitsize, var_num, input_num, random_level, max_depth, op_num, verbosity, k, ops, inputs):
+    """ Table generation utility """
+
+    logging.root.handlers = []
+    logging.basicConfig(level=logging.DEBUG if verbosity else logging.INFO, format='%(message)s')
+
+    if resume is not None:
+        pass  # TODO: implementing resume features
+    else:
+        g = operator_generator(op_num)
+        out_dir = Path(output_file)
+        if not out_dir.exists() and k > 1:
+            out_dir.mkdir()
+
+        ops = [BvOp[x] for x in ops.split(",")] if ops else None
+        inputs = [int(x) for x in inputs.split(",") if x]
+
+        for i in range(k):
+            logging.info(f"Generate Table #{i}")
+            lt = gen_new(bitsize, g, var_num, inputs, input_num, random_level, max_depth, ops)
+
+            p = out_dir/f"{i}.pkl" if k > 1 else out_dir
+            lt.dump(p)
+
+
+@main.command(name="info")
+@click.argument('table_file', type=click.Path(exists=True))
+def infos_command(table_file):
+    logging.root.handlers = []
+    logging.basicConfig(level=logging.INFO, format='%(message)s')
+
+    table = LookupTable.load(table_file)
+
+    logging.info(f"Bitsize: {table.bitsize}")
+    logging.info(f"Size: {table.size}")
+    logging.info(f"Variables: {table.grammar.vars}")
+    logging.info(f"Operators: {[x.name for x in table.grammar.ops]}")
+    l = []
+    for i in table.inputs:
+        for v in i.values():
+            l.append(v)
+    logging.info(",".join(str(x) for x in l))
+
+
+if __name__ == "__main__":
+    main()
