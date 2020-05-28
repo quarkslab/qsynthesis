@@ -70,7 +70,7 @@ class LookupTable:
         return len(self.grammar.ops)
 
     @staticmethod
-    def hash(self, outs) -> Tuple[int]:
+    def hash(outs) -> Tuple[int]:
         return tuple((x if isinstance(x, int) else x.value) for x in outs) # Strip pydffi before adding
 
     def generate(self, depth, max_count=0):
@@ -136,7 +136,7 @@ class LookupTable:
                             new_vals = tuple(map(lambda x: op.eval(*x), zip(vals1, vals2)))  # compute new vals
 
                             if any([x < 0 for x in new_vals]):
-                                print(f"ret value {op}: {vals1} {vals2} => {new_vals}")
+                                logging.warning(f"ret value {op}: {vals1} {vals2} => {new_vals}")
 
                             #h = hash(new_vals)
                             h = self.hash(new_vals)
