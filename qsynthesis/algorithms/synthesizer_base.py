@@ -13,13 +13,13 @@ class SynthesizerBase:
     This synthesis mechanism always converges
     """
 
-    def __init__(self, ltms: List[LookupTable], only_first_match: bool = False):
+    def __init__(self, ltms: Union[LookupTable, List[LookupTable]], only_first_match: bool = False):
         """
         Initialize TritonTDBUSynthesizer
 
         :param ltms: List of lookup tables to use
         """
-        self._ltms = ltms
+        self._ltms = [ltms] if isinstance(ltms, LookupTable) else ltms
         self.only_first_match = only_first_match
 
         # Caches use internally
