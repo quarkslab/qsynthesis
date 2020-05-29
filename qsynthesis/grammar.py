@@ -15,6 +15,7 @@ CODE = '''
 #include <stdint.h> 
 uint64_t add(uint64_t a, uint64_t b) { return a+b; }
 uint64_t sub(uint64_t a, uint64_t b) { return a-b; }
+uint64_t mul(uint64_t a, uint64_t b) { return a*b; }
 uint64_t udiv(uint64_t a, uint64_t b) { return a/b; }
 uint64_t usub(uint64_t a) { return -a; }
 uint64_t invert(uint64_t a) { return ~a; }
@@ -37,9 +38,9 @@ CU = ffi_ctx.compile(CODE)
 
 to_uint = CU.funcs.to_uint
 
-
-def bnd(f):
-    return lambda x, y: SZ_MASK & f(x, y)
+#
+# def bnd(f):
+#     return lambda x, y: SZ_MASK & f(x, y)
 
 #
 # def left_rotate(i, n):
@@ -139,7 +140,7 @@ OPERATORS = {               # ID               strop    Trit op         Py op   
     BvOp.XOR:        Operator(BvOp.XOR,        '^',     operator.xor,   operator.xor,        2,   True,  False, True,   False,  False, False),
     BvOp.NEG:        Operator(BvOp.NEG,        '-',     operator.neg,   CU.funcs.usub,       1,   False, False, False,  True,   False, False),
     BvOp.ADD:        Operator(BvOp.ADD,        '+',     operator.add,   CU.funcs.add,        2,   True,  False, False,  False,  True,  False),
-    BvOp.MUL:        Operator(BvOp.MUL,        '*',     operator.mul,   bnd(operator.mul),   2,   True,  False, False,  False,  True,  False),
+    BvOp.MUL:        Operator(BvOp.MUL,        '*',     operator.mul,   CU.funcs.mul,        2,   True,  False, False,  False,  True,  False),
     BvOp.SUB:        Operator(BvOp.SUB,        '-',     operator.sub,   CU.funcs.sub,        2,   False, False, True,   False,  False, False),
     BvOp.SHL:        Operator(BvOp.SHL,        "<<",    operator.lshift,CU.funcs.lshift,     2,   False, False, False,  False,  True,  False),
     BvOp.LSHR:       Operator(BvOp.LSHR,       ">>",    operator.rshift,CU.funcs.rshift,     2,   False, False, False,  True,   False, False),

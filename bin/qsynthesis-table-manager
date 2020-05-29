@@ -15,10 +15,6 @@ from qsynthesis.lookuptable import LookupTable
 
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 
-CONTEXT_SETTINGS = dict(
-        help_option_names=['-h', '--help']
-    #default_map={'runserver': {'port': 5000}}
-)
 
 def biased_input_generator(var_num: int, input_number: int, bs: int, random_level: int):
     vals = [1, 0, -1] + [None] * (max(var_num-3, random_level))
