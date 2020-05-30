@@ -2,6 +2,8 @@
 
 import sys
 import argparse
+from random import choice
+
 from orderedset import OrderedSet
 from itertools import permutations, combinations
 import random
@@ -11,7 +13,7 @@ from typing import List
 import click
 
 from qsynthesis.grammar import TritonGrammar, BvOp, BoolOp
-from qsynthesis.lookuptable import LookupTable
+from qsynthesis.lookuptable import LookupTable, HashType
 
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 
@@ -34,7 +36,7 @@ def operator_generator(nb_operator: int):
         yield from l
 
 
-def gen_new(bitsize: int, op_generator, n_vars: int, inputs: List[int], n_inputs: int, random_level: int, max_depth: int, ops=None) -> LookupTable:
+def gen_new(bitsize: int, op_generator, n_vars: int, inputs: List[int], n_inputs: int, random_level: int, max_depth: int, hash_mode, ops=None, fname="") -> LookupTable:
     operators = next(op_generator) if ops is None else ops
     vars = [chr(ord('a')+x) for x in range(n_vars)]
     if inputs:
@@ -45,7 +47,8 @@ def gen_new(bitsize: int, op_generator, n_vars: int, inputs: List[int], n_inputs
 
     grammar = TritonGrammar([(x, bitsize) for x in vars], operators)
 
-    ltm = LookupTable(grammar, inputs)
+    print("hash mode in look", hash_mode)
+    ltm = LookupTable(grammar, inputs, HashType[hash_mode], fname)
     try:
         ltm.generate(depth=max_depth)
     except KeyboardInterrupt:
@@ -71,7 +74,8 @@ def main():
 @click.option('-k', default=1, type=int, help="Number of tables to generate")
 @click.option('--ops', type=str, default='', help='specifying operators to uses')
 @click.option('--inputs', type=str, default='', help='specifying input vector to use')
-def generate_command(output_file, resume, bitsize, var_num, input_num, random_level, max_depth, op_num, verbosity, k, ops, inputs):
+@click.option('--hash-mode', default=HashType.RAW, type=click.Choice([x.name for x in HashType]), help="Hash function for keys in table")
+def generate_command(output_file, resume, bitsize, var_num, input_num, random_level, max_depth, op_num, verbosity, k, ops, inputs, hash_mode):
     """ Table generation utility """
 
     logging.root.handlers = []
@@ -90,9 +94,8 @@ def generate_command(output_file, resume, bitsize, var_num, input_num, random_le
 
         for i in range(k):
             logging.info(f"Generate Table #{i}")
-            lt = gen_new(bitsize, g, var_num, inputs, input_num, random_level, max_depth, ops)
-
             p = out_dir/f"{i}.pkl" if k > 1 else out_dir
+            lt = gen_new(bitsize, g, var_num, inputs, input_num, random_level, max_depth, hash_mode, ops, p.name)
             lt.dump(p)
 
 
@@ -105,6 +108,7 @@ def infos_command(table_file):
     table = LookupTable.load(table_file)
 
     logging.info(f"Bitsize: {table.bitsize}")
+    logging.info(f"Hash mode: {table.hash_mode.name}")
     logging.info(f"Size: {table.size}")
     logging.info(f"Variables: {table.grammar.vars}")
     logging.info(f"Operators: {[x.name for x in table.grammar.ops]}")
