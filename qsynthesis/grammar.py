@@ -21,13 +21,13 @@ uint64_t usub(uint64_t a) { return -a; }
 uint64_t invert(uint64_t a) { return ~a; }
 uint64_t to_uint(int64_t a) { return (uint64_t) a; }
 uint64_t urem(uint64_t a, uint64_t b) { return  b==0? a: a % b ; }
-uint64_t ashr(int64_t a, uint64_t b) { return  a >> b; }
-uint64_t sle(int64_t a, int64_t b) { return a <= b ; }        
+uint64_t ashr(uint64_t a, uint64_t b) { int bitsz = sizeof(uint64_t)*8; return (b >= bitsz)? ((int64_t) a) >> bitsz-1: ((int64_t) a) >> b; }
+uint64_t sle(int64_t a, int64_t b) { return a <= b ; }
 uint64_t slt(int64_t a, int64_t b) { return a < b ; }
 uint64_t sge(int64_t a, int64_t b) { return a >= b ; }
 uint64_t sgt(int64_t a, int64_t b) { return a > b ; }
-uint64_t lshift(uint64_t a, uint64_t b) { return a << b; }
-uint64_t rshift(uint64_t a, uint64_t b) { return a >> b; }
+uint64_t lshift(uint64_t a, uint64_t b) { return (b >= sizeof(uint64_t)*8)? 0: a << b; }
+uint64_t rshift(uint64_t a, uint64_t b) { return (b >= sizeof(uint64_t)*8)? 0: a >> b; }
 uint64_t rol(uint8_t i, uint64_t n) { return (n << i) | (n >> (8*sizeof(n) - i)); }
 uint64_t ror(uint8_t i, uint64_t n) { return (n >> i)|(n << (8*sizeof(n) - i)); }
 uint64_t mod(uint64_t a, uint64_t b) { return a % b; }
@@ -143,12 +143,12 @@ OPERATORS = {               # ID               strop    Trit op         Py op   
     BvOp.MUL:        Operator(BvOp.MUL,        '*',     operator.mul,   CU.funcs.mul,        2,   True,  False, False,  False,  True,  False),
     BvOp.SUB:        Operator(BvOp.SUB,        '-',     operator.sub,   CU.funcs.sub,        2,   False, False, True,   False,  False, False),
     BvOp.SHL:        Operator(BvOp.SHL,        "<<",    operator.lshift,CU.funcs.lshift,     2,   False, False, False,  False,  True,  False),
-    BvOp.LSHR:       Operator(BvOp.LSHR,       ">>",    operator.rshift,CU.funcs.rshift,     2,   False, False, False,  True,   False, False),
+    BvOp.LSHR:       Operator(BvOp.LSHR,       ">>",    operator.rshift,CU.funcs.rshift,     2,   False, False, False,  False,   False, False),
     BvOp.ROL:        Operator(BvOp.ROL,        "bvrol", "bvrol",        CU.funcs.rol,        2,   False, False, False,  True,   False, False),
     BvOp.ROR:        Operator(BvOp.ROR,        "bvror", "bvror",        CU.funcs.ror,        2,   False, False, False,  True,   False, False),
     BvOp.UDIV:       Operator(BvOp.UDIV,       "/",     operator.truediv,CU.funcs.udiv,      2,   False, False, False,  True,   False, False),
     BvOp.UREM:       Operator(BvOp.UREM,       "%",     operator.mod,   CU.funcs.urem,       2,   False, False, False,  False,  False, False),
-    BvOp.ASHR:       Operator(BvOp.ASHR,       ">>",    "bvashr",       CU.funcs.ashr,       2,   False, False, False,  False,  False, False),
+    BvOp.ASHR:       Operator(BvOp.ASHR,       "bvashr","bvashr",       CU.funcs.ashr,       2,   False, False, False,  True,  False, False),
     BvOp.SDIV:       Operator(BvOp.SDIV,       "bvsdiv","bvsdiv",       operator.truediv,    2,   False, False, False,  False,  False, False),
     BvOp.SREM:       Operator(BvOp.SREM,       "bvsrem","bvsrem",       None,                2,   False, False, True,   True,   False, False),
     BvOp.SMOD:       Operator(BvOp.SMOD,       "bvsmod","bvsmod",       CU.funcs.mod,        2,   False, False, True,   False,  False, False),
@@ -170,6 +170,8 @@ OPERATORS = {               # ID               strop    Trit op         Py op   
     BvOp.SGT:        Operator(BvOp.SGT,        "bvsgt",  "bvsgt",       CU.funcs.sgt,        2,   False, False, True,   True,   False, True)
 }
 
+SUPPORTED_OPERATORS = {BvOp.NOT, BvOp.AND, BvOp.OR, BvOp.XOR, BvOp.NEG, BvOp.ADD, BvOp.MUL, BvOp.SUB, BvOp.SHL,
+                       BvOp.ASHR, BvOp.LSHR}
 
 class TritonGrammar(object):
     """
