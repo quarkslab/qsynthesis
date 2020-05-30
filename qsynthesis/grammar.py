@@ -28,8 +28,8 @@ uint64_t sge(int64_t a, int64_t b) { return a >= b ; }
 uint64_t sgt(int64_t a, int64_t b) { return a > b ; }
 uint64_t lshift(uint64_t a, uint64_t b) { return (b >= sizeof(uint64_t)*8)? 0: a << b; }
 uint64_t rshift(uint64_t a, uint64_t b) { return (b >= sizeof(uint64_t)*8)? 0: a >> b; }
-uint64_t rol(uint8_t i, uint64_t n) { return (n << i) | (n >> (8*sizeof(n) - i)); }
-uint64_t ror(uint8_t i, uint64_t n) { return (n >> i)|(n << (8*sizeof(n) - i)); }
+uint64_t rol(uint64_t i, uint64_t n) { int bitsz = 8*sizeof(n); return (n << (i%bitsz)) | (n >> (8*sizeof(n) - (i%bitsz))); }
+uint64_t ror(uint64_t i, uint64_t n) { int bitsz = 8*sizeof(n); return (n >> (i%bitsz))|(n << (8*sizeof(n) - (i%bitsz))); }
 uint64_t mod(uint64_t a, uint64_t b) { return a % b; }
 '''
 
@@ -125,15 +125,15 @@ class BvOp(IntEnum):
     SGT = AST_NODE.BVSGT
 
 
-Operator = namedtuple("Operator", "id symbol op_triton eval arity commutative id_eq id_zero is_prefix can_overflow bool_ret")
+Operator = namedtuple("Operator", "id symbol eval_trit eval arity commutative id_eq id_zero is_prefix can_overflow bool_ret")
 
 OPERATORS = {               # ID               strop    Trit op         Py op                arit comm   id_eq  id_zero is_pfx  can_ov bool_ret
-    BoolOp.EQUAL:    Operator(BoolOp.EQUAL,    "==",    operator.eq,    operator.eq,         2,   True,  True,  False,  False,  False, True),
-    BoolOp.DISTINCT: Operator(BoolOp.DISTINCT, "!=",    operator.ne,    operator.ne,         2,   True,  False, True,   False,  False, True),
-    BoolOp.IFF:      Operator(BoolOp.IFF,      "iff",   "iff",          None,                2,   False, False, False,  False,  False, True),
-    BoolOp.LOR:      Operator(BoolOp.LOR,      "lor",   "lor",          lambda x,y: x or y,  2,   True,  True,  False,  True,   False, True),
-    BoolOp.AND:      Operator(BoolOp.AND,      "land",  "land",         lambda x,y: x and y, 2,   True,  True,  False,  True,   False, True),
-    BoolOp.NOT:      Operator(BoolOp.NOT,      "lnot",  "lnot",         lambda x: not x,     1,   False, False, False,  True,   False, True),
+    # BoolOp.EQUAL:    Operator(BoolOp.EQUAL,    "==",    operator.eq,    operator.eq,         2,   True,  True,  False,  False,  False, True),
+    # BoolOp.DISTINCT: Operator(BoolOp.DISTINCT, "!=",    operator.ne,    operator.ne,         2,   True,  False, True,   False,  False, True),
+    # BoolOp.IFF:      Operator(BoolOp.IFF,      "iff",   "iff",          None,                2,   False, False, False,  False,  False, True),
+    # BoolOp.LOR:      Operator(BoolOp.LOR,      "lor",   "lor",          lambda x,y: x or y,  2,   True,  True,  False,  True,   False, True),
+    # BoolOp.AND:      Operator(BoolOp.AND,      "land",  "land",         lambda x,y: x and y, 2,   True,  True,  False,  True,   False, True),
+    # BoolOp.NOT:      Operator(BoolOp.NOT,      "lnot",  "lnot",         lambda x: not x,     1,   False, False, False,  True,   False, True),
     BvOp.NOT:        Operator(BvOp.NOT,        "~",     operator.invert,CU.funcs.invert,     1,   False, False, False,  True,   False, False),
     BvOp.AND:        Operator(BvOp.AND,        "&",     operator.and_,  operator.and_,       2,   True,  True,  False,  False,  False, False),
     BvOp.OR:         Operator(BvOp.OR,         '|',     operator.or_,   operator.or_,        2,   True,  True,  False,  False,  False, False),
@@ -146,32 +146,30 @@ OPERATORS = {               # ID               strop    Trit op         Py op   
     BvOp.LSHR:       Operator(BvOp.LSHR,       ">>",    operator.rshift,CU.funcs.rshift,     2,   False, False, False,  False,   False, False),
     BvOp.ROL:        Operator(BvOp.ROL,        "bvrol", "bvrol",        CU.funcs.rol,        2,   False, False, False,  True,   False, False),
     BvOp.ROR:        Operator(BvOp.ROR,        "bvror", "bvror",        CU.funcs.ror,        2,   False, False, False,  True,   False, False),
-    BvOp.UDIV:       Operator(BvOp.UDIV,       "/",     operator.truediv,CU.funcs.udiv,      2,   False, False, False,  True,   False, False),
-    BvOp.UREM:       Operator(BvOp.UREM,       "%",     operator.mod,   CU.funcs.urem,       2,   False, False, False,  False,  False, False),
-    BvOp.ASHR:       Operator(BvOp.ASHR,       "bvashr","bvashr",       CU.funcs.ashr,       2,   False, False, False,  True,  False, False),
-    BvOp.SDIV:       Operator(BvOp.SDIV,       "bvsdiv","bvsdiv",       operator.truediv,    2,   False, False, False,  False,  False, False),
-    BvOp.SREM:       Operator(BvOp.SREM,       "bvsrem","bvsrem",       None,                2,   False, False, True,   True,   False, False),
-    BvOp.SMOD:       Operator(BvOp.SMOD,       "bvsmod","bvsmod",       CU.funcs.mod,        2,   False, False, True,   False,  False, False),
-    BvOp.XNOR:       Operator(BvOp.XNOR,       "bvxnor","bvxnor",       lambda x,y:~(x ^ y), 2,   True,  False, False,  True,   False, False),
-    BvOp.NOR:        Operator(BvOp.NOR,        "bvnor", "bvnor",        lambda x, y:~(x | y),2,   True,  False, False,  True,   False, False),
-    BvOp.NAND:       Operator(BvOp.NAND,       "bvnand","bvnand",       lambda x, y:~(x & y),2,   True,  False, False,  True,   False, False),
-    BvOp.ZEXT:       Operator(BvOp.ZEXT,       "zx",    "zx",           lambda y, x: x,      2,   False, True,  False,  True,   False, False),
-    BvOp.SEXT:       Operator(BvOp.SEXT,       "sx",    "sx",           sign_ext,            2,   False, False, False,  True,   False, False), # FIXME: operator
-    BvOp.CONCAT:     Operator(BvOp.CONCAT,     "concat","concat",       concat,              2,   False, False, False,  True,   False, False), # FIXME: operator
-    BvOp.EXTRACT:    Operator(BvOp.EXTRACT,    "extract","extract",     extract,             2,   False, False, False,  True,   False, False), # FIXME: operator
-    BvOp.ITE:        Operator(BvOp.ITE,        "If",     "If",          ite,                 3,   False, False, False,  True,   False, False),
-    BvOp.UGE:        Operator(BvOp.UGE,        ">=",     operator.ge,   operator.ge,         2,   False, True,  False,  False,  False, True),
-    BvOp.UGT:        Operator(BvOp.UGT,        ">",      operator.gt,   operator.gt,         2,   False, False, True,   False,  False, True),
-    BvOp.ULE:        Operator(BvOp.ULE,        "<=",     operator.le,   operator.le,         2,   False, True,  False,  False,  False, True),
-    BvOp.ULT:        Operator(BvOp.ULT,        "<",      operator.lt,   operator.lt,         2,   False, False, True,   False,  False, True),
-    BvOp.SLE:        Operator(BvOp.SLE,        "bvsle",  "bvsle",       CU.funcs.sle,        2,   False, True,  False,  True,   False, True),
-    BvOp.SLT:        Operator(BvOp.SLT,        "bvslt",  "bvslt",       CU.funcs.slt,        2,   False, False, True,   True,   False, True),
-    BvOp.SGE:        Operator(BvOp.SGE,        "bvsge",  "bvsge",       CU.funcs.sge,        2,   False, True,  False,  True,   False, True),
-    BvOp.SGT:        Operator(BvOp.SGT,        "bvsgt",  "bvsgt",       CU.funcs.sgt,        2,   False, False, True,   True,   False, True)
+    # BvOp.UDIV:       Operator(BvOp.UDIV,       "/",     operator.truediv,CU.funcs.udiv,      2,   False, False, False,  True,   False, False),
+    # BvOp.UREM:       Operator(BvOp.UREM,       "%",     operator.mod,   CU.funcs.urem,       2,   False, False, False,  False,  False, False),
+    # BvOp.ASHR:       Operator(BvOp.ASHR,       "bvashr","bvashr",       CU.funcs.ashr,       2,   False, False, False,  True,  False, False),
+    # BvOp.SDIV:       Operator(BvOp.SDIV,       "bvsdiv","bvsdiv",       operator.truediv,    2,   False, False, False,  False,  False, False),
+    # BvOp.SREM:       Operator(BvOp.SREM,       "bvsrem","bvsrem",       None,                2,   False, False, True,   True,   False, False),
+    # BvOp.SMOD:       Operator(BvOp.SMOD,       "bvsmod","bvsmod",       CU.funcs.mod,        2,   False, False, True,   False,  False, False),
+    # BvOp.XNOR:       Operator(BvOp.XNOR,       "bvxnor","bvxnor",       lambda x,y:~(x ^ y), 2,   True,  False, False,  True,   False, False),
+    # BvOp.NOR:        Operator(BvOp.NOR,        "bvnor", "bvnor",        lambda x, y:~(x | y),2,   True,  False, False,  True,   False, False),
+    # BvOp.NAND:       Operator(BvOp.NAND,       "bvnand","bvnand",       lambda x, y:~(x & y),2,   True,  False, False,  True,   False, False),
+    # BvOp.ZEXT:       Operator(BvOp.ZEXT,       "zx",    "zx",           lambda y, x: x,      2,   False, True,  False,  True,   False, False),
+    # BvOp.SEXT:       Operator(BvOp.SEXT,       "sx",    "sx",           sign_ext,            2,   False, False, False,  True,   False, False), # FIXME: operator
+    # BvOp.CONCAT:     Operator(BvOp.CONCAT,     "concat","concat",       concat,              2,   False, False, False,  True,   False, False), # FIXME: operator
+    # BvOp.EXTRACT:    Operator(BvOp.EXTRACT,    "extract","extract",     extract,             2,   False, False, False,  True,   False, False), # FIXME: operator
+    # BvOp.ITE:        Operator(BvOp.ITE,        "If",     "If",          ite,                 3,   False, False, False,  True,   False, False),
+    # BvOp.UGE:        Operator(BvOp.UGE,        ">=",     operator.ge,   operator.ge,         2,   False, True,  False,  False,  False, True),
+    # BvOp.UGT:        Operator(BvOp.UGT,        ">",      operator.gt,   operator.gt,         2,   False, False, True,   False,  False, True),
+    # BvOp.ULE:        Operator(BvOp.ULE,        "<=",     operator.le,   operator.le,         2,   False, True,  False,  False,  False, True),
+    # BvOp.ULT:        Operator(BvOp.ULT,        "<",      operator.lt,   operator.lt,         2,   False, False, True,   False,  False, True),
+    # BvOp.SLE:        Operator(BvOp.SLE,        "bvsle",  "bvsle",       CU.funcs.sle,        2,   False, True,  False,  True,   False, True),
+    # BvOp.SLT:        Operator(BvOp.SLT,        "bvslt",  "bvslt",       CU.funcs.slt,        2,   False, False, True,   True,   False, True),
+    # BvOp.SGE:        Operator(BvOp.SGE,        "bvsge",  "bvsge",       CU.funcs.sge,        2,   False, True,  False,  True,   False, True),
+    # BvOp.SGT:        Operator(BvOp.SGT,        "bvsgt",  "bvsgt",       CU.funcs.sgt,        2,   False, False, True,   True,   False, True)
 }
 
-SUPPORTED_OPERATORS = {BvOp.NOT, BvOp.AND, BvOp.OR, BvOp.XOR, BvOp.NEG, BvOp.ADD, BvOp.MUL, BvOp.SUB, BvOp.SHL,
-                       BvOp.ASHR, BvOp.LSHR}
 
 class TritonGrammar(object):
     """
