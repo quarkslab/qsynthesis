@@ -16,8 +16,10 @@ from qsynthesis.lookuptable import LookupTable
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 
 
-def biased_input_generator(var_num: int, input_number: int, bs: int, random_level: int):
-    vals = [1, 0, -1] + [None] * (max(var_num-3, random_level))
+def biased_input_generator(bitsize:int, var_num: int, input_number: int, bs: int, random_level: int = 2):
+    n = max(var_num-3, random_level)
+    minus_one = pow(2, bitsize)-1
+    vals = [1, 0, minus_one] + [None] * n
     all_perms = list(permutations(vals, var_num))
     return list(map(lambda l: [random.getrandbits(bs) if x is None else x for x in l], random.sample(all_perms, k=input_number)))
 
@@ -38,7 +40,7 @@ def gen_new(bitsize: int, op_generator, n_vars: int, inputs: List[int], n_inputs
     if inputs:
         inputs = [{n: v for n, v in zip(vars, inputs[i:i+len(vars)])} for i in range(0, len(inputs), len(vars))]
     else:
-        inputs = biased_input_generator(n_vars, n_inputs, bitsize, random_level)
+        inputs = biased_input_generator(bitsize, n_vars, n_inputs, bitsize, random_level)
         inputs = [{n: v for n, v in zip(vars, i)} for i in inputs]
 
     grammar = TritonGrammar([(x, bitsize) for x in vars], operators)
@@ -62,7 +64,7 @@ def main():
 @click.option('-bs', '--bitsize', metavar="bitsize", default=64, type=int, help="Bit size of expressions")
 @click.option('--var-num', default=3, type=int, help="Number of variables")
 @click.option('--input-num', default=5, type=int, help="Number of inputs")
-@click.option('--random-level', type=int, default=0, help="Randomness level of inputs 0 means higlhly biased to use corner-case values (0,1,-1)")
+@click.option('--random-level', type=int, default=2, help="Randomness level of inputs 0 means higlhly biased to use corner-case values (0,1,-1)")
 @click.option('--max-depth', default=5, type=int, help="Maximum depth")
 @click.option('--op-num', default=5, type=int, help="Operator number")
 @click.option("-v", "--verbosity", default=0, count=True, help="increase output verbosity")
