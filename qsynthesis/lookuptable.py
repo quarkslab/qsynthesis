@@ -5,9 +5,11 @@ import logging
 from enum import IntEnum
 import array
 import hashlib
+import threading
+import psutil
 
 from typing import Optional, List, Dict, Union, Generator, Tuple, Any, TypeVar
-from time import time
+from time import time, sleep
 
 Expr = TypeVar('Expr')  # Expression type in the associated grammar
 
@@ -29,6 +31,10 @@ class LookupTable:
         self.lookup_found = 0
         self.cache_hit = 0
         self.hash_mode = hash_mode
+
+        # generation related fields
+        self.watchdog = None
+        self.stop = False
 
         if isinstance(inputs, int):
             self.inputs = self.grammar.gen_test_inputs(inputs)
@@ -109,8 +115,20 @@ class LookupTable:
         elif self.hash_mode == HashType.MD5:
             return self.md5(outs)
 
-    def generate(self, depth, max_count=0):
-        # convert List of Dict to Dict of List
+    def watchdog_worker(self, threshold):
+        while not self.stop:
+            sleep(2)
+            mem = psutil.virtual_memory()
+            if mem.percent >= threshold:
+                logging.warning(f"Threshold reached: {mem.percent}%")
+                self.stop = True  # Should stop self and also main thread
+
+    def generate(self, depth, max_count=0, do_watch=False, watchdog_threshold=90):
+        if do_watch:
+            self.watchdog = threading.Thread(target=self.watchdog_worker, args=[watchdog_threshold], daemon=True)
+            logging.info("Start watchdog")
+            self.watchdog.start()
+
         import pydffi
         ffi_ctx = pydffi.FFI()
 
@@ -122,75 +140,86 @@ class LookupTable:
         ops = self.grammar.non_terminal_operators
         cur_depth = depth-1
 
-        while cur_depth > 0:
-            # Start a new depth
-            n_items = len(worklist)
-            t = time() - t0
-            print(f"Depth {depth-cur_depth} (size:{n_items}) (Time:{int(t/60)}m{t%60:.5f}s)")
+        try:
+            while cur_depth > 0:
+                # Start a new depth
+                n_items = len(worklist)
+                t = time() - t0
+                print(f"Depth {depth-cur_depth} (size:{n_items}) (Time:{int(t/60)}m{t%60:.5f}s)")
 
-            for op in ops:  # Iterate over all operators
-                print(f"  op: {op.symbol}")
+                for op in ops:  # Iterate over all operators
+                    print(f"  op: {op.symbol}")
 
-                if op.arity == 1:
-                    for i1 in range(n_items):  # iterate once the list
-                        name, vals = worklist[i1]
-                        new_vals = tuple(map(lambda x: op.eval(x), vals))
-
-                        if any([x < 0 for x in new_vals]):
-                            print(f"ret value {op}: {vals} => {new_vals}")
-
-                        h = self.hash([x.value for x in new_vals])  # Strip pydffi before hashing
-                        if h not in self.lookup_table:
-                            fmt = f"{op.symbol}{name}"
-                            logging.debug(f"[add] {fmt: <20} {h}")
-                            self.lookup_table[h] = fmt
-                            worklist.append((fmt, new_vals))  # add it in worklist if not already in LUT
-                        else:
-                            logging.debug(f"[drop] {op.symbol}{name}  [{self.lookup_table[h]}]")
-
-                else:  # arity is 2
-                    blacklist = set()
-                    for i1 in range(n_items):
-                        if len(worklist) > max_count > 0:
-                            print("Max count exceeded, break")
-                            break
-                        name1, vals1 = worklist[i1]
-                        for i2 in range(n_items):
-                            name2, vals2 = worklist[i2]
-
-                            # for identity (a op a) ignore it if the result is known to be 0 or a
-                            if i1 == i2 and (op.id_eq or op.id_zero):
-                                continue
-
-                            # Ignore expression if they are in the blacklist
-                            fmt = f"{op.symbol}({name1},{name2})" if op.is_prefix else f"({name1}{op.symbol}{name2})"
-                            if fmt in blacklist:
-                                continue
-
-                            #new_vals = tuple(map(lambda x: to_uint(op.eval(*x)), zip(vals1, vals2)))  # compute new vals
-                            new_vals = tuple(map(lambda x: op.eval(*x), zip(vals1, vals2)))  # compute new vals
+                    if op.arity == 1:
+                        for i1 in range(n_items):  # iterate once the list
+                            if self.stop:
+                                logging.warning("Threshold reached, generation interrupted")
+                                raise KeyboardInterrupt()
+                            name, vals = worklist[i1]
+                            new_vals = tuple(map(lambda x: op.eval(x), vals))
 
                             if any([x < 0 for x in new_vals]):
-                                logging.warning(f"ret value {op}: {vals1} {vals2} => {new_vals}")
+                                print(f"ret value {op}: {vals} => {new_vals}")
 
-                            #h = hash(new_vals)
-                            h = self.hash([x.value for x in new_vals])   # Strip pydffi before hashing
+                            h = self.hash([x.value for x in new_vals])  # Strip pydffi before hashing
                             if h not in self.lookup_table:
+                                fmt = f"{op.symbol}{name}"
                                 logging.debug(f"[add] {fmt: <20} {h}")
                                 self.lookup_table[h] = fmt
-                                worklist.append((fmt, new_vals))
-
-                                if op.commutative:
-                                    fmt = f"{op.symbol}({name2},{name1})" if op.is_prefix else f"({name2}{op.symbol}{name1})"
-                                    blacklist.add(fmt)  # blacklist commutative equivalent e.g for a+b blacklist: b+a
-                                    logging.debug(f"[blacklist] {fmt}")
+                                worklist.append((fmt, new_vals))  # add it in worklist if not already in LUT
                             else:
-                                logging.debug(f"[drop] {fmt}  [{self.lookup_table[h]}]")
-            cur_depth -= 1
+                                logging.debug(f"[drop] {op.symbol}{name}  [{self.lookup_table[h]}]")
 
+                    else:  # arity is 2
+                        blacklist = set()
+                        for i1 in range(n_items):
+                            if len(worklist) > max_count > 0:
+                                print("Max count exceeded, break")
+                                break
+                            name1, vals1 = worklist[i1]
+                            for i2 in range(n_items):
+                                if self.stop:
+                                    logging.warning("Threshold reached, generation interrupted")
+                                    raise KeyboardInterrupt()
+                                name2, vals2 = worklist[i2]
+
+                                # for identity (a op a) ignore it if the result is known to be 0 or a
+                                if i1 == i2 and (op.id_eq or op.id_zero):
+                                    continue
+
+                                # Ignore expression if they are in the blacklist
+                                fmt = f"{op.symbol}({name1},{name2})" if op.is_prefix else f"({name1}{op.symbol}{name2})"
+                                if fmt in blacklist:
+                                    continue
+
+                                #new_vals = tuple(map(lambda x: to_uint(op.eval(*x)), zip(vals1, vals2)))  # compute new vals
+                                new_vals = tuple(map(lambda x: op.eval(*x), zip(vals1, vals2)))  # compute new vals
+
+                                if any([x < 0 for x in new_vals]):
+                                    logging.warning(f"ret value {op}: {vals1} {vals2} => {new_vals}")
+
+                                #h = hash(new_vals)
+                                h = self.hash([x.value for x in new_vals])   # Strip pydffi before hashing
+                                if h not in self.lookup_table:
+                                    logging.debug(f"[add] {fmt: <20} {h}")
+                                    self.lookup_table[h] = fmt
+                                    worklist.append((fmt, new_vals))
+
+                                    if op.commutative:
+                                        fmt = f"{op.symbol}({name2},{name1})" if op.is_prefix else f"({name2}{op.symbol}{name1})"
+                                        blacklist.add(fmt)  # blacklist commutative equivalent e.g for a+b blacklist: b+a
+                                        logging.debug(f"[blacklist] {fmt}")
+                                else:
+                                    logging.debug(f"[drop] {fmt}  [{self.lookup_table[h]}]")
+                cur_depth -= 1
+        except KeyboardInterrupt:
+            logging.info("Stop required")
         # In the end
+        self.stop = True
         t = time() - t0
         print(f"Depth {depth - cur_depth} (size:{len(worklist)}) (Time:{int(t/60)}m{t%60:.5f}s)")
+        if do_watch:
+            self.watchdog.join()
 
     def dump(self, file: Union[Path, str]) -> None:
         print(f"Start dumping lookup table: {len(self.lookup_table)} entries")
