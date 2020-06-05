@@ -14,6 +14,7 @@ import click
 
 from qsynthesis.grammar import TritonGrammar, BvOp, BoolOp
 from qsynthesis.lookuptable import LookupTable, HashType
+from qsynthesis.lookuptabledb import LookupTableDB
 
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 
@@ -36,29 +37,6 @@ def operator_generator(nb_operator: int):
         yield from l
 
 
-def gen_new(bitsize: int, op_generator, n_vars: int, inputs: List[int], n_inputs: int, random_level: int, max_depth: int, hash_mode, watchdog, ops=None, fname="") -> LookupTable:
-    operators = next(op_generator) if ops is None else ops
-    vars = [chr(ord('a')+x) for x in range(n_vars)]
-    if inputs:
-        inputs = [{n: v for n, v in zip(vars, inputs[i:i+len(vars)])} for i in range(0, len(inputs), len(vars))]
-    else:
-        inputs = biased_input_generator(bitsize, n_vars, n_inputs, bitsize, random_level)
-        inputs = [{n: v for n, v in zip(vars, i)} for i in inputs]
-
-    grammar = TritonGrammar([(x, bitsize) for x in vars], operators)
-
-    print("Watchdog value:", watchdog)
-    ltm = LookupTable(grammar, inputs, HashType[hash_mode], fname)
-    try:
-        if watchdog:
-            ltm.generate(depth=max_depth, do_watch=True, watchdog_threshold=watchdog)
-        else:
-            ltm.generate(depth=max_depth)
-    except KeyboardInterrupt:
-        print("Stop required")
-    return ltm
-
-
 @click.group(context_settings={'help_option_names': ['-h', '--help']})
 def main():
     pass
@@ -79,7 +57,8 @@ def main():
 @click.option('--inputs', type=str, default='', help='specifying input vector to use')
 @click.option('--hash-mode', default=HashType.RAW, type=click.Choice([x.name for x in HashType]), help="Hash function for keys in table")
 @click.option('--watchdog', type=float, help="Activate RAM watchdog (percentage of load when to stop)")
-def generate_command(output_file, resume, bitsize, var_num, input_num, random_level, max_depth, op_num, verbosity, k, ops, inputs, hash_mode, watchdog):
+@click.option('-t', '--type', type=click.Choice(["pkl", "db"]), default="db", help="Type of database to create")
+def generate_command(output_file, resume, bitsize, var_num, input_num, random_level, max_depth, op_num, verbosity, k, ops, inputs, hash_mode, watchdog, type):
     """ Table generation utility """
 
     logging.root.handlers = []
@@ -88,7 +67,6 @@ def generate_command(output_file, resume, bitsize, var_num, input_num, random_le
     if resume is not None:
         pass  # TODO: implementing resume features
     else:
-        g = operator_generator(op_num)
         out_dir = Path(output_file)
         if not out_dir.exists() and k > 1:
             out_dir.mkdir()
@@ -98,9 +76,34 @@ def generate_command(output_file, resume, bitsize, var_num, input_num, random_le
 
         for i in range(k):
             logging.info(f"Generate Table #{i}")
-            p = out_dir/f"{i}.pkl" if k > 1 else out_dir
-            lt = gen_new(bitsize, g, var_num, inputs, input_num, random_level, max_depth, hash_mode, watchdog, ops, p.name)
-            lt.dump(p)
+            p = out_dir/f"{i}.{type}" if k > 1 else out_dir
+
+            operators = next(operator_generator(op_num)) if ops is None else ops
+            vars = [chr(ord('a') + x) for x in range(var_num)]
+            if inputs:
+                inputs = [{n: v for n, v in zip(vars, inputs[i:i + len(vars)])} for i in
+                          range(0, len(inputs), len(vars))]
+            else:
+                inputs = biased_input_generator(bitsize, var_num, input_num, bitsize, random_level)
+                inputs = [{n: v for n, v in zip(vars, i)} for i in inputs]
+
+            grammar = TritonGrammar([(x, bitsize) for x in vars], operators)
+
+            print("Watchdog value:", watchdog)
+            if type == "pkl":
+                ltm = LookupTable(grammar, inputs, HashType[hash_mode], p.name)
+            else:
+                ltm = LookupTableDB.create(p.absolute(), grammar, inputs, HashType[hash_mode])
+            try:
+                if watchdog:
+                    ltm.generate(depth=max_depth, do_watch=True, watchdog_threshold=watchdog)
+                else:
+                    ltm.generate(depth=max_depth)
+            except KeyboardInterrupt:
+                print("Stop required")
+
+            if type == "pkl":
+                ltm.dump(p)
 
 
 @main.command(name="info")
@@ -108,8 +111,12 @@ def generate_command(output_file, resume, bitsize, var_num, input_num, random_le
 def infos_command(table_file):
     logging.root.handlers = []
     logging.basicConfig(level=logging.INFO, format='%(message)s')
+    table_file = Path(table_file)
 
-    table = LookupTable.load(table_file)
+    if table_file.suffix == ".pkl":
+        table = LookupTable.load(table_file)
+    else:
+        table = LookupTableDB.load(table_file)
 
     logging.info(f"Bitsize: {table.bitsize}")
     logging.info(f"Hash mode: {table.hash_mode.name}")
