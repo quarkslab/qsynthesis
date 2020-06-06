@@ -221,6 +221,7 @@ class LookupTableDB:
         # self.lookup_table = {self.hash([x.value for x in v]): k for k, v in inputs.items()}  # initialize lookup table with vars singleton
         ops = self.grammar.non_terminal_operators
         cur_depth = depth-1
+        blacklist = set()
 
         try:
             while cur_depth > 0:
@@ -254,7 +255,6 @@ class LookupTableDB:
                                 logging.debug(f"[drop] {op.symbol}{name}  ")#[{self.lookup_table[h]}]")
 
                     else:  # arity is 2
-                        blacklist = set()
                         for i1 in range(n_items):
                             if len(worklist) > max_count > 0:
                                 print("Max count exceeded, break")
