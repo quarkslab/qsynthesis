@@ -12,6 +12,7 @@ SZ_MASK = 0xffffffffffffffff  # FIXME: make it variadic
 
 # First, declare an FFI context
 CODE = '''
+#include <stdio.h>
 #include <stdint.h> 
 uint64_t add(uint64_t a, uint64_t b) { return a+b; }
 uint64_t sub(uint64_t a, uint64_t b) { return a-b; }
@@ -31,6 +32,28 @@ uint64_t rshift(uint64_t a, uint64_t b) { return (b >= sizeof(uint64_t)*8)? 0: a
 uint64_t rol(uint64_t i, uint64_t n) { int bitsz = 8*sizeof(n); return (n << (i%bitsz)) | (n >> (8*sizeof(n) - (i%bitsz))); }
 uint64_t ror(uint64_t i, uint64_t n) { int bitsz = 8*sizeof(n); return (n >> (i%bitsz))|(n << (8*sizeof(n) - (i%bitsz))); }
 uint64_t mod(uint64_t a, uint64_t b) { return a % b; }
+
+
+void add_arr(uint64_t* dst, uint64_t* a, uint64_t* b, size_t n) { for(int i=0; i < n; i ++) { dst[i] = a[i] + b[i]; } }
+void and_arr(uint64_t* dst, uint64_t* a, uint64_t* b, size_t n) { for(int i=0; i < n; i ++) { dst[i] = a[i] & b[i]; } }
+void or_arr(uint64_t* dst, uint64_t* a, uint64_t* b, size_t n) { for(int i=0; i < n; i ++) { dst[i] = a[i] | b[i]; } }
+void xor_arr(uint64_t* dst, uint64_t* a, uint64_t* b, size_t n) { for(int i=0; i < n; i ++) { dst[i] = a[i] ^ b[i]; } }
+void sub_arr(uint64_t* dst, uint64_t* a, uint64_t* b, size_t n) { for(int i=0; i < n; i ++) { dst[i] = a[i] - b[i]; } }
+void mul_arr(uint64_t* dst, uint64_t* a, uint64_t* b, size_t n) { for(int i=0; i < n; i ++) { dst[i] = a[i] * b[i]; } }
+void udiv_arr(uint64_t* dst, uint64_t* a, uint64_t* b, size_t n) { for(int i=0; i < n; i ++) { dst[i] = a[i] / b[i]; } }
+void usub_arr(uint64_t* dst, uint64_t* a, size_t n) { for(int i=0; i < n; i ++) { dst[i] = -a[i]; } }
+void invert_arr(uint64_t* dst, uint64_t* a, size_t n) { for(int i=0; i < n; i ++) { dst[i] = ~a[i]; } }
+void urem_arr(uint64_t* dst, uint64_t* a, uint64_t* b, size_t n) { for(int i=0; i < n; i ++) { dst[i] = b[i]==0? a[i]: a[i] % b[i] ; } }
+void ashr_arr(uint64_t* dst, uint64_t* a, uint64_t* b, size_t n) { int bitsz = sizeof(uint64_t)*8; for(int i=0; i < n; i ++) { dst[i] = (b[i] >= bitsz)? ((int64_t) a[i]) >> bitsz-1: ((int64_t) a[i]) >> b[i]; } }
+void sle_arr(uint64_t* dst, int64_t* a, int64_t* b, size_t n) { for(int i=0; i < n; i ++) { dst[i] = a[i] <= b[i] ; } }
+void slt_arr(uint64_t* dst, int64_t* a, int64_t* b, size_t n) { for(int i=0; i < n; i ++) { dst[i] = a[i] < b[i] ; } }
+void sge_arr(uint64_t* dst, int64_t* a, int64_t* b, size_t n) { for(int i=0; i < n; i ++) { dst[i] = a[i] >= b[i] ; } }
+void sgt_arr(uint64_t* dst, int64_t* a, int64_t* b, size_t n) { for(int i=0; i < n; i ++) { dst[i] = a[i] > b[i] ; } }
+void lshift_arr(uint64_t* dst, uint64_t* a, uint64_t* b, size_t n) { for(int i=0; i < n; i ++) { dst[i] = (b[i] >= sizeof(uint64_t)*8)? 0: a[i] << b[i]; } }
+void rshift_arr(uint64_t* dst, uint64_t* a, uint64_t* b, size_t n) { for(int i=0; i < n; i ++) { dst[i] = (b[i] >= sizeof(uint64_t)*8)? 0: a[i] >> b[i]; } }
+void rol_arr(uint64_t* dst, uint64_t* i, uint64_t* n, size_t sz) { for(int j=0; j < sz; j ++) { int bsz = 8*sizeof(n[j]); dst[j] = (n[j] << (i[j]%bsz)) | (n[j] >> (bsz - (i[j]%bsz))); } }
+void ror_arr(uint64_t* dst, uint64_t* i, uint64_t* n, size_t sz) { for(int j=0; j < sz; j ++) { int bsz = 8*sizeof(n[j]); dst[j] = (n[j] >> (i[j]%bsz)) | (n[j] << (bsz - (i[j]%bsz))); } }
+void mod_arr(uint64_t* dst, uint64_t* a, uint64_t* b, size_t n) { for(int i=0; i < n; i ++) { dst[i] = a[i] % b[i] ; } }
 '''
 
 ffi_ctx = pydffi.FFI()
@@ -125,27 +148,27 @@ class BvOp(IntEnum):
     SGT = AST_NODE.BVSGT
 
 
-Operator = namedtuple("Operator", "id symbol eval_trit eval arity commutative id_eq id_zero is_prefix can_overflow bool_ret")
+Operator = namedtuple("Operator", "id symbol eval_trit eval eval_a arity commutative id_eq id_zero is_prefix can_overflow bool_ret")
 
-OPERATORS = {               # ID               strop    Trit op         Py op                arit comm   id_eq  id_zero is_pfx  can_ov bool_ret
-    # BoolOp.EQUAL:    Operator(BoolOp.EQUAL,    "==",    operator.eq,    operator.eq,         2,   True,  True,  False,  False,  False, True),
-    # BoolOp.DISTINCT: Operator(BoolOp.DISTINCT, "!=",    operator.ne,    operator.ne,         2,   True,  False, True,   False,  False, True),
-    # BoolOp.IFF:      Operator(BoolOp.IFF,      "iff",   "iff",          None,                2,   False, False, False,  False,  False, True),
-    # BoolOp.LOR:      Operator(BoolOp.LOR,      "lor",   "lor",          lambda x,y: x or y,  2,   True,  True,  False,  True,   False, True),
-    # BoolOp.AND:      Operator(BoolOp.AND,      "land",  "land",         lambda x,y: x and y, 2,   True,  True,  False,  True,   False, True),
-    # BoolOp.NOT:      Operator(BoolOp.NOT,      "lnot",  "lnot",         lambda x: not x,     1,   False, False, False,  True,   False, True),
-    BvOp.NOT:        Operator(BvOp.NOT,        "~",     operator.invert,CU.funcs.invert,     1,   False, False, False,  True,   False, False),
-    BvOp.AND:        Operator(BvOp.AND,        "&",     operator.and_,  operator.and_,       2,   True,  True,  False,  False,  False, False),
-    BvOp.OR:         Operator(BvOp.OR,         '|',     operator.or_,   operator.or_,        2,   True,  True,  False,  False,  False, False),
-    BvOp.XOR:        Operator(BvOp.XOR,        '^',     operator.xor,   operator.xor,        2,   True,  False, True,   False,  False, False),
-    BvOp.NEG:        Operator(BvOp.NEG,        '-',     operator.neg,   CU.funcs.usub,       1,   False, False, False,  True,   False, False),
-    BvOp.ADD:        Operator(BvOp.ADD,        '+',     operator.add,   CU.funcs.add,        2,   True,  False, False,  False,  True,  False),
-    BvOp.MUL:        Operator(BvOp.MUL,        '*',     operator.mul,   CU.funcs.mul,        2,   True,  False, False,  False,  True,  False),
-    BvOp.SUB:        Operator(BvOp.SUB,        '-',     operator.sub,   CU.funcs.sub,        2,   False, False, True,   False,  False, False),
-    BvOp.SHL:        Operator(BvOp.SHL,        "<<",    operator.lshift,CU.funcs.lshift,     2,   False, False, False,  False,  True,  False),
-    BvOp.LSHR:       Operator(BvOp.LSHR,       ">>",    operator.rshift,CU.funcs.rshift,     2,   False, False, False,  False,   False, False),
-    BvOp.ROL:        Operator(BvOp.ROL,        "bvrol", "bvrol",        CU.funcs.rol,        2,   False, False, False,  True,   False, False),
-    BvOp.ROR:        Operator(BvOp.ROR,        "bvror", "bvror",        CU.funcs.ror,        2,   False, False, False,  True,   False, False),
+OPERATORS = {               # ID               strop    Trit op         Py op                 Eval Array          arit comm   id_eq  id_zero is_pfx  can_ov bool_ret
+    # BoolOp.EQUAL:    Operator(BoolOp.EQUAL,    "==",    operator.eq,    operator.eq,                            2,   True,  True,  False,  False,  False, True),
+    # BoolOp.DISTINCT: Operator(BoolOp.DISTINCT, "!=",    operator.ne,    operator.ne,                            2,   True,  False, True,   False,  False, True),
+    # BoolOp.IFF:      Operator(BoolOp.IFF,      "iff",   "iff",          None,                                   2,   False, False, False,  False,  False, True),
+    # BoolOp.LOR:      Operator(BoolOp.LOR,      "lor",   "lor",          lambda x,y: x or y,                     2,   True,  True,  False,  True,   False, True),
+    # BoolOp.AND:      Operator(BoolOp.AND,      "land",  "land",         lambda x,y: x and y,                    2,   True,  True,  False,  True,   False, True),
+    # BoolOp.NOT:      Operator(BoolOp.NOT,      "lnot",  "lnot",         lambda x: not x,                        1,   False, False, False,  True,   False, True),
+    BvOp.NOT:        Operator(BvOp.NOT,        "~",     operator.invert,CU.funcs.invert,     CU.funcs.invert_arr, 1,   False, False, False,  True,   False, False),
+    BvOp.AND:        Operator(BvOp.AND,        "&",     operator.and_,  operator.and_,       CU.funcs.and_arr,    2,   True,  True,  False,  False,  False, False),
+    BvOp.OR:         Operator(BvOp.OR,         '|',     operator.or_,   operator.or_,        CU.funcs.or_arr,     2,   True,  True,  False,  False,  False, False),
+    BvOp.XOR:        Operator(BvOp.XOR,        '^',     operator.xor,   operator.xor,        CU.funcs.xor_arr,    2,   True,  False, True,   False,  False, False),
+    BvOp.NEG:        Operator(BvOp.NEG,        '-',     operator.neg,   CU.funcs.usub,       CU.funcs.usub_arr,   1,   False, False, False,  True,   False, False),
+    BvOp.ADD:        Operator(BvOp.ADD,        '+',     operator.add,   CU.funcs.add,        CU.funcs.add_arr,    2,   True,  False, False,  False,  True,  False),
+    BvOp.MUL:        Operator(BvOp.MUL,        '*',     operator.mul,   CU.funcs.mul,        CU.funcs.mul_arr,    2,   True,  False, False,  False,  True,  False),
+    BvOp.SUB:        Operator(BvOp.SUB,        '-',     operator.sub,   CU.funcs.sub,        CU.funcs.sub_arr,    2,   False, False, True,   False,  False, False),
+    BvOp.SHL:        Operator(BvOp.SHL,        "<<",    operator.lshift,CU.funcs.lshift,     CU.funcs.lshift_arr, 2,   False, False, False,  False,  True,  False),
+    BvOp.LSHR:       Operator(BvOp.LSHR,       ">>",    operator.rshift,CU.funcs.rshift,     CU.funcs.rshift_arr, 2,   False, False, False,  False,   False, False),
+    # BvOp.ROL:        Operator(BvOp.ROL,        "bvrol", "bvrol",        CU.funcs.rol,        2,   False, False, False,  True,   False, False),
+    # BvOp.ROR:        Operator(BvOp.ROR,        "bvror", "bvror",        CU.funcs.ror,        2,   False, False, False,  True,   False, False),
     # BvOp.UDIV:       Operator(BvOp.UDIV,       "/",     operator.truediv,CU.funcs.udiv,      2,   False, False, False,  True,   False, False),
     # BvOp.UREM:       Operator(BvOp.UREM,       "%",     operator.mod,   CU.funcs.urem,       2,   False, False, False,  False,  False, False),
     # BvOp.ASHR:       Operator(BvOp.ASHR,       "bvashr","bvashr",       CU.funcs.ashr,       2,   False, False, False,  True,  False, False),

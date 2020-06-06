@@ -114,7 +114,7 @@ def generate_command(output_file, resume, bitsize, var_num, input_num, random_le
         elapsed = time.time() - t1
         hours, rem = divmod(elapsed, 3600)
         minutes, seconds = divmod(rem, 60)
-        logging.info(f"\n{hours}h{minutes}m{seconds:.2f}s")
+        logging.info(f"\n{int(hours)}h{int(minutes)}m{seconds:.2f}s")
 
 
 @main.command(name="info")
@@ -134,6 +134,7 @@ def infos_command(table_file):
     logging.info(f"Size: {table.size}")
     logging.info(f"Variables: {table.grammar.vars}")
     logging.info(f"Operators: {[x.name for x in table.grammar.ops]}")
+    logging.info(f"Nb inputs: {len(table.inputs)}")
     l = []
     for i in table.inputs:
         for v in i.values():
