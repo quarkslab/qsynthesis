@@ -110,13 +110,20 @@ class LookupTableDB:
         with db_session:
             TableEntry(hash=hash, expression=value)
 
-    @db_session
-    def _add_entries(self, entries: List[Tuple[str, List[int]]]) -> None:
+    # @db_session
+    def _add_entries(self, entries: List[Tuple[str, List[int]]], chunk_size=10000) -> None:
         count = len(entries)
-        for i, (s, outs) in enumerate(entries):
-            if i % 1000 == 0:
-                print(f"process {i}/{count}\r", end="")
-            TableEntry(hash=self.hash(outs), expression=s)
+        hash_fun = lambda x: hashlib.md5(bytes(x)).digest() if self.hash_mode == HashType.MD5 else self.hash
+        for step in range(0, count, chunk_size):
+            print(f"process {step}/{count}\r", end="")
+            with db_session:
+                for s, outs in entries[step:step+chunk_size]:
+                    TableEntry(hash=hash_fun(outs), expression=s)
+
+        # for i, (s, outs) in enumerate(entries):
+        #     if i % 1000 == 0:
+        #         print(f"process {i}/{count}\r", end="")
+        #     TableEntry(hash=self.hash(outs), expression=s)
 
     @property
     def size(self):
@@ -161,6 +168,10 @@ class LookupTableDB:
     @property
     def operator_number(self):
         return len(self.grammar.ops)
+
+    @property
+    def input_number(self):
+        return len(self.inputs)
 
     @staticmethod
     def fnv1a_128(outs) -> int:
@@ -209,16 +220,20 @@ class LookupTableDB:
             self.watchdog = threading.Thread(target=self.watchdog_worker, args=[watchdog_threshold], daemon=True)
             logging.info("Start watchdog")
             self.watchdog.start()
+        t0 = time()
 
         import pydffi
-        ffi_ctx = pydffi.FFI()
+        FFI = pydffi.FFI()
+        N = self.input_number
+        ArTy = FFI.arrayType(FFI.ULongLongTy, N)
 
-        inputs = {k: [pydffi.ULongLong(ffi_ctx, inp[k]) for inp in self.inputs] for k in self.inputs[0].keys()}
+        hash_fun = lambda x: hashlib.md5(bytes(x)).digest() if self.hash_mode == HashType.MD5 else self.hash
+        worklist = [(k, ArTy()) for k in self.grammar.vars]
+        for i, inp in enumerate(self.inputs):
+            for k, v in worklist:
+                v[i] = inp[k]
+        hash_set = set(hash_fun(x[1]) for x in worklist)
 
-        t0 = time()
-        worklist: List[Tuple[str, List[int]]] = [(k, v) for k, v in inputs.items()]
-        hash_set = set([self.hash([x.value for x in v]) for v in inputs.values()])
-        # self.lookup_table = {self.hash([x.value for x in v]): k for k, v in inputs.items()}  # initialize lookup table with vars singleton
         ops = self.grammar.non_terminal_operators
         cur_depth = depth-1
         blacklist = set()
@@ -239,20 +254,20 @@ class LookupTableDB:
                                 logging.warning("Threshold reached, generation interrupted")
                                 raise KeyboardInterrupt()
                             name, vals = worklist[i1]
-                            new_vals = tuple(map(lambda x: op.eval(x), vals))
 
-                            if any([x < 0 for x in new_vals]):
-                                print(f"ret value {op}: {vals} => {new_vals}")
+                            new_vals = ArTy()
+                            op.eval_a(new_vals, vals, N)
+                            #new_vals = tuple(map(lambda x: op.eval(x), vals))
 
-                            h = self.hash([x.value for x in new_vals])  # Strip pydffi before hashing
-                            if h not in hash_set: # self.lookup_table:
+                            #h = self.hash([x.value for x in new_vals])
+                            h = hash_fun(new_vals)
+                            if h not in hash_set:
                                 fmt = f"{op.symbol}{name}"
                                 logging.debug(f"[add] {fmt: <20} {h}")
-                                #self.lookup_table[h] = fmt
                                 hash_set.add(h)
                                 worklist.append((fmt, new_vals))  # add it in worklist if not already in LUT
                             else:
-                                logging.debug(f"[drop] {op.symbol}{name}  ")#[{self.lookup_table[h]}]")
+                                logging.debug(f"[drop] {op.symbol}{name}  ")
 
                     else:  # arity is 2
                         for i1 in range(n_items):
@@ -275,17 +290,14 @@ class LookupTableDB:
                                 if fmt in blacklist:
                                     continue
 
-                                #new_vals = tuple(map(lambda x: to_uint(op.eval(*x)), zip(vals1, vals2)))  # compute new vals
-                                new_vals = tuple(map(lambda x: op.eval(*x), zip(vals1, vals2)))  # compute new vals
+                                new_vals = ArTy()
+                                op.eval_a(new_vals, vals1, vals2, N)
+                                #new_vals = tuple(map(lambda x: op.eval(*x), zip(vals1, vals2)))  # compute new vals
 
-                                if any([x < 0 for x in new_vals]):
-                                    logging.warning(f"ret value {op}: {vals1} {vals2} => {new_vals}")
-
-                                #h = hash(new_vals)
-                                h = self.hash([x.value for x in new_vals])   # Strip pydffi before hashing
-                                if h not in hash_set: # self.lookup_table:
+                                #h = self.hash([x.value for x in new_vals])   # Strip pydffi before hashing
+                                h = hash_fun(new_vals)
+                                if h not in hash_set:
                                     logging.debug(f"[add] {fmt: <20} {h}")
-                                    #self.lookup_table[h] = fmt
                                     hash_set.add(h)
                                     worklist.append((fmt, new_vals))
 
@@ -294,7 +306,7 @@ class LookupTableDB:
                                         blacklist.add(fmt)  # blacklist commutative equivalent e.g for a+b blacklist: b+a
                                         logging.debug(f"[blacklist] {fmt}")
                                 else:
-                                    logging.debug(f"[drop] {fmt}  ") #[{self.lookup_table[h]}]")
+                                    logging.debug(f"[drop] {fmt}  ")
                 cur_depth -= 1
         except KeyboardInterrupt:
             logging.info("Stop required")
