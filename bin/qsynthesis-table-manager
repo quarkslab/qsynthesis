@@ -11,7 +11,9 @@ from pathlib import Path
 import logging
 from typing import List
 import click
+import time
 
+import qsynthesis
 from qsynthesis.grammar import TritonGrammar, BvOp, BoolOp
 from qsynthesis.lookuptable import LookupTable, HashType
 from qsynthesis.lookuptabledb import LookupTableDB
@@ -38,6 +40,7 @@ def operator_generator(nb_operator: int):
 
 
 @click.group(context_settings={'help_option_names': ['-h', '--help']})
+@click.version_option(version=qsynthesis.__version__, message='%(version)s')
 def main():
     pass
 
@@ -68,11 +71,15 @@ def generate_command(output_file, resume, bitsize, var_num, input_num, random_le
         pass  # TODO: implementing resume features
     else:
         out_dir = Path(output_file)
+        if out_dir.exists() and out_dir.is_file():
+            out_dir.unlink()
         if not out_dir.exists() and k > 1:
             out_dir.mkdir()
 
         ops = [BvOp[x] for x in ops.split(",")] if ops else None
         inputs = [int(x) for x in inputs.split(",") if x]
+
+        t1 = time.time()
 
         for i in range(k):
             logging.info(f"Generate Table #{i}")
@@ -89,7 +96,7 @@ def generate_command(output_file, resume, bitsize, var_num, input_num, random_le
 
             grammar = TritonGrammar([(x, bitsize) for x in vars], operators)
 
-            print("Watchdog value:", watchdog)
+            logging.info(f"Watchdog value: {watchdog}")
             if type == "pkl":
                 ltm = LookupTable(grammar, inputs, HashType[hash_mode], p.name)
             else:
@@ -100,10 +107,14 @@ def generate_command(output_file, resume, bitsize, var_num, input_num, random_le
                 else:
                     ltm.generate(depth=max_depth)
             except KeyboardInterrupt:
-                print("Stop required")
+                logging.warning("Stop required")
 
             if type == "pkl":
                 ltm.dump(p)
+        elapsed = time.time() - t1
+        hours, rem = divmod(elapsed, 3600)
+        minutes, seconds = divmod(rem, 60)
+        logging.info(f"\n{hours}h{minutes}m{seconds:.2f}s")
 
 
 @main.command(name="info")
