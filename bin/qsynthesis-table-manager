@@ -66,7 +66,7 @@ def generate_command(output_file, resume, bitsize, var_num, input_num, random_le
     """ Table generation utility """
 
     logging.root.handlers = []
-    logging.basicConfig(level=logging.INFO if verbosity else logging.WARNING, format='%(message)s')
+    logging.basicConfig(level=logging.DEBUG if verbosity else logging.INFO, format='%(message)s')
 
     if resume is not None:
         pass  # TODO: implementing resume features
