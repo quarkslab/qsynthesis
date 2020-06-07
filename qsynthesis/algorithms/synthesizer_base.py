@@ -95,6 +95,8 @@ class SynthesizerBase:
             if lk_expr is None:
                 return None
             else:
+                if lk_expr.node_count > cur_ast.node_count:
+                    logging.warning(f"[base] synthesized bigger expression ({lk_expr.pp_str}) than given ({cur_ast.pp_str})")
                 #logging.debug(f"found candidate entry {ltm.name}")#}: {cur_ast.expr} ===> {lk_expr}")
                 return lk_expr
 
