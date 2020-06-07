@@ -18,8 +18,6 @@ from qsynthesis.grammar import TritonGrammar, BvOp, BoolOp
 from qsynthesis.lookuptable import LookupTable, HashType
 from qsynthesis.lookuptabledb import LookupTableDB
 
-logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
-
 
 def biased_input_generator(bitsize:int, var_num: int, input_number: int, bs: int, random_level: int = 2):
     n = max(var_num-3, random_level)
@@ -64,8 +62,6 @@ def main():
 @click.option('--linearization', is_flag=True, type=bool, default=False, help="If set activate linearization of expressions")
 def generate_command(output_file, resume, bitsize, var_num, input_num, random_level, max_depth, op_num, verbosity, k, ops, inputs, hash_mode, watchdog, type, linearization):
     """ Table generation utility """
-
-    logging.root.handlers = []
     logging.basicConfig(level=logging.DEBUG if verbosity else logging.INFO, format='%(message)s')
 
     if resume is not None:
@@ -121,7 +117,6 @@ def generate_command(output_file, resume, bitsize, var_num, input_num, random_le
 @main.command(name="info")
 @click.argument('table_file', type=click.Path(exists=True))
 def infos_command(table_file):
-    logging.root.handlers = []
     logging.basicConfig(level=logging.INFO, format='%(message)s')
     table_file = Path(table_file)
 
@@ -141,6 +136,31 @@ def infos_command(table_file):
         for v in i.values():
             l.append(v)
     logging.info(",".join(str(x) for x in l))
+
+
+@main.command(name="check")
+@click.argument('table_file', type=click.Path(exists=True))
+def check_command(table_file):
+    logging.basicConfig(level=logging.INFO, format='%(message)s')
+    table_file = Path(table_file)
+
+    if table_file.suffix == ".pkl":
+        raise click.BadParameter("pickle tables are not supported")
+
+    table = LookupTableDB.load(table_file)
+    count = table.size
+    good, bad = 0, 0
+
+    for i, (h, expr) in enumerate(table):
+        if i % 100 == 0:
+            print(f"process {i}/{count} [KO:{bad}]\r", end="")
+        triton_exp = table.get_expr(expr)
+        outs = table.eval_expr_inputs(triton_exp)
+        if table.hash(outs) != h:
+            logging.warning(f"Bad expression: {expr}  with [{outs}]")
+        else:
+            good += 1
+    logging.info(f"[OK:{good}/{count}]{'': <15}")
 
 
 if __name__ == "__main__":

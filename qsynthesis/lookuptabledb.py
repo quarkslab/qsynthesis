@@ -192,10 +192,10 @@ class LookupTableDB:
             self._ectx = _EvalCtx(self.grammar)
         return self._ectx.eval_str(expr)
 
-    def set_input_lcontext(self, i: int):
+    def set_input_lcontext(self, i: Union[int, Dict]):
         if self._ectx is None:
             self._ectx = _EvalCtx(self.grammar)
-        self._ectx.set_symvar_values(self.inputs[i])
+        self._ectx.set_symvar_values(self.inputs[i] if isinstance(i, int) else i)
 
     def eval_expr_inputs(self, expr) -> List[int]:
         outs = []
@@ -331,7 +331,7 @@ class LookupTableDB:
                             #h = self.hash([x.value for x in new_vals])
                             h = hash_fun(new_vals)
                             if h not in hash_set:
-                                fmt = f"{op.symbol}{name}"
+                                fmt = f"{op.symbol}({name})" if len(name) > 1 else f"{op.symbol}{name}"
                                 fmt = self.try_linearize(fmt, symbols) if linearize else fmt
                                 logging.debug(f"[add] {fmt: <20} {h}")
                                 hash_set.add(h)
@@ -356,6 +356,7 @@ class LookupTableDB:
                                     continue
 
                                 fmt = f"{op.symbol}({name1},{name2})" if op.is_prefix else f"({name1}){op.symbol}({name2})"
+
                                 if not linearize:
                                     if fmt in blacklist:  # Ignore expression if they are in the blacklist
                                         continue
