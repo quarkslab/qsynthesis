@@ -6,9 +6,9 @@ import array
 import hashlib
 import threading
 import psutil
-from pony.orm import Database, Required, PrimaryKey, db_session, IntArray, StrArray, count
+from pony.orm import Database, Required, PrimaryKey, db_session, IntArray, StrArray, count, commit
 from pony.orm.dbapiprovider import IntConverter
-
+from triton import TritonContext, ARCH
 from typing import Optional, List, Dict, Union, Tuple, TypeVar, Iterable
 from time import time, sleep
 
@@ -59,6 +59,35 @@ class EnumConverter(IntConverter):
         return self.py_type(value)
 
 
+class _EvalCtx(object):
+    def __init__(self, grammar):
+        # Create the context
+        self.ctx = TritonContext(ARCH.X86_64)
+        self.ast = self.ctx.getAstContext()
+
+        # Create symbolic variables for grammar variables
+        self.symvars = {}
+        self.vars = {}
+        for v, sz in grammar.vars_dict.items():
+            sym_v = self.ctx.newSymbolicVariable(sz, v)
+            self.symvars[v] = sym_v
+            self.vars[v] = self.ast.variable(sym_v)
+
+        # Create mapping to triton operators
+        self.tops = {x: getattr(self.ast, x) for x in dir(self.ast) if not x.startswith("__")}
+
+    def eval_str(self, s: str) -> 'AstNode':
+        e = eval(s, self.tops, self.vars)
+        if isinstance(e, int):  # In case the expression was in fact an int
+            return self.ast.bv(e, 64)
+        else:
+            return e
+
+    def set_symvar_values(self, args) -> None:
+        for v_name, value in args.items():
+            self.ctx.setConcreteVariableValue(self.symvars[v_name], value)
+
+
 class LookupTableDB:
     def __init__(self, grammar: TritonGrammar, inputs: List[Dict[str, int]], hash_mode: HashType = HashType.RAW, f_name: str = ""):
         if db.provider_name is None:
@@ -71,7 +100,7 @@ class LookupTableDB:
         self.lookup_found = 0
         self.cache_hit = 0
         self.hash_mode = hash_mode
-
+        self._ectx = None
         # generation related fields
         self.watchdog = None
         self.stop = False
@@ -125,6 +154,11 @@ class LookupTableDB:
         #         print(f"process {i}/{count}\r", end="")
         #     TableEntry(hash=self.hash(outs), expression=s)
 
+    @db_session
+    def __iter__(self):
+        for entry in TableEntry.select():
+            yield entry.hash, entry.expression
+
     @property
     def size(self):
         with db_session:
@@ -152,6 +186,16 @@ class LookupTableDB:
         with db_session:
             entry = TableEntry.get(hash=h)
         return entry.expression if entry else None
+
+    def get_expr(self, expr: str):
+        if self._ectx is None:
+            self._ectx = _EvalCtx(self.grammar)
+        return self._ectx.eval_str(expr)
+
+    def set_input_lcontext(self, i: int):
+        if self._ectx is None:
+            self._ectx = _EvalCtx(self.grammar)
+        self._ectx.set_symvar_values(self.inputs[i])
 
     @property
     def name(self) -> Path:

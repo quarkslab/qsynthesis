@@ -151,10 +151,10 @@ class TritonAst:
         WARNING: the str expr must be obtain through the eval_oracle of the exact same TritonAst (otherwise
         names would be shuffled)
         """
-        lcls = locals()
+        #lcls = locals()
         #logging.debug(f"str-to-expr: '{s}' with submap: {self.sub_map}")
-        lcls.update(self.sub_map)
-        e = eval(s)
+        #lcls.update(self.sub_map)
+        e = eval(s, self.sub_map)
         ast = self.make_ast(self.ctx, e)
         return ast
 
@@ -288,8 +288,8 @@ class TritonAst:
         cst = self.ast.distinct(self.expr, other.expr)
         return not(self.ctx.isSat(cst))
 
-    @property
-    def dyn_node_count(self) -> int:
+    @staticmethod
+    def dyn_node_count(expr) -> int:
         def rec(e):
             typ = e.getType()
             if typ == AST_NODE.REFERENCE:
@@ -298,10 +298,10 @@ class TritonAst:
                 return 1  # prevent counting BV childs as nodes
             else:
                 return 1+sum(map(rec, e.getChildren()))
-        return rec(self.expr)
+        return rec(expr)
 
-    @property
-    def dyn_depth(self) -> int:
+    @staticmethod
+    def dyn_depth(expr) -> int:
         def rec(e):
             typ = e.getType()
             if typ == AST_NODE.REFERENCE:
@@ -310,7 +310,7 @@ class TritonAst:
                 return 1  # prevent couting BV childs as nodes
             else:
                 return 1+max(map(rec, e.getChildren()), default=0)
-        return rec(self.expr)
+        return rec(expr)
 
     @staticmethod
     def _visit_replacement(ast: 'TritonAst') -> Generator[Union['TritonAst', Tuple['TritonAst', bool]], 'TritonAst', None]:
