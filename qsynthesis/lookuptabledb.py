@@ -197,6 +197,13 @@ class LookupTableDB:
             self._ectx = _EvalCtx(self.grammar)
         self._ectx.set_symvar_values(self.inputs[i])
 
+    def eval_expr_inputs(self, expr) -> List[int]:
+        outs = []
+        for i in range(len(self.inputs)):
+            self.set_input_lcontext(i)
+            outs.append(expr.evaluate())
+        return outs
+
     @property
     def name(self) -> Path:
         return self._name
@@ -259,11 +266,29 @@ class LookupTableDB:
                 logging.warning(f"Threshold reached: {mem.percent}%")
                 self.stop = True  # Should stop self and also main thread
 
-    def generate(self, depth, max_count=0, do_watch=False, watchdog_threshold=90):
+    @staticmethod
+    def try_linearize(s: str, symbols) -> str:
+        import sympy
+        try:
+            lin = eval(s, symbols)
+            if isinstance(lin, sympy.boolalg.BooleanFalse):
+                logging.error(f"[linearization] expression {s} False")
+            logging.debug(f"[linearization] expression linearized {s} => {lin}")
+            return str(lin).replace(" ", "")
+        except TypeError:
+            return s
+        except AttributeError as e:
+            return s
+
+    def generate(self, depth, max_count=0, do_watch=False, watchdog_threshold=90, linearize=True):
         if do_watch:
             self.watchdog = threading.Thread(target=self.watchdog_worker, args=[watchdog_threshold], daemon=True)
             logging.info("Start watchdog")
             self.watchdog.start()
+        if linearize:
+            logging.info("Linearization enabled")
+            import sympy
+            symbols = {x: sympy.symbols(x) for x in self.grammar.vars}
         t0 = time()
 
         import pydffi
@@ -307,7 +332,8 @@ class LookupTableDB:
                             h = hash_fun(new_vals)
                             if h not in hash_set:
                                 fmt = f"{op.symbol}{name}"
-                                logging.debug(f"[add] {fmt: <20} {h}")
+                                fmt = self.try_linearize(fmt, symbols) if linearize else fmt
+                                logging.debug(f"[add] {fmt: <20} {h}   {list(new_vals)}")
                                 hash_set.add(h)
                                 worklist.append((fmt, new_vals))  # add it in worklist if not already in LUT
                             else:
@@ -329,11 +355,6 @@ class LookupTableDB:
                                 if i1 == i2 and (op.id_eq or op.id_zero):
                                     continue
 
-                                # Ignore expression if they are in the blacklist
-                                fmt = f"{op.symbol}({name1},{name2})" if op.is_prefix else f"({name1}{op.symbol}{name2})"
-                                if fmt in blacklist:
-                                    continue
-
                                 new_vals = ArTy()
                                 op.eval_a(new_vals, vals1, vals2, N)
                                 #new_vals = tuple(map(lambda x: op.eval(*x), zip(vals1, vals2)))  # compute new vals
@@ -341,16 +362,24 @@ class LookupTableDB:
                                 #h = self.hash([x.value for x in new_vals])   # Strip pydffi before hashing
                                 h = hash_fun(new_vals)
                                 if h not in hash_set:
-                                    logging.debug(f"[add] {fmt: <20} {h}")
+                                    fmt = f"{op.symbol}({name1},{name2})" if op.is_prefix else f"({name1}){op.symbol}({name2})"
+                                    fmt = self.try_linearize(fmt, symbols) if linearize else fmt
+                                    # Ignore expression if they are in the blacklist
+                                    if fmt in blacklist:
+                                        continue
+
+                                    logging.debug(f"[add] {fmt: <20} {h}  {list(new_vals)}")
                                     hash_set.add(h)
                                     worklist.append((fmt, new_vals))
 
                                     if op.commutative:
                                         fmt = f"{op.symbol}({name2},{name1})" if op.is_prefix else f"({name2}{op.symbol}{name1})"
+                                        fmt = self.try_linearize(fmt, symbols) if linearize else fmt
                                         blacklist.add(fmt)  # blacklist commutative equivalent e.g for a+b blacklist: b+a
                                         logging.debug(f"[blacklist] {fmt}")
                                 else:
-                                    logging.debug(f"[drop] {fmt}  ")
+                                    logging.debug(f"[drop] {op.symbol}({name1},{name2})" if op.is_prefix else f"[drop] ({name1}{op.symbol}{name2})")
+
                 cur_depth -= 1
         except KeyboardInterrupt:
             logging.info("Stop required")
