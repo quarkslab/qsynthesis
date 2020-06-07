@@ -1,20 +1,14 @@
 #!/usr/bin/env python3
 
-import sys
-import argparse
-from random import choice
-
-from orderedset import OrderedSet
 from itertools import permutations, combinations
 import random
 from pathlib import Path
 import logging
-from typing import List
 import click
 import time
 
 import qsynthesis
-from qsynthesis.grammar import TritonGrammar, BvOp, BoolOp
+from qsynthesis.grammar import TritonGrammar, BvOp
 from qsynthesis.lookuptable import LookupTable, HashType
 from qsynthesis.lookuptabledb import LookupTableDB
 
