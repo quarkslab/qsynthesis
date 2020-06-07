@@ -61,11 +61,12 @@ def main():
 @click.option('--hash-mode', default=HashType.RAW, type=click.Choice([x.name for x in HashType]), help="Hash function for keys in table")
 @click.option('--watchdog', type=float, help="Activate RAM watchdog (percentage of load when to stop)")
 @click.option('-t', '--type', type=click.Choice(["pkl", "db"]), default="db", help="Type of database to create")
-def generate_command(output_file, resume, bitsize, var_num, input_num, random_level, max_depth, op_num, verbosity, k, ops, inputs, hash_mode, watchdog, type):
+@click.option('--linearization', is_flag=True, type=bool, default=False, help="If set activate linearization of expressions")
+def generate_command(output_file, resume, bitsize, var_num, input_num, random_level, max_depth, op_num, verbosity, k, ops, inputs, hash_mode, watchdog, type, linearization):
     """ Table generation utility """
 
     logging.root.handlers = []
-    logging.basicConfig(level=logging.DEBUG if verbosity else logging.INFO, format='%(message)s')
+    logging.basicConfig(level=logging.INFO if verbosity else logging.WARNING, format='%(message)s')
 
     if resume is not None:
         pass  # TODO: implementing resume features
@@ -103,9 +104,9 @@ def generate_command(output_file, resume, bitsize, var_num, input_num, random_le
                 ltm = LookupTableDB.create(p.absolute(), grammar, inputs, HashType[hash_mode])
             try:
                 if watchdog:
-                    ltm.generate(depth=max_depth, do_watch=True, watchdog_threshold=watchdog)
+                    ltm.generate(depth=max_depth, do_watch=True, watchdog_threshold=watchdog, linearize=linearization)
                 else:
-                    ltm.generate(depth=max_depth)
+                    ltm.generate(depth=max_depth, linearize=linearization)
             except KeyboardInterrupt:
                 logging.warning("Stop required")
 
