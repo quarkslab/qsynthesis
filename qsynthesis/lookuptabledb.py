@@ -8,7 +8,6 @@ import threading
 import psutil
 from pony.orm import Database, Required, PrimaryKey, db_session, IntArray, StrArray, count, commit
 from pony.orm.dbapiprovider import IntConverter
-from triton import TritonContext, ARCH
 from typing import Optional, List, Dict, Union, Tuple, TypeVar, Iterable
 from time import time, sleep
 
@@ -61,6 +60,7 @@ class EnumConverter(IntConverter):
 
 class _EvalCtx(object):
     def __init__(self, grammar):
+        from triton import TritonContext, ARCH
         # Create the context
         self.ctx = TritonContext(ARCH.X86_64)
         self.ast = self.ctx.getAstContext()
@@ -355,7 +355,9 @@ class LookupTableDB:
                                 if i1 == i2 and (op.id_eq or op.id_zero):
                                     continue
 
-                                fmt = f"{op.symbol}({name1},{name2})" if op.is_prefix else f"({name1}){op.symbol}({name2})"
+                                sn1 = f'{name1}' if len(name1) == 1 else f'({name1})'
+                                sn2 = f'{name2}' if len(name2) == 1 else f'({name2})'
+                                fmt = f"{op.symbol}({name1},{name2})" if op.is_prefix else f"{sn1}{op.symbol}{sn2}"
 
                                 if not linearize:
                                     if fmt in blacklist:  # Ignore expression if they are in the blacklist
@@ -378,7 +380,7 @@ class LookupTableDB:
                                     worklist.append((fmt, new_vals))
 
                                     if op.commutative:
-                                        fmt = f"{op.symbol}({name2},{name1})" if op.is_prefix else f"({name2}){op.symbol}({name1})"
+                                        fmt = f"{op.symbol}({name2},{name1})" if op.is_prefix else f"{sn2}{op.symbol}{sn1}"
                                         fmt = self.try_linearize(fmt, symbols) if linearize else fmt
                                         blacklist.add(fmt)  # blacklist commutative equivalent e.g for a+b blacklist: b+a
                                         logging.debug(f"[blacklist] {fmt}")
