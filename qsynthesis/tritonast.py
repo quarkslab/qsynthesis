@@ -3,7 +3,7 @@ from triton import AST_NODE
 import logging
 # Imports used only for typing
 from triton import TritonContext
-from typing import List, Tuple, Generator, Dict, Union
+from typing import List, Tuple, Generator, Dict, Union, Optional
 from enum import IntEnum
 import random
 from functools import reduce
@@ -142,7 +142,7 @@ class TritonAst:
         ast_s = self.ast.variable(s)
         return TritonAst(self.ctx, ast_s, 1, 1, {s.getName(): s}, [])
 
-    def normalized_str_to_ast(self, s: str) -> 'TritonAst':
+    def normalized_str_to_ast(self, s: str) -> Optional['TritonAst']:
         """
         Evaluate expression like "a + b - 1" creating a triton AST
         expression out of it. All variables have to be present in the AST
@@ -151,10 +151,11 @@ class TritonAst:
         WARNING: the str expr must be obtain through the eval_oracle of the exact same TritonAst (otherwise
         names would be shuffled)
         """
-        #lcls = locals()
-        #logging.debug(f"str-to-expr: '{s}' with submap: {self.sub_map}")
-        #lcls.update(self.sub_map)
-        e = eval(s, self.sub_map)
+        try:
+            e = eval(s, self.sub_map)
+        except NameError:
+            logging.warning(f"Expression {s} evaluation failed {self.sub_map}")
+            return None
         ast = self.make_ast(self.ctx, e)
         return ast
 

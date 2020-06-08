@@ -60,9 +60,10 @@ class EnumConverter(IntConverter):
 
 class _EvalCtx(object):
     def __init__(self, grammar):
-        from triton import TritonContext, ARCH
+        from triton import TritonContext, ARCH, AST_REPRESENTATION
         # Create the context
         self.ctx = TritonContext(ARCH.X86_64)
+        self.ctx.setAstRepresentationMode(AST_REPRESENTATION.PYTHON)
         self.ast = self.ctx.getAstContext()
 
         # Create symbolic variables for grammar variables
@@ -176,8 +177,12 @@ class LookupTableDB:
             if v:
                 self.lookup_found += 1
                 e = self.grammar.str_to_expr(v.expression, *args)
-                self.expr_cache[h] = e
-                return e
+                if e is None:
+                    logging.debug(f"H: {h} => {v.expression}  {outputs}")
+                    return None
+                else:
+                    self.expr_cache[h] = e
+                    return e
             else:
                 return None
 
