@@ -31,4 +31,5 @@ setup(
         'Operating System :: OS Independent',
     ],
     test_suite="",
+    scripts=['bin/qsynthesis-table-manager']
 )
