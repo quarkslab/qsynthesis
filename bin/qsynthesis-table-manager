@@ -6,6 +6,7 @@ from pathlib import Path
 import logging
 import click
 import time
+from binascii import unhexlify
 
 import qsynthesis
 from qsynthesis.grammar import TritonGrammar, BvOp
@@ -57,6 +58,15 @@ def main():
 def generate_command(output_file, resume, bitsize, var_num, input_num, random_level, max_depth, op_num, verbosity, k, ops, inputs, hash_mode, watchdog, type, linearization):
     """ Table generation utility """
     logging.basicConfig(level=logging.DEBUG if verbosity else logging.INFO, format='%(message)s')
+
+    try:
+        import pydffi
+    except ImportError as e:
+        raise click.Abort("Cannot import dragonffi (pip3 install pydffi")
+    try:
+        import sympy
+    except ImportError as e:
+        raise click.Abort("Cannot import sympy (pip3 install sympy")
 
     if resume is not None:
         pass  # TODO: implementing resume features
@@ -155,6 +165,46 @@ def check_command(table_file):
         else:
             good += 1
     logging.info(f"[OK:{good}/{count}]{'': <15}")
+
+
+@main.command(name="runserver")
+@click.argument('table_file', type=click.Path(exists=True))
+@click.option('-p', '--port', type=int, default=8080, help="Service port to listen on")
+def serve_command(table_file, port):
+    logging.basicConfig(level=logging.INFO, format='%(message)s')
+    table_file = Path(table_file)
+
+    if table_file.suffix == ".pkl":
+        raise click.BadParameter("pickle tables are not supported")
+
+    table = LookupTableDB.load(table_file)
+
+    try:
+        from fastapi import FastAPI, Query
+        import uvicorn
+    except ImportError as e:
+        raise click.Abort("Cannot import fastapi or uvicorn (pip3 install fastapi uvicorn")
+
+    app = FastAPI()
+
+    @app.get("/")
+    def read_root():
+        return {'hash_mode': table.hash_mode.name,
+                'inputs': table.inputs,
+                'grammar': table.grammar.to_dict()}
+
+    @app.get("/entry/{hash}")
+    def read_item(hash: str = Query(None, min_length=32, max_length=32, regex="^[0-9a-z]+$")):
+        #def read_item(hash: str = Query(None, min_length=32, max_length=32, regex="^[0-9a-z]+$")):
+        decoded = unhexlify(hash)
+        entry = table.lookup_hash(decoded)
+        print(entry)
+        if entry:
+            return {"hash": hash, "expression": entry}
+        else:
+            return {}
+
+    uvicorn.run(app, host="0.0.0.0", port=port)
 
 
 if __name__ == "__main__":
