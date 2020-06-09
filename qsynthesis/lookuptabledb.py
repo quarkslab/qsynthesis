@@ -192,6 +192,11 @@ class LookupTableDB:
             entry = TableEntry.get(hash=h)
         return entry.expression if entry else None
 
+    def lookup_hash(self, h: bytes) -> Optional[str]:
+        with db_session:
+            entry = TableEntry.get(hash=h)
+        return entry.expression if entry else None
+
     def get_expr(self, expr: str):
         if self._ectx is None:
             self._ectx = _EvalCtx(self.grammar)
