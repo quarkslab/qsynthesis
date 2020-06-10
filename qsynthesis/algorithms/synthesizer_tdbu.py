@@ -1,5 +1,5 @@
 import logging
-from qsynthesis.lookuptable import LookupTable
+from qsynthesis.tables.lookuptable import LookupTable
 from typing import List, Optional, Tuple, Set, Dict, Generator, Union
 import triton
 from enum import IntEnum

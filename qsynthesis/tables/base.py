@@ -1,61 +1,24 @@
+import pickle
 from pathlib import Path
-from qsynthesis.grammar import TritonGrammar, BvOp
+from qsynthesis.grammar import TritonGrammar
 import logging
-from enum import IntEnum, Enum
+from enum import IntEnum
 import array
 import hashlib
 import threading
 import psutil
-from pony.orm import Database, Required, PrimaryKey, db_session, IntArray, StrArray, count, commit
-from pony.orm.dbapiprovider import IntConverter
-from typing import Optional, List, Dict, Union, Tuple, TypeVar, Iterable
+
+from typing import Optional, List, Dict, Union, Generator, Tuple, Any, TypeVar, Iterable
 from time import time, sleep
 
 Expr = TypeVar('Expr')  # Expression type in the associated grammar
+Hash = Union[bytes, int, Tuple[int]]
 
 
 class HashType(IntEnum):
     RAW = 1
     FNV1A_128 = 2
     MD5 = 3
-
-
-db = Database()
-
-
-class TableEntry(db.Entity):
-    hash = PrimaryKey(bytes)
-    expression = Required(str)
-
-
-class Metadata(db.Entity):
-    hash_mode = Required(HashType)
-    operators = Required(IntArray)
-
-
-class Variable(db.Entity):
-    name = PrimaryKey(str)
-    size = Required(int)
-
-
-class Input(db.Entity):
-    id = PrimaryKey(int, auto=True)
-    variables = Required(StrArray)
-    values = Required(IntArray)
-
-
-class EnumConverter(IntConverter):
-    def validate(self, val, obj=None):
-        if not isinstance(val, Enum):
-            raise ValueError('Must be an Enum.  Got {}'.format(type(val)))
-        return val
-
-    def py2sql(self, val):
-        return val.value
-
-    def sql2py(self, value):
-        # Any enum type can be used, so py_type ensures the correct one is used to create the enum instance
-        return self.py_type(value)
 
 
 class _EvalCtx(object):
@@ -89,12 +52,14 @@ class _EvalCtx(object):
             self.ctx.setConcreteVariableValue(self.symvars[v_name], value)
 
 
-class LookupTableDB:
-    def __init__(self, grammar: TritonGrammar, inputs: List[Dict[str, int]], hash_mode: HashType = HashType.RAW, f_name: str = ""):
-        if db.provider_name is None:
-            logging.error("LookupTableDB object should be created with a databased already binded !")
+class BaseTable:
+    """
+    Base Lookup table class. Specify the interface that child
+    class have to implement to be interoperable with other the synthesizer
+    """
+    def __init__(self, gr: TritonGrammar, inputs: Union[int, List[Dict[str, int]]], hash_mode: HashType=HashType.RAW, f_name: str = ""):
         self._name = Path(f_name)
-        self.grammar = grammar
+        self.grammar = gr
         self._bitsize = self.grammar.size
         self.expr_cache = {}
         self.lookup_count = 0
@@ -109,62 +74,12 @@ class LookupTableDB:
 
         self.inputs = inputs
 
-    @staticmethod
-    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Dict[str, int]], hash_mode: HashType = HashType.RAW) -> 'LookupTableDB':
-        db.bind(provider='sqlite', filename=str(filename), create_db=True)
-        db.provider.converter_classes.append((Enum, EnumConverter))
-        db.generate_mapping(create_tables=True)
-        with db_session:
-            Metadata(hash_mode=hash_mode, operators=[x.value for x in grammar.ops])
-            for name, sz in grammar.vars_dict.items():
-                Variable(name=name, size=sz)
-            for i in inputs:
-                Input(variables=list(i.keys()), values=list(i.values()))
-        return LookupTableDB(grammar=grammar, inputs=inputs, hash_mode=hash_mode, f_name=filename)
-
-    @staticmethod
-    def load(file: Union[Path, str]) -> 'LookupTableDB':
-        file = file.absolute() if isinstance(file, Path) else Path(file).absolute()
-        db.bind(provider='sqlite', filename=str(file), create_db=False)
-        db.provider.converter_classes.append((Enum, EnumConverter))
-        db.generate_mapping(create_tables=False)
-
-        with db_session:
-            inputs = [{n: v for n, v in zip(i.variables, i.values)} for i in Input.select()]
-            vars = [(x.name, x.size) for x in Variable.select()]
-            m = Metadata.select().first()
-            ops = [BvOp(x) for x in m.operators]
-            gr = TritonGrammar(vars=vars, ops=ops)
-            return LookupTableDB(grammar=gr, inputs=inputs, hash_mode=HashType(m.hash_mode), f_name=file)
-
-    def _add_entry(self, hash: bytes, value: str):
-        with db_session:
-            TableEntry(hash=hash, expression=value)
-
-    # @db_session
-    def _add_entries(self, entries: List[Tuple[str, List[int]]], chunk_size=10000) -> None:
-        count = len(entries)
-        hash_fun = lambda x: hashlib.md5(bytes(x)).digest() if self.hash_mode == HashType.MD5 else self.hash
-        for step in range(0, count, chunk_size):
-            print(f"process {step}/{count}\r", end="")
-            with db_session:
-                for s, outs in entries[step:step+chunk_size]:
-                    TableEntry(hash=hash_fun(outs), expression=s)
-
-        # for i, (s, outs) in enumerate(entries):
-        #     if i % 1000 == 0:
-        #         print(f"process {i}/{count}\r", end="")
-        #     TableEntry(hash=self.hash(outs), expression=s)
-
-    @db_session
-    def __iter__(self):
-        for entry in TableEntry.select():
-            yield entry.hash, entry.expression
-
     @property
     def size(self):
-        with db_session:
-            return count(TableEntry.select())
+        raise NotImplementedError("Should be implemented by child class")
+
+    def _get_item(self, h: Hash) -> Optional[str]:
+        raise NotImplementedError("Should be implemented by child class")
 
     def lookup(self, outputs: Union[Tuple[int], List[int]], *args,  use_cache=True) -> Optional[Expr]:
         self.lookup_count += 1
@@ -173,47 +88,21 @@ class LookupTableDB:
             self.cache_hit += 1
             return self.expr_cache[h]
         else:
-            with db_session:
-                v = TableEntry.get(hash=h)
+            v = self._get_item(h)
             if v:
                 self.lookup_found += 1
-                e = self.grammar.str_to_expr(v.expression, *args)
-                if e is None:
-                    logging.debug(f"H: {h} => {v.expression}  {outputs}")
-                    return None
-                else:
-                    self.expr_cache[h] = e
-                    return e
+                e = self.grammar.str_to_expr(v, *args)
+                self.expr_cache[h] = e
+                return e
             else:
                 return None
 
     def lookup_raw(self, outputs: Union[Tuple[int], List[int]]) -> Optional[str]:
         h = self.hash(outputs)
-        with db_session:
-            entry = TableEntry.get(hash=h)
-        return entry.expression if entry else None
+        return self._get_item(h)
 
-    def lookup_hash(self, h: bytes) -> Optional[str]:
-        with db_session:
-            entry = TableEntry.get(hash=h)
-        return entry.expression if entry else None
-
-    def get_expr(self, expr: str):
-        if self._ectx is None:
-            self._ectx = _EvalCtx(self.grammar)
-        return self._ectx.eval_str(expr)
-
-    def set_input_lcontext(self, i: Union[int, Dict]):
-        if self._ectx is None:
-            self._ectx = _EvalCtx(self.grammar)
-        self._ectx.set_symvar_values(self.inputs[i] if isinstance(i, int) else i)
-
-    def eval_expr_inputs(self, expr) -> List[int]:
-        outs = []
-        for i in range(len(self.inputs)):
-            self.set_input_lcontext(i)
-            outs.append(expr.evaluate())
-        return outs
+    def lookup_hash(self, h: Hash) -> Optional[str]:
+        return self._get_item(h)
 
     @property
     def name(self) -> Path:
@@ -268,6 +157,26 @@ class LookupTableDB:
             return self.fnv1a_128(outs)
         elif self.hash_mode == HashType.MD5:
             return self.md5(outs)
+
+    def __iter__(self) -> Iterable[Tuple[Hash, str]]:
+        raise NotImplementedError("Should be implemented by child class")
+
+    def get_expr(self, expr: str):
+        if self._ectx is None:
+            self._ectx = _EvalCtx(self.grammar)
+        return self._ectx.eval_str(expr)
+
+    def set_input_lcontext(self, i: Union[int, Dict]):
+        if self._ectx is None:
+            self._ectx = _EvalCtx(self.grammar)
+        self._ectx.set_symvar_values(self.inputs[i] if isinstance(i, int) else i)
+
+    def eval_expr_inputs(self, expr) -> List[int]:
+        outs = []
+        for i in range(len(self.inputs)):
+            self.set_input_lcontext(i)
+            outs.append(expr.evaluate())
+        return outs
 
     def watchdog_worker(self, threshold):
         while not self.stop:
@@ -406,9 +315,26 @@ class LookupTableDB:
         self.stop = True
         t = time() - t0
         print(f"Depth {depth - cur_depth} (size:{len(worklist)}) (Time:{int(t/60)}m{t%60:.5f}s) [RAM:{self.__size_to_str(self.max_mem)}]")
-        self._add_entries(worklist)
+        self.add_entries(worklist)
         if do_watch:
             self.watchdog.join()
+
+    def add_entry(self, hash: Hash, value: str) -> None:
+        raise NotImplementedError("Should be implemented by child class")
+
+    def add_entries(self, worklist):
+        raise NotImplementedError("Should be implemented by child class")
+
+    @staticmethod
+    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Dict[str, int]], hash_mode: HashType = HashType.RAW) -> 'BaseTable':
+        raise NotImplementedError("Should be implemented by child class")
+
+    @staticmethod
+    def load(file: Union[Path, str]) -> 'BaseTable':
+        raise NotImplementedError("Should be implemented by child class")
+
+    def save(self, file: Optional[Union[Path, str]]):
+        raise NotImplementedError("Should be implemented by child class")
 
     @staticmethod
     def __size_to_str(value):

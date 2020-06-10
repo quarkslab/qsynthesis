@@ -5,7 +5,7 @@ from triton import ARCH
 
 from qsynthesis.utils.symexec import SimpleSymExec
 from qsynthesis.algorithms import TopDownSynthesizer
-from qsynthesis.lookuptable import LookupTable
+from qsynthesis.tables.lookuptable import LookupTable
 
 #logging.basicConfig(level=logging.DEBUG)
 

@@ -10,8 +10,8 @@ from binascii import unhexlify
 
 import qsynthesis
 from qsynthesis.grammar import TritonGrammar, BvOp
-from qsynthesis.lookuptable import LookupTable, HashType
-from qsynthesis.lookuptabledb import LookupTableDB
+from qsynthesis.tables.lookuptable import LookupTable, HashType
+from qsynthesis.tables.lookuptabledb import LookupTableDB
 
 
 def biased_input_generator(bitsize:int, var_num: int, input_number: int, bs: int, random_level: int = 2):
@@ -98,10 +98,11 @@ def generate_command(output_file, resume, bitsize, var_num, input_num, random_le
             grammar = TritonGrammar([(x, bitsize) for x in vars], operators)
 
             logging.info(f"Watchdog value: {watchdog}")
-            if type == "pkl":
-                ltm = LookupTable(grammar, inputs, HashType[hash_mode], p.name)
-            else:
-                ltm = LookupTableDB.create(p.absolute(), grammar, inputs, HashType[hash_mode])
+            ltm = (LookupTable if type == "pkl" else LookupTableDB).create(p.absolute(), grammar, inputs, HashType[hash_mode])
+            # if type == "pkl":
+            #     ltm = (LookupTable(grammar, inputs, HashType[hash_mode], p.name)
+            # else:
+            #     ltm = LookupTableDB.create()
             try:
                 if watchdog:
                     ltm.generate(depth=max_depth, do_watch=True, watchdog_threshold=watchdog, linearize=linearization)
@@ -110,8 +111,7 @@ def generate_command(output_file, resume, bitsize, var_num, input_num, random_le
             except KeyboardInterrupt:
                 logging.warning("Stop required")
 
-            if type == "pkl":
-                ltm.dump(p)
+            ltm.save(p)
         elapsed = time.time() - t1
         hours, rem = divmod(elapsed, 3600)
         minutes, seconds = divmod(rem, 60)
@@ -178,6 +178,8 @@ def serve_command(table_file, port):
         raise click.BadParameter("pickle tables are not supported")
 
     table = LookupTableDB.load(table_file)
+    logging.info("preload table size")
+    _ = table.size
 
     try:
         from fastapi import FastAPI, Query
