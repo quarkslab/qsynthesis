@@ -104,6 +104,7 @@ class LookupTableDB:
         self._ectx = None
         # generation related fields
         self.watchdog = None
+        self.max_mem = 0
         self.stop = False
 
         self.inputs = inputs
@@ -272,6 +273,7 @@ class LookupTableDB:
         while not self.stop:
             sleep(2)
             mem = psutil.virtual_memory()
+            self.max_mem = max(mem.used, self.max_mem)
             if mem.percent >= threshold:
                 logging.warning(f"Threshold reached: {mem.percent}%")
                 self.stop = True  # Should stop self and also main thread
@@ -403,7 +405,17 @@ class LookupTableDB:
         # In the end
         self.stop = True
         t = time() - t0
-        print(f"Depth {depth - cur_depth} (size:{len(worklist)}) (Time:{int(t/60)}m{t%60:.5f}s)")
+        print(f"Depth {depth - cur_depth} (size:{len(worklist)}) (Time:{int(t/60)}m{t%60:.5f}s) [RAM:{self.__size_to_str(self.max_mem)}]")
         self._add_entries(worklist)
         if do_watch:
             self.watchdog.join()
+
+    @staticmethod
+    def __size_to_str(value):
+        units = [(float(1024), "Kb"), (float(1024 **2), "Mb"), (float(1024 **3), "Gb")]
+        for unit, s in units[::-1]:
+            if value / unit < 1:
+                continue
+            else:  # We are on the right unit
+                return f"{value/unit:.2f}{s}"
+        return f"{value}B"
