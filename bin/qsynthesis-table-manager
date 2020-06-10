@@ -189,7 +189,8 @@ def serve_command(table_file, port):
 
     @app.get("/")
     def read_root():
-        return {'hash_mode': table.hash_mode.name,
+        return {'size': table.size,
+                'hash_mode': table.hash_mode.name,
                 'inputs': table.inputs,
                 'grammar': table.grammar.to_dict()}
 
