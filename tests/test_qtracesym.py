@@ -5,7 +5,7 @@ from qtracedb import DatabaseManager
 
 from qsynthesis.utils.qtrace_symexec import QtraceSymExec, Mode
 from qsynthesis.algorithms import TopDownSynthesizer
-from qsynthesis.lookuptable import LookupTable
+from qsynthesis.tables.lookuptable import LookupTable
 
 logging.basicConfig(level=logging.DEBUG)
 
