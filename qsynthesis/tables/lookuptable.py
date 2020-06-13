@@ -2,6 +2,7 @@ import pickle
 from pathlib import Path
 import logging
 from typing import Optional, List, Dict, Union, Generator, Tuple, Any, TypeVar, Iterable
+from binascii import unhexlify, hexlify
 
 from qsynthesis.grammar import TritonGrammar
 from qsynthesis.tables.base import BaseTable, HashType, Hash
@@ -20,14 +21,13 @@ class LookupTable(BaseTable):
         return self.lookup_table.get(hash, None)
 
     def __iter__(self) -> Iterable[Tuple[Hash, str]]:
-        return self.lookup_table.items()
+        return iter(self.lookup_table.items())
 
     def add_entry(self, hash: Hash, value: str) -> None:
         self.lookup_table[hash] = value
 
     def add_entries(self, worklist):
         for s, outs in worklist:
-            print("outs", outs, " str:", s)
             h = self.hash(outs)
             self.lookup_table[h] = s
 
@@ -56,3 +56,68 @@ class LookupTable(BaseTable):
     @staticmethod
     def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Dict[str, int]], hash_mode: HashType = HashType.RAW) -> 'BaseTable':
         return LookupTable(grammar, inputs, hash_mode, filename)
+
+
+class LookupTableRaw(BaseTable):
+    def __init__(self, gr: TritonGrammar, inputs: Union[int, List[Dict[str, int]]], hash_mode: HashType=HashType.RAW, f_name: str = ""):
+        super(LookupTableRaw, self).__init__(gr, inputs, hash_mode, f_name)
+
+    @property
+    def size(self):
+        raise NotImplementedError()
+
+    def _get_item(self, hash: Hash) -> Optional[str]:
+        raise NotImplementedError()
+
+    def __iter__(self) -> Iterable[Tuple[Hash, str]]:
+        with open(str(self.name), "rb") as f:
+            _ = f.readline()
+            _ = f.readline()
+            while 1:
+                line = f.read(16)
+                if not line:
+                    break
+                s = f.readline()
+                yield line, s.strip().decode()
+
+    def add_entry(self, hash: Hash, value: str) -> None:
+        with open(str(self.name), "ab") as f:
+            f.write(f"{hash},{value}\n".encode())
+
+    def add_entries(self, worklist):
+        import hashlib
+        count = len(worklist)
+        hash_fun = lambda x: hashlib.md5(bytes(x)).digest() if self.hash_mode == HashType.MD5 else self.hash
+        print("\nExport data")
+
+        with open(str(self.name), "ab") as f:
+            for step in range(0, count, 10000):
+                print(f"process {step}/{count}\r", end="")
+                chk_s = b"\n".join(hash_fun(outs)+s.encode() for s, outs in worklist[step:step+10000])
+                f.write(chk_s)
+
+    def save(self, file: Union[Path, str]) -> None:
+        logging.info("Saved")
+
+    @staticmethod
+    def load(file: Union[Path, str]) -> 'LookupTable':
+        import json
+        f = Path(file)
+        with open(f, 'rb') as f:
+            raw = json.loads(f.readline())
+            hm = HashType[raw['hash-mode']] if "hash-mode" in raw else HashType.RAW
+            gr = TritonGrammar.from_dict(raw)
+            inp_l = json.loads(f.readline())
+            inputs = TritonGrammar.load_inputs(inp_l)
+            lkp = LookupTableRaw(gr, inputs, hm, f.name)
+            return lkp
+
+    @staticmethod
+    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Dict[str, int]], hash_mode: HashType = HashType.RAW) -> 'BaseTable':
+        import json
+        with open(filename, "wb") as f:
+            d = grammar.to_dict()
+            d["hash_mode"] = hash_mode.name
+            f.write(f"{json.dumps(d)}\n".encode())
+            f.write(f"{json.dumps(inputs)}\n".encode())
+        return LookupTableRaw(grammar, inputs, hash_mode, filename)
