@@ -105,6 +105,10 @@ class BaseTable:
         return self._get_item(h)
 
     @property
+    def is_writable(self) -> bool:
+        return False
+
+    @property
     def name(self) -> Path:
         return self._name
 

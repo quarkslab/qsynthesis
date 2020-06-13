@@ -103,6 +103,10 @@ class LookupTableDB(BaseTable):
             yield entry.hash, entry.expression
 
     @property
+    def is_writable(self) -> bool:
+        return True
+
+    @property
     def size(self):
         with db_session:
             return count(TableEntry.select())
