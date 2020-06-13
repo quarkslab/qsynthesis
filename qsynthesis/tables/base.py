@@ -201,7 +201,15 @@ class BaseTable:
         except AttributeError as e:
             return s
 
-    def generate(self, depth, max_count=0, do_watch=False, watchdog_threshold=90, linearize=True):
+    @staticmethod
+    def custom_permutations(l):
+        for i in range(len(l)):
+            for j in range(0, i):
+                yield False, l[i], l[j]
+                yield False, l[j], l[i]
+            yield True, l[i], l[i]
+
+    def generate(self, depth, max_count=0, do_watch=False, watchdog_threshold=90, linearize=True, do_use_blacklist=False):
         if do_watch:
             self.watchdog = threading.Thread(target=self.watchdog_worker, args=[watchdog_threshold], daemon=True)
             logging.info("Start watchdog")
@@ -224,7 +232,7 @@ class BaseTable:
                 v[i] = inp[k]
         hash_set = set(hash_fun(x[1]) for x in worklist)
 
-        ops = self.grammar.non_terminal_operators
+        ops = sorted(self.grammar.non_terminal_operators, key=lambda x: x.arity == 1)  # sort operators to iterate on unary first
         cur_depth = depth-1
         blacklist = set()
 
@@ -234,79 +242,65 @@ class BaseTable:
                 n_items = len(worklist)
                 t = time() - t0
                 print(f"Depth {depth-cur_depth} (size:{n_items}) (Time:{int(t/60)}m{t%60:.5f}s)")
+                c = 0
 
-                for op in ops:  # Iterate over all operators
-                    print(f"  op: {op.symbol}")
+                for i, (same, (name1, vals1), (name2, vals2)) in enumerate(self.custom_permutations(worklist)):
+                    if same:
+                        c += 1
+                        print(f"process: {(c*100)/n_items:.2f}%\r", end="")
+                    if self.stop:
+                        logging.warning("Threshold reached, generation interrupted")
+                        raise KeyboardInterrupt()
 
-                    if op.arity == 1:
-                        for i1 in range(n_items):  # iterate once the list
-                            if self.stop:
-                                logging.warning("Threshold reached, generation interrupted")
-                                raise KeyboardInterrupt()
-                            name, vals = worklist[i1]
-
-                            new_vals = ArTy()
-                            op.eval_a(new_vals, vals, N)
-                            #new_vals = tuple(map(lambda x: op.eval(x), vals))
-
-                            #h = self.hash([x.value for x in new_vals])
-                            h = hash_fun(new_vals)
-                            if h not in hash_set:
-                                fmt = f"{op.symbol}({name})" if len(name) > 1 else f"{op.symbol}{name}"
-                                fmt = self.try_linearize(fmt, symbols) if linearize else fmt
-                                logging.debug(f"[add] {fmt: <20} {h}")
-                                hash_set.add(h)
-                                worklist.append((fmt, new_vals))  # add it in worklist if not already in LUT
-                            else:
-                                logging.debug(f"[drop] {op.symbol}{name}  ")
-
-                    else:  # arity is 2
-                        for i1 in range(n_items):
-                            if len(worklist) > max_count > 0:
-                                print("Max count exceeded, break")
-                                break
-                            name1, vals1 = worklist[i1]
-                            for i2 in range(n_items):
-                                if self.stop:
-                                    logging.warning("Threshold reached, generation interrupted")
-                                    raise KeyboardInterrupt()
-                                name2, vals2 = worklist[i2]
-
-                                # for identity (a op a) ignore it if the result is known to be 0 or a
-                                if i1 == i2 and (op.id_eq or op.id_zero):
-                                    continue
-
-                                sn1 = f'{name1}' if len(name1) == 1 else f'({name1})'
-                                sn2 = f'{name2}' if len(name2) == 1 else f'({name2})'
-                                fmt = f"{op.symbol}({name1},{name2})" if op.is_prefix else f"{sn1}{op.symbol}{sn2}"
-
-                                if not linearize:
-                                    if fmt in blacklist:  # Ignore expression if they are in the blacklist
-                                        continue
-
+                    for op in ops:  # Iterate over all operators
+                        if op.arity == 1:
                                 new_vals = ArTy()
-                                op.eval_a(new_vals, vals1, vals2, N)
-                                #new_vals = tuple(map(lambda x: op.eval(*x), zip(vals1, vals2)))  # compute new vals
+                                op.eval_a(new_vals, vals1, N)
 
-                                #h = self.hash([x.value for x in new_vals])   # Strip pydffi before hashing
                                 h = hash_fun(new_vals)
                                 if h not in hash_set:
-                                    if linearize:
-                                        fmt = self.try_linearize(fmt, symbols) if linearize else fmt
-                                        if fmt in blacklist:  # if linearize check blacklist here
-                                            continue
-
+                                    fmt = f"{op.symbol}({name1})" if len(name1) > 1 else f"{op.symbol}{name1}"
+                                    fmt = self.try_linearize(fmt, symbols) if linearize else fmt
                                     logging.debug(f"[add] {fmt: <20} {h}")
                                     hash_set.add(h)
-                                    worklist.append((fmt, new_vals))
-
-                                    if op.commutative:
-                                        fmt = f"{op.symbol}({name2},{name1})" if op.is_prefix else f"{sn2}{op.symbol}{sn1}"
-                                        fmt = self.try_linearize(fmt, symbols) if linearize else fmt
-                                        blacklist.add(fmt)  # blacklist commutative equivalent e.g for a+b blacklist: b+a
-                                        logging.debug(f"[blacklist] {fmt}")
+                                    worklist.append((fmt, new_vals))  # add it in worklist if not already in LUT
                                 else:
-                                    logging.debug(f"[drop] {op.symbol}({name1},{name2})" if op.is_prefix else f"[drop] ({name1}){op.symbol}({name2})")
+                                    logging.debug(f"[drop] {op.symbol}{name1}  ")
+
+                        else:  # arity is 2
+                            # for identity (a op a) ignore it if the result is known to be 0 or a
+                            if same and (op.id_eq or op.id_zero):
+                                continue
+
+                            sn1 = f'{name1}' if len(name1) == 1 else f'({name1})'
+                            sn2 = f'{name2}' if len(name2) == 1 else f'({name2})'
+                            fmt = f"{op.symbol}({name1},{name2})" if op.is_prefix else f"{sn1}{op.symbol}{sn2}"
+
+                            if not linearize:
+                                if fmt in blacklist:  # Ignore expression if they are in the blacklist
+                                    continue
+
+                            new_vals = ArTy()
+                            op.eval_a(new_vals, vals1, vals2, N)
+
+                            h = hash_fun(new_vals)
+                            if h not in hash_set:
+                                if linearize:
+                                    fmt = self.try_linearize(fmt, symbols) if linearize else fmt
+                                    if fmt in blacklist:  # if linearize check blacklist here
+                                        continue
+
+                                logging.debug(f"[add] {fmt: <20} {h}")
+                                hash_set.add(h)
+                                worklist.append((fmt, new_vals))
+
+                                if op.commutative and do_use_blacklist:
+                                    fmt = f"{op.symbol}({name2},{name1})" if op.is_prefix else f"{sn2}{op.symbol}{sn1}"
+                                    fmt = self.try_linearize(fmt, symbols) if linearize else fmt
+                                    blacklist.add(fmt)  # blacklist commutative equivalent e.g for a+b blacklist: b+a
+                                    logging.debug(f"[blacklist] {fmt}")
+                            else:
+                                logging.debug(f"[drop] {op.symbol}({name1},{name2})" if op.is_prefix else f"[drop] ({name1}){op.symbol}({name2})")
 
                 cur_depth -= 1
         except KeyboardInterrupt:
