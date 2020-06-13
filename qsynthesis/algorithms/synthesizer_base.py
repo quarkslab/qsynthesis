@@ -13,7 +13,7 @@ class SynthesizerBase:
     This synthesis mechanism always converges
     """
 
-    def __init__(self, ltms: Union[LookupTable, List[LookupTable]], only_first_match: bool = False):
+    def __init__(self, ltms: Union[LookupTable, List[LookupTable]], only_first_match: bool = False, learning_new_exprs: bool = False):
         """
         Initialize TritonTDBUSynthesizer
 
@@ -21,6 +21,7 @@ class SynthesizerBase:
         """
         self._ltms = [ltms] if isinstance(ltms, LookupTable) else ltms
         self.only_first_match = only_first_match
+        self.learning_enabled = learning_new_exprs
 
         # Caches use internally
         self.expr_cache = {}  # Dict expr_str -> synth_expr
@@ -97,7 +98,11 @@ class SynthesizerBase:
             else:
                 if lk_expr.node_count > cur_ast.node_count:
                     logging.warning(f"[base] synthesized bigger expression ({lk_expr.pp_str}) than given ({cur_ast.pp_str})")
-                #logging.debug(f"found candidate entry {ltm.name}")#}: {cur_ast.expr} ===> {lk_expr}")
+                    if ltm.is_writable and self.learning_enabled:
+                        h = ltm.hash(outputs)
+                        s = cur_ast.to_normalized_str()
+                        logging.info(f"[base] expression {s} added to {ltm.name}")
+                        ltm.add_entry(h, s)
                 return lk_expr
 
     def eval_ast(self, ioast, inputs):

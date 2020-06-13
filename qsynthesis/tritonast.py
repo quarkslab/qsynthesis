@@ -159,6 +159,18 @@ class TritonAst:
         ast = self.make_ast(self.ctx, e)
         return ast
 
+    def to_normalized_str(self) -> str:
+        back = {}
+        for name, ast_v in self.sub_map:  # Substitute aliases with the normalized names
+            sym_v = ast_v.getSymbolicVariable()
+            back[name] = sym_v.getAlias()
+            sym_v.setAlias(name)
+        final_s = self.pp_str  # FIXME: Make a proper iteration of the expression to generate something compliant with lookup tables
+        for name, ast_v in self.sub_map:  # Restore true aliases
+            sym_v = ast_v.getSymbolicVariable()
+            sym_v.setAlias(back[name])
+        return final_s
+
     def update_all(self) -> None:
         def rec(a):
             chs = [rec(x) for x in a.get_children()]

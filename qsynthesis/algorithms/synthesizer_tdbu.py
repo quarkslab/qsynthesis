@@ -23,8 +23,8 @@ class TopDownBottomUpSynthesizer(SynthesizerBase):
     This synthesis mechanism always converges
     """
 
-    def __init__(self, ltms: List[LookupTable], only_first_match: bool = False):
-        super(TopDownBottomUpSynthesizer, self).__init__(ltms, only_first_match)
+    def __init__(self, ltms: List[LookupTable], only_first_match: bool = False, learning_new_exprs: bool = False):
+        super(TopDownBottomUpSynthesizer, self).__init__(ltms, only_first_match, learning_new_exprs)
         self.total_repl_td = 0
         self.total_repl_bu = 0
 
