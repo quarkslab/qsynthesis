@@ -142,7 +142,7 @@ class SimpleSymExec:
         self.symbolize_register(reg, 0, comment)
 
     def get_register_ast(self, reg_name: Union[str, Register]) -> TritonAst:
-        reg = getattr(self.ctx.registers, reg_name) if isinstance(reg_name, str) else reg_name
+        reg = getattr(self.ctx.registers, reg_name.lower()) if isinstance(reg_name, str) else reg_name
         reg_se = self.ctx.getSymbolicRegister(reg)
         actx = self.ctx.getAstContext()
         if reg_se is None:
@@ -151,8 +151,10 @@ class SimpleSymExec:
             e = actx.unroll(reg_se.getAst())
         return TritonAst.make_ast(self.ctx, e)
 
-    def get_memory_ast(self, addr: int, size: int):
-        raise NotImplementedError("getting AST of memory not implemented yet")
+    def get_memory_ast(self, addr: int, size: int) -> TritonAst:
+        ast = self.ctx.getMemoryAst(MemoryAccess(addr, size))
+        actx = self.ctx.getAstContext()
+        return TritonAst.make_ast(self.ctx, actx.unroll(ast))
 
     def symbolize_register(self, reg, value, comment):
         self.reg_id_seen.add(reg.getId())
@@ -164,7 +166,7 @@ class SimpleSymExec:
         self.reg_symvars.append(symvar)
 
     def initialize_register(self, reg: Union[str, Register], value: int):
-        reg = getattr(self.ctx.registers, reg) if isinstance(reg, str) else reg
+        reg = getattr(self.ctx.registers, reg.lower()) if isinstance(reg, str) else reg
         self.reg_id_seen.add(reg.getId())
         self.ctx.setConcreteRegisterValue(reg, value)
 
