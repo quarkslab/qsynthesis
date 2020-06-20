@@ -260,7 +260,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
 
     @property
     def algorithm(self) -> AlgorithmType:
-        return AlgorithmType(self.algorithm_box.currentIndex())
+        return AlgorithmType(self.algorithm_box.currentText())
 
     @property
     def analysis_type(self) -> AnalysisType:
@@ -345,6 +345,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             self.ast = symexec.get_memory_ast(mem_addr, self.lookuptable.bitsize/8)
         else:
             assert False
+        symexec.ctx.clearCallbacks()  # Fix the bug from space / can also be fixed by making symexec object attribute
         return True
 
     def run_triton_fullsym(self) -> bool:
@@ -386,7 +387,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         # Execute the range of instructions
         while cur_addr < stop_addr:  # Retrieve directly bytes from IDA
             if ida_bytes.is_code(ida_bytes.get_flags(cur_addr)):
-                opc = ida_bytes.get_many_bytes(cur_addr, ida_bytes.get_item_size(cur_addr))
+                opc = ida_bytes.get_bytes(cur_addr, ida_bytes.get_item_size(cur_addr))
                 if not symexec.execute(opc):
                     QtWidgets.QMessageBox.critical(self, "Symbolic Execution Error", f"Instruction at address 0x{cur_addr:x} seems unsupported by Triton")
                     return False
@@ -400,6 +401,8 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             self.ast = symexec.get_memory_ast(mem_addr, self.lookuptable.bitsize/8)
         else:
             assert False
+
+        symexec.clearCallbacks()
         return True
 
     def on_triton_finished(self):
@@ -445,9 +448,10 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
     def on_synthesis_finished(self):
         # Enable Synthesis fields
         self.synthesis_textarea.setEnabled(True)
+        if QTRACEIDA_ENABLED:
+            self.show_ast_synthesis_button.setEnabled(True)
         if IDA_ENABLED:
-            self.show_deps_triton_button.setEnabled(True)
-        self.show_ast_triton_button.setEnabled(True)
+            self.reassemble_button.setEnabled(True)
 
         # Fill the text area with the results
         self.fill_synthesis_results()
@@ -455,7 +459,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
     def fill_synthesis_results(self):
         self.synthesis_textarea.clear()
         self.synthesis_textarea.append(f"simplified: {self.ast.node_count > self.synth_ast.node_count}")
-        self.synthesis_textarea.append(f"synthesized expression: {self.synt_rax.pp_str if self.synth_ast.node_count < 15 else 'too large'}")
+        self.synthesis_textarea.append(f"synthesized expression: {self.synth_ast.pp_str if self.synth_ast.node_count < 15 else 'too large'}")
 
         self.synthesis_textarea.append(f"Node count: {self.synth_ast.node_count}")
         self.synthesis_textarea.append(f"Depth: {self.synth_ast.depth}")
@@ -473,9 +477,6 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
     def set_enabled_synthesis_widgets(self, val):
         self.run_synthesis_button.setEnabled(val)
         self.synthesis_textarea.setEnabled(val)
-        # FIXME: If True conditionnaly enable synthesis buttons
-        self.show_ast_synthesis_button.setEnabled(val)
-        self.reassemble_button.setEnabled(val)
 
     # =====================  Trace Database related fields  ======================
     @property
