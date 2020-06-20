@@ -5,6 +5,7 @@ try:
     import ida_gdl
     import ida_funcs
     import ida_bytes
+    import ida_idp
     IDA_ENABLED = True
 except ImportError:
     # If we cannot import ida Mock most of its API to works equally without
