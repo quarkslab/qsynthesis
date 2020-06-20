@@ -3,7 +3,7 @@ from qsynthesis.grammar import TritonGrammar, BvOp
 import logging
 from enum import IntEnum, Enum
 import hashlib
-from pony.orm import Database, Required, PrimaryKey, db_session, IntArray, StrArray, count, commit
+from pony.orm import Database, Required, PrimaryKey, db_session, IntArray, StrArray, count, commit, BindingError, DatabaseError
 from pony.orm.dbapiprovider import IntConverter
 from typing import Optional, List, Dict, Union, Tuple, TypeVar, Iterable, Generator, Iterator
 from time import time, sleep
@@ -70,10 +70,16 @@ class LookupTableDB(BaseTable):
 
     @staticmethod
     def load(file: Union[Path, str]) -> 'LookupTableDB':
+        global db
         file = file.absolute() if isinstance(file, Path) else Path(file).absolute()
+        if db.provider:  # Reset the provider if already set
+            db.provider = None
         db.bind(provider='sqlite', filename=str(file), create_db=False)
         db.provider.converter_classes.append((Enum, EnumConverter))
-        db.generate_mapping(create_tables=False)
+        try:
+            db.generate_mapping(create_tables=False)
+        except BindingError:
+            pass  # Binding was already generated
 
         with db_session:
             inputs = [{n: v for n, v in zip(i.variables, i.values)} for i in Input.select()]
