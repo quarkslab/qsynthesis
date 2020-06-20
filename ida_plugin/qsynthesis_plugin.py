@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from qsynthesis.plugin.dependencies import ida_idaapi, ida_kernwin
+from qsynthesis.plugin.dependencies import ida_idaapi, ida_kernwin, QTRACEIDA_ENABLED, TRITON_ENABLED
 import qsynthesis
 
 
@@ -20,13 +20,17 @@ class QSynthesisPlugin(ida_idaapi.plugin_t):
         addon_info.url = "https://gitlab.qb/synthesis/qsynthesis"
         addon_info.freeform = "Copyright (c) 2020 - All Rights Reserved"
         ida_kernwin.register_addon(addon_info)
-        return ida_idaapi.PLUGIN_OK
+        return ida_idaapi.PLUGIN_OK if TRITON_ENABLED else ida_idaapi.PLUGIN_SKIP
 
     def run(self, arg):
         print("Running QSynthesis")
-        import qtraceida
+        if QTRACEIDA_ENABLED:
+            import qtraceida
+            qtr = qtraceida.get_qtrace()
+        else:
+            qtr = None
         from qsynthesis.plugin.view import SynthesizerView
-        self.view = SynthesizerView(qtraceida.get_qtrace())
+        self.view = SynthesizerView(qtr)
         # self.view.init()
         self.view.Show()  # Show will call OnCreate that will call init
 
