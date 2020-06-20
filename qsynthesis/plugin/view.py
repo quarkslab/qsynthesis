@@ -66,17 +66,20 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
 
     @property
     def arch(self) -> Arch:
-        if IDA_ENABLED:
+        if QTRACEIDA_ENABLED:
             return self.qtrace.arch
         else:
             return self._arch
 
     @property
     def trace(self) -> Trace:
-        if IDA_ENABLED:
+        if QTRACEIDA_ENABLED:
             return self.qtrace.trace
         else:
             return self._trace
+
+    def is_lookuptable_loaded(self):
+        return self.lookuptable is not None
 
     def OnCreate(self, form):
         print("On Create called !")
@@ -267,10 +270,20 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         return AnalysisType[self.algorithm_type_box.currentText()]
 
     def run_triton_clicked(self):
-        if not self.load_lookup_table():
-            return
-
+        self.ast = None  # Reset the AST variable
+        self.triton_textarea.clear()  # clear
         self.set_enabled_synthesis_widgets(False)
+
+        if self.is_lookuptable_loaded():
+            if self.lookuptable.name != self.table_line.text():
+                print("Reload lookup table")
+                ret = self.load_lookup_table()
+            else:
+                ret = True
+        else:
+            ret = self.load_lookup_table()
+        if not ret:
+            return
 
         if self.analysis_type == AnalysisType.QTRACE:
             ret = self.run_triton_qtrace()
@@ -308,12 +321,17 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             addr = int(widget.text(), 16)
             inst = self.trace.get_first_instr_at_addr(addr)
             if inst is None:
-                QtWidgets.QMessageBox.critical(self, "Invalid parameter", f"No instruction in trace at address: 0x{from_addr:x}")
+                QtWidgets.QMessageBox.critical(self, "Invalid parameter", f"No instruction in trace at address: 0x{addr:x}")
                 return None
             else:
                 return inst
 
     def run_triton_qtrace(self) -> bool:
+        # Make sure a trace is loaded before proceeding
+        if self.trace is None:
+            QtWidgets.QMessageBox.critical(self, "No trace", f"A trace should be loaded first ")
+            return False
+
         from_inst = self.line_to_qtrace_inst(self.from_line)
         if from_inst is None:
             return False
@@ -394,6 +412,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             else:
                 QtWidgets.QMessageBox.critical(self, "Invalid byte", f"Stop on address: 0x{cur_addr:x} which is not code")
                 return False
+            cur_addr = ida_bytes.next_head(cur_addr, stop_addr)
 
         if self.target_type == TargetType.REG:
             self.ast = symexec.get_register_ast(self.register_box.currentText())
@@ -402,7 +421,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         else:
             assert False
 
-        symexec.clearCallbacks()
+        symexec.ctx.clearCallbacks()
         return True
 
     def on_triton_finished(self):
@@ -477,6 +496,11 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
     def set_enabled_synthesis_widgets(self, val):
         self.run_synthesis_button.setEnabled(val)
         self.synthesis_textarea.setEnabled(val)
+        if not val:  # In case we disable everything
+            self.synthesis_textarea.clear()  # Clear synthesis view
+            self.show_ast_synthesis_button.setEnabled(val)
+            self.reassemble_button.setEnabled(val)
+
 
     # =====================  Trace Database related fields  ======================
     @property
