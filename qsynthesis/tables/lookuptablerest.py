@@ -29,7 +29,7 @@ class LookupTableREST(BaseTable):
             lkp._name = file
             return lkp
         else:
-            raise ConnectionAbortedError("Cannot reach remote server")
+            raise ConnectionAbortedError(f"Cannot reach remote server (code:{res.status_code})")
 
     def add_entry(self, hash: Hash, value: str):
         raise NotImplementedError("REST Lookup Table are read-only at the moment")
