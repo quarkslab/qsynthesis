@@ -5,7 +5,7 @@ from qtracedb import DatabaseManager
 
 from qsynthesis.utils.qtrace_symexec import QtraceSymExec, Mode
 from qsynthesis.algorithms import TopDownSynthesizer
-from qsynthesis.tables import LookupTable
+from qsynthesis.tables import LookupTablePickle
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -100,7 +100,7 @@ def test():
     rax = symexec.get_register_ast("rax")
 
     # Load lookup tables
-    ltms = [LookupTable.load(x) for x in TABLES_DIR.iterdir()]
+    ltms = [LookupTablePickle.load(x) for x in TABLES_DIR.iterdir()]
 
     # Perform Synthesis of the expression
     synthesizer = TopDownSynthesizer(ltms)

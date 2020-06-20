@@ -4,10 +4,10 @@ import requests
 import binascii
 
 from qsynthesis.grammar import TritonGrammar
-from qsynthesis.tables.base import BaseTable, Expr, HashType, Hash
+from qsynthesis.tables.base import LookupTable, Expr, HashType, Hash
 
 
-class LookupTableREST(BaseTable):
+class LookupTableREST(LookupTable):
     def __init__(self, grammar: TritonGrammar, inputs: List[Dict[str, int]], hash_mode: HashType = HashType.RAW, f_name: str = ""):
         super(LookupTableREST, self).__init__(grammar, inputs, hash_mode, f_name)
         self.session = requests.Session()
