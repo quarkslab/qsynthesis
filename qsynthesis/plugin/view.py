@@ -342,7 +342,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         if self.target_type == TargetType.REG:
             self.ast = symexec.get_register_ast(self.register_box.currentText())
         elif self.target_type == TargetType.MEMORY:
-            self.ast = symexec.get_memory_ast(mem_addr, self.lookuptable.bitsize/8)
+            self.ast = symexec.get_memory_ast(mem_addr, int(self.lookuptable.bitsize/8))
         else:
             assert False
         symexec.ctx.clearCallbacks()  # Fix the bug from space / can also be fixed by making symexec object attribute
@@ -398,7 +398,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         if self.target_type == TargetType.REG:
             self.ast = symexec.get_register_ast(self.register_box.currentText())
         elif self.target_type == TargetType.MEMORY:
-            self.ast = symexec.get_memory_ast(mem_addr, self.lookuptable.bitsize/8)
+            self.ast = symexec.get_memory_ast(mem_addr, int(self.lookuptable.bitsize/8))
         else:
             assert False
 
