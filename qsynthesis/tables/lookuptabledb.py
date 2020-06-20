@@ -8,7 +8,7 @@ from pony.orm.dbapiprovider import IntConverter
 from typing import Optional, List, Dict, Union, Tuple, TypeVar, Iterable, Generator, Iterator
 from time import time, sleep
 
-from qsynthesis.tables.base import BaseTable, Expr, HashType, Hash
+from qsynthesis.tables.base import LookupTable, Expr, HashType, Hash
 
 
 db = Database()
@@ -49,7 +49,7 @@ class EnumConverter(IntConverter):
         return self.py_type(value)
 
 
-class LookupTableDB(BaseTable):
+class LookupTableDB(LookupTable):
     def __init__(self, grammar: TritonGrammar, inputs: List[Dict[str, int]], hash_mode: HashType = HashType.RAW, f_name: str = ""):
         super(LookupTableDB, self).__init__(grammar, inputs, hash_mode, f_name)
         if db.provider_name is None:

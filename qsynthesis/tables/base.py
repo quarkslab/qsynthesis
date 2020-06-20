@@ -52,7 +52,7 @@ class _EvalCtx(object):
             self.ctx.setConcreteVariableValue(self.symvars[v_name], value)
 
 
-class BaseTable:
+class LookupTable:
     """
     Base Lookup table class. Specify the interface that child
     class have to implement to be interoperable with other the synthesizer
@@ -324,11 +324,11 @@ class BaseTable:
         raise NotImplementedError("Should be implemented by child class")
 
     @staticmethod
-    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Dict[str, int]], hash_mode: HashType = HashType.RAW) -> 'BaseTable':
+    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Dict[str, int]], hash_mode: HashType = HashType.RAW) -> 'LookupTable':
         raise NotImplementedError("Should be implemented by child class")
 
     @staticmethod
-    def load(file: Union[Path, str]) -> 'BaseTable':
+    def load(file: Union[Path, str]) -> 'LookupTable':
         raise NotImplementedError("Should be implemented by child class")
 
     def save(self, file: Optional[Union[Path, str]]):

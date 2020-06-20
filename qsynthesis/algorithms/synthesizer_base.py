@@ -3,7 +3,7 @@ from typing import List, Optional, Tuple, Set, Dict, Generator, Union
 import triton
 from enum import IntEnum
 
-from qsynthesis.tables import LookupTable
+from qsynthesis.tables.base import LookupTable
 from qsynthesis.tritonast import TritonAst
 
 

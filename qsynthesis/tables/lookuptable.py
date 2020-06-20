@@ -5,12 +5,12 @@ from typing import Optional, List, Dict, Union, Generator, Tuple, Any, TypeVar, 
 from binascii import unhexlify, hexlify
 
 from qsynthesis.grammar import TritonGrammar
-from qsynthesis.tables.base import BaseTable, HashType, Hash
+from qsynthesis.tables.base import LookupTable, HashType, Hash
 
 
-class LookupTable(BaseTable):
+class LookupTablePickle(LookupTable):
     def __init__(self, gr: TritonGrammar, inputs: Union[int, List[Dict[str, int]]], hash_mode: HashType=HashType.RAW, f_name: str = ""):
-        super(LookupTable, self).__init__(gr, inputs, hash_mode, f_name)
+        super(LookupTablePickle, self).__init__(gr, inputs, hash_mode, f_name)
         self.lookup_table = {}
 
     @property
@@ -41,7 +41,7 @@ class LookupTable(BaseTable):
             pickle.dump(self.lookup_table, f)
 
     @staticmethod
-    def load(file: Union[Path, str]) -> 'LookupTable':
+    def load(file: Union[Path, str]) -> 'LookupTablePickle':
         f = Path(file)
         with open(f, 'rb') as f:
             raw = pickle.load(f)
@@ -49,16 +49,16 @@ class LookupTable(BaseTable):
             gr = TritonGrammar.from_dict(raw)
             inp_l = pickle.load(f)
             inputs = TritonGrammar.load_inputs(inp_l)
-            lkp = LookupTable(gr, inputs, hm, f.name)
+            lkp = LookupTablePickle(gr, inputs, hm, f.name)
             lkp.lookup_table = pickle.load(f)
             return lkp
 
     @staticmethod
-    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Dict[str, int]], hash_mode: HashType = HashType.RAW) -> 'BaseTable':
-        return LookupTable(grammar, inputs, hash_mode, filename)
+    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Dict[str, int]], hash_mode: HashType = HashType.RAW) -> 'LookupTablePickle':
+        return LookupTablePickle(grammar, inputs, hash_mode, filename)
 
 
-class LookupTableRaw(BaseTable):
+class LookupTableRaw(LookupTable):
     def __init__(self, gr: TritonGrammar, inputs: Union[int, List[Dict[str, int]]], hash_mode: HashType=HashType.RAW, f_name: str = ""):
         super(LookupTableRaw, self).__init__(gr, inputs, hash_mode, f_name)
 
@@ -100,7 +100,7 @@ class LookupTableRaw(BaseTable):
         logging.info("Saved")
 
     @staticmethod
-    def load(file: Union[Path, str]) -> 'LookupTable':
+    def load(file: Union[Path, str]) -> 'LookupTableRaw':
         import json
         f = Path(file)
         with open(f, 'rb') as f:
@@ -113,7 +113,7 @@ class LookupTableRaw(BaseTable):
             return lkp
 
     @staticmethod
-    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Dict[str, int]], hash_mode: HashType = HashType.RAW) -> 'BaseTable':
+    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Dict[str, int]], hash_mode: HashType = HashType.RAW) -> 'LookupTableRaw':
         import json
         with open(filename, "wb") as f:
             d = grammar.to_dict()
