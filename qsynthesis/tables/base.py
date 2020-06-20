@@ -109,8 +109,8 @@ class LookupTable:
         return False
 
     @property
-    def name(self) -> Path:
-        return self._name
+    def name(self) -> str:
+        return str(self._name)
 
     @property
     def bitsize(self):
