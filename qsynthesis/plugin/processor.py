@@ -4,8 +4,7 @@
 # it is meant to be replaced by idacore in a near future
 
 from enum import IntEnum
-import ida_idp
-import ida_idaapi
+from qsynthesis.plugin.dependencies import ida_idp, ida_idaapi
 
 from triton import ARCH
 from qtracedb.archs.arch import Arch

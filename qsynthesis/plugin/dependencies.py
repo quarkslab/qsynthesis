@@ -21,11 +21,29 @@ except ImportError:
         class plugin_t:
             pass
 
+        class get_inf_structure:
+            def is_64bit(self):
+                return True
+
     class ida_gdl:
         pass
 
     class ida_bytes:
         pass
+
+    class ida_idp:
+        PLFM_386 = 0
+        PLFM_ARM = 1
+
+        @staticmethod
+        def get_idp_name():
+            return "plop"
+        @staticmethod
+        def ph_get_id():
+            return ida_idp.PLFM_386
+        @staticmethod
+        def ph_get_flag():
+            return 12
 
     IDA_ENABLED = False
 
