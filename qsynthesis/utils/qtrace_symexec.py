@@ -6,7 +6,7 @@ from typing import List
 
 # third-party libs
 from triton import ARCH, MemoryAccess
-from triton import TritonContext
+from triton import TritonContext, Instruction
 
 from qtracedb.trace import Trace, MemAccessType
 from qtracedb.archs import ArchsManager
@@ -53,6 +53,15 @@ class QtraceSymExec(SimpleSymExec):
         self._sup_regs = None
 
     @property
+    def inst_id(self):
+        """ Overwrite Full Symbolic instruction identifier by trace one """
+        return self._cur_db_inst.id
+
+    @inst_id.setter
+    def inst_id(self, value):
+        pass
+
+    @property
     def parameter_regs(self) -> List[Register]:
         return [getattr(self.ctx.registers, x.name.lower()) for x in self.trace_arch.registers_cc]
 
@@ -94,8 +103,7 @@ class QtraceSymExec(SimpleSymExec):
 
             # Coalesce adjacent bytes and create memory accesses' symvars
             for ma in self.coalesce_bytes_to_mas(new_addrs):
-                comment = "mem_{:#x}_{}_{}".format(ma.getAddress(), ma.getSize(), self._cur_db_inst.id)
-                symvar = ctx.symbolizeMemory(ma, comment)
+                symvar = self.symbolize_memory(ma)
 
                 # Set symbolic variable value according to memory content
                 for qtracedb_ma in qtracedb_mas:
@@ -154,8 +162,7 @@ class QtraceSymExec(SimpleSymExec):
             return
 
         if self.mode == Mode.FULL_SYMBOLIC or (self.mode == Mode.PARAM_SYMBOLIC and parent_reg in self.parameter_regs):
-            comment = f"reg_{reg.getName()}_id_{self._cur_db_inst.id}"
-            self.symbolize_register(reg, 0, comment)
+            self.symbolize_register(reg, 0, self.fmt_comment())
         else:
             logging.debug(f"Concretizing the never seen register: {reg.getName()}")
             self.concretize_register(reg)
@@ -198,7 +205,7 @@ class QtraceSymExec(SimpleSymExec):
                 continue
 
             if triton_reg_val != qtracedb_reg_val:
-                logging.debug(f'{self._cur_db_inst.id} {reg} <- {qtracedb_reg_val:#x} (was {triton_reg_val:#x})')
+                logging.debug(f'{self.inst_id} {reg} <- {qtracedb_reg_val:#x} (was {triton_reg_val:#x})')
 
                 self.ctx.setConcreteRegisterValue(reg, qtracedb_reg_val)
 

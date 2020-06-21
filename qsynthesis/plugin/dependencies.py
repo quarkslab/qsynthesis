@@ -6,6 +6,7 @@ try:
     import ida_funcs
     import ida_bytes
     import ida_idp
+    import ida_nalt
     IDA_ENABLED = True
 except ImportError:
     # If we cannot import ida Mock most of its API to works equally without
@@ -45,6 +46,9 @@ except ImportError:
         @staticmethod
         def ph_get_flag():
             return 12
+
+    class ida_nalt:
+        pass
 
     IDA_ENABLED = False
 
