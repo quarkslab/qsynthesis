@@ -2,11 +2,12 @@ from enum import Enum
 from PyQt5 import QtWidgets, QtCore, QtGui
 from pathlib import Path
 
-from qsynthesis.plugin.dependencies import ida_kernwin, IDA_ENABLED, QTRACEIDA_ENABLED, QTRACEDB_ENABLED, ida_bytes
+from qsynthesis.plugin.dependencies import ida_kernwin, IDA_ENABLED, QTRACEIDA_ENABLED, QTRACEDB_ENABLED, ida_bytes, ida_nalt
 from qsynthesis.tables import LookupTableDB, LookupTableREST
 from qsynthesis.algorithms import TopDownSynthesizer, PlaceHolderSynthesizer
 from qsynthesis.utils.symexec import SimpleSymExec
 from qsynthesis.plugin.processor import processor_to_triton_arch, processor_to_qtracedb_arch, Arch, Processor, ProcessorType
+from qtraceanalysis.slicing import Slicer
 from qtracedb import DatabaseManager
 from qtracedb.trace import Trace
 from qtracedb.archs import ArchsManager
@@ -43,6 +44,11 @@ class QtraceSymType(Enum):
     PARAM_SYMBOLIC = 1
 
 
+class ShowDepState(Enum):
+    SHOW = "Highlight Deps"
+    HIDE = "Hide Deps"
+
+
 class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_view):
 
     NAME = "QSynthesis"
@@ -57,6 +63,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         self.closed = True
 
         # Analysis variables
+        self.symexec = None
         self.lookuptable = None
         self.ast = None
         self.synthesizer = None
@@ -66,6 +73,10 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         self._dbm = None
         self._trace = None
         self._arch = processor_to_qtracedb_arch()
+
+        # Expresssion highlighted
+        self.highlighted_addr = {}  # addr -> backed_color
+
 
     @property
     def arch(self) -> Arch:
@@ -135,7 +146,6 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
 
     def init(self):
         self.setupUi(self.parent_widget)
-
         if QTRACEIDA_ENABLED or not QTRACEDB_ENABLED:  # The trace will be provided by qtraceida so not showing this
             self.set_visible_all_layout(self.traceLayout, False)
         else:  # Initialize the fields and actions
@@ -177,6 +187,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         self.set_visible_all_layout(self.experimentalLayout, False)
 
         self.run_triton_button.clicked.connect(self.run_triton_clicked)
+        self.show_deps_triton_button.setText(ShowDepState.SHOW.value)
         self.show_deps_triton_button.clicked.connect(self.triton_show_deps_clicked)
         self.show_ast_triton_button.clicked.connect(self.triton_show_ast_clicked)
         self.run_synthesis_button.clicked.connect(self.run_synthesis_clicked)
@@ -358,17 +369,17 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
 
         from qsynthesis.utils.qtrace_symexec import QtraceSymExec, Mode
         m = Mode[self.qtrace_sym_type.name]
-        symexec = QtraceSymExec(self.trace, m)
-        symexec.initialize_register(self.arch.INS_PTR.name, from_inst.INS_PTR)
-        symexec.initialize_register(self.arch.STK_PTR.name, from_inst.STK_PTR)
-        symexec.process_instr_sequence(from_inst.id, to_inst.id)
+        self.symexec = QtraceSymExec(self.trace, m)
+        self.symexec.initialize_register(self.arch.INS_PTR.name, from_inst.INS_PTR)
+        self.symexec.initialize_register(self.arch.STK_PTR.name, from_inst.STK_PTR)
+        self.symexec.process_instr_sequence(from_inst.id, to_inst.id)
         if self.target_type == TargetType.REG:
-            self.ast = symexec.get_register_ast(self.register_box.currentText())
+            self.ast = self.symexec.get_register_ast(self.register_box.currentText())
         elif self.target_type == TargetType.MEMORY:
-            self.ast = symexec.get_memory_ast(mem_addr, int(self.lookuptable.bitsize/8))
+            self.ast = self.symexec.get_memory_ast(mem_addr, int(self.lookuptable.bitsize/8))
         else:
             assert False
-        symexec.ctx.clearCallbacks()  # Fix the bug from space / can also be fixed by making symexec object attribute
+        self.symexec.ctx.clearCallbacks()  # Fix the bug from space / can also be fixed by making self.symexec object attribute
         return True
 
     def run_triton_fullsym(self) -> bool:
@@ -402,16 +413,16 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         # At this point we are sur to have valid pa  rameters
 
         # Create the purely symbolic executor
-        symexec = SimpleSymExec(processor_to_triton_arch())
+        self.symexec = SimpleSymExec(processor_to_triton_arch())
 
-        symexec.initialize_register(self.arch.INS_PTR.name, cur_addr)
-        symexec.initialize_register(self.arch.STK_PTR.name, 0x800000)
+        self.symexec.initialize_register(self.arch.INS_PTR.name, cur_addr)
+        self.symexec.initialize_register(self.arch.STK_PTR.name, 0x800000)
 
         # Execute the range of instructions
         while cur_addr < stop_addr:  # Retrieve directly bytes from IDA
             if ida_bytes.is_code(ida_bytes.get_flags(cur_addr)):
                 opc = ida_bytes.get_bytes(cur_addr, ida_bytes.get_item_size(cur_addr))
-                if not symexec.execute(opc):
+                if not self.symexec.execute(opc):
                     QtWidgets.QMessageBox.critical(self, "Symbolic Execution Error", f"Instruction at address 0x{cur_addr:x} seems unsupported by Triton")
                     return False
             else:
@@ -420,13 +431,13 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             cur_addr = ida_bytes.next_head(cur_addr, stop_addr)
 
         if self.target_type == TargetType.REG:
-            self.ast = symexec.get_register_ast(self.register_box.currentText())
+            self.ast = self.symexec.get_register_ast(self.register_box.currentText())
         elif self.target_type == TargetType.MEMORY:
-            self.ast = symexec.get_memory_ast(mem_addr, int(self.lookuptable.bitsize/8))
+            self.ast = self.symexec.get_memory_ast(mem_addr, int(self.lookuptable.bitsize/8))
         else:
             assert False
 
-        symexec.ctx.clearCallbacks()
+        self.symexec.ctx.clearCallbacks()
         return True
 
     def on_triton_finished(self):
@@ -453,8 +464,38 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         pass
 
     def triton_show_deps_clicked(self):
-        print("Not implemented yet")
-        # TODO: To implement
+        st = ShowDepState(self.show_deps_triton_button.text())
+        if st == ShowDepState.SHOW:
+            if self.target_type == TargetType.REG:
+                sym = self.symexec.get_register_symbolic_expression(self.register_box.currentText())
+            else:
+                # FIXME: Sanitize memory value before using it
+                mem_addr = int(self.mem_line.text(), 16)
+                sym = self.symexec.get_memory_symbolic_expression(mem_addr, int(self.lookuptable.bitsize/8))
+                # FIXME: Very hacky way to create a new comment for a memory
+                expr_cnt = len(self.symexec.cur_inst.getSymbolicExpressions())+1
+                inst_id = self.symexec._cur_db_inst.id if hasattr(self.symexec, "_cur_db_inst") else self.symexec.inst_count
+                sym.setComment(f"{inst_id}#{expr_cnt}#{self.symexec.cur_inst.getAddress()}")
+
+            # Instanciate the slicer
+            sl = Slicer(self.trace)
+
+            # Call the backslice with existing context and symbolic expression
+            dg = sl._backslice(self.symexec.ctx, sym)
+
+            # Iterate all addresses
+            for addr in Slicer.to_address_set(dg):
+                back = ida_nalt.get_item_color(addr)
+                self.highlighted_addr[addr] = back
+                ida_nalt.set_item_color(addr, 0xA1F7A1)
+
+        else:
+            for addr, color in self.highlighted_addr.items():
+                ida_nalt.set_item_color(addr, color)
+            self.highlighted_addr.clear()
+
+        # Switch state
+        self.show_deps_triton_button.setText(ShowDepState.HIDE.value if st == ShowDepState.SHOW else ShowDepState.SHOW.value)
 
     def triton_show_ast_clicked(self):
         print("Not implemented yet")

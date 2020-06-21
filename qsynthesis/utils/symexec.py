@@ -48,7 +48,17 @@ class SimpleSymExec:
         self.ctx.addCallback(self._reg_read_callback, CALLBACK.GET_CONCRETE_REGISTER_VALUE)
 
         self.cur_inst = None
-        self.inst_count = 0
+        self.inst_id = 0
+        self._expr_id = 0
+
+    @property
+    def expr_id(self):
+        self._expr_id += 1
+        return self._expr_id - 1
+
+    @expr_id.setter
+    def expr_id(self, value):
+        self._expr_id = value
 
     @property
     def arch(self):
@@ -109,9 +119,7 @@ class SimpleSymExec:
         # Symbolize all the memory cells that have not yet been seen
         # Coalesce adjacent bytes and create memory accesses' symvars
         for ma in self.coalesce_bytes_to_mas(new_addrs):
-            comment = f"mem_0x{ma.getAddress():x}_at_0x{self.current_address:x}_{self.inst_count}"
-            symvar = ctx.symbolizeMemory(ma, comment)
-
+            symvar = self.symbolize_memory(ma)
             self.mem_symvars.append(symvar)
 
     def _reg_write_callback(self, ctx: TritonContext, reg: Register, _: int) -> None:
@@ -138,8 +146,7 @@ class SimpleSymExec:
             return
 
         # Symbolize the register
-        comment = f"reg_{reg.getName()}_at_0x{self.current_address}_{self.inst_count}"
-        self.symbolize_register(reg, 0, comment)
+        self.symbolize_register(reg, 0, self.fmt_comment())
 
     def get_register_ast(self, reg_name: Union[str, Register]) -> TritonAst:
         reg = getattr(self.ctx.registers, reg_name.lower()) if isinstance(reg_name, str) else reg_name
@@ -156,14 +163,41 @@ class SimpleSymExec:
         actx = self.ctx.getAstContext()
         return TritonAst.make_ast(self.ctx, actx.unroll(ast))
 
+    def get_register_symbolic_expression(self, reg_name: Union[str, Register]) -> 'SymbolicExpression':
+        reg = getattr(self.ctx.registers, reg_name.lower()) if isinstance(reg_name, str) else reg_name
+        return self.ctx.getSymbolicRegister(reg)
+
+    def get_memory_symbolic_expression(self, addr: int, size: int) -> 'SymbolicExpression':
+        ast = self.ctx.getMemoryAst(MemoryAccess(addr, size))
+        return self.ctx.newSymbolicExpression(ast)
+
     def symbolize_register(self, reg, value, comment):
         self.reg_id_seen.add(reg.getId())
-        symvar = self.ctx.symbolizeRegister(reg, comment)
-        symvar.setAlias(reg.getName())
+        symvar = self.ctx.symbolizeRegister(reg, reg.getName())
+        symvar.setComment(comment)
+
+        # Set comment on the register reference
+        sreg = self.ctx.getSymbolicRegister(reg)
+        sreg.setComment(comment)
 
         # We also set the symbolic var to the actual value of the register
         self.ctx.setConcreteVariableValue(symvar, value)
         self.reg_symvars.append(symvar)
+
+    def symbolize_memory(self, mem: MemoryAccess):
+        # Explaining how that shit works
+        alias = f"mem_{mem.getAddress():#x}_{mem.getSize()}_{self.inst_id}"
+        symvar = self.ctx.symbolizeMemory(mem, alias)
+        symvar.setComment(self.fmt_comment())
+        addr = mem.getAddress()
+        end = addr + mem.getSize()
+        while addr < end:
+            cur_mem_exp = self.ctx.getSymbolicMemory(addr)
+            cur_mem_exp.setComment(self.fmt_comment())
+            addr += 1
+        var_exp = self.ctx.getSymbolicExpression(cur_mem_exp.getId()-1)
+        var_exp.setComment(self.fmt_comment())
+        return symvar
 
     def initialize_register(self, reg: Union[str, Register], value: int):
         reg = getattr(self.ctx.registers, reg.lower()) if isinstance(reg, str) else reg
@@ -177,13 +211,22 @@ class SimpleSymExec:
     def execute_instruction(self, instr: Instruction) -> bool:
         # Update object values
         self.cur_inst = instr
-        self.inst_count += 1
+        self.inst_id += 1
+        self.expr_id = 0
 
         # Process instruction
         self.turn_on()
         r = self.ctx.processing(instr)
+
+        # Set a unique comment on each symbolic expressions
+        for e in instr.getSymbolicExpressions():
+            e.setComment(self.fmt_comment())
+
         self.turn_off()
         return r
+
+    def fmt_comment(self):
+        return f"{self.inst_id}#{self.expr_id}#{self.current_address}"
 
     @staticmethod
     def memacc_to_all_addr(ma: MemoryAccess) -> Set[int]:
