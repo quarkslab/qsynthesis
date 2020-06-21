@@ -44,6 +44,9 @@ class QtraceSymType(Enum):
 
 
 class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_view):
+
+    NAME = "QSynthesis"
+
     def __init__(self, qtrace):
         QtWidgets.QWidget.__init__(self)
         ida_kernwin.PluginForm.__init__(self)
@@ -102,7 +105,9 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         print("On Show called !")
         self.closed = False
         opts = ida_kernwin.PluginForm.WOPN_PERSIST
-        return ida_kernwin.PluginForm.Show(self, self.windowTitle(), options=opts)
+        r = ida_kernwin.PluginForm.Show(self, self.NAME, options=opts)
+        ida_kernwin.set_dock_pos(self.NAME, "IDA View-A", ida_kernwin.DP_RIGHT)
+        return r
 
     def OnClose(self, form):
         # Change visibility state

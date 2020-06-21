@@ -10,7 +10,7 @@ class SynthetizerViewHook(ida_kernwin.action_handler_t):
         from qtraceida.icons.raw_icons import ICON_DEBUG_ID
         self.view = None
         self.view_id = f"{QTRACE_MENU_NAME}:Synthesizer"
-        self.name = "QSynthesizer"
+        self.name = SynthesizerView.NAME
         self.icon = ICON_DEBUG_ID
         self.qtrace = qtrace
 
