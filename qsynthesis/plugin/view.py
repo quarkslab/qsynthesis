@@ -338,7 +338,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             addr = int(widget.text(), 16)
             inst = self.trace.get_first_instr_at_addr(addr)
             if inst is None:
-                QtWidgets.QMessageBox.critical(self, "Invalid parameter", f"No instruction in trace at address: 0x{addr:x}")
+                QtWidgets.QMessageBox.critical(self, "Invalid parameter", f"No instruction in trace at address: {addr:#x}")
                 return None
             else:
                 return inst
@@ -356,7 +356,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         if to_inst is None:
             return False
         if to_inst.id < from_inst.id:
-            QtWidgets.QMessageBox.critical(self, "Invalid order", f"Instruction 0x{from_inst.addr:x}{from_inst} higher in the trace than 0x{to_inst.addr:x}{to_inst} ({from_inst.id} > {to_inst.id})")
+            QtWidgets.QMessageBox.critical(self, "Invalid order", f"Instruction {from_inst.addr:#x}{from_inst} higher in the trace than {to_inst.addr:#x}{to_inst} ({from_inst.id} > {to_inst.id})")
             return False
 
         if self.target_type == TargetType.MEMORY:
@@ -396,11 +396,11 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         cur_addr = int(self.from_line.text(), 16)
         end_addr = int(self.to_line.text(), 16)
         if end_addr <= cur_addr:
-            QtWidgets.QMessageBox.critical(self, "Invalid order", f"From 0x{cur_addr:x} must be lower than 0x{end_addr:x}")
+            QtWidgets.QMessageBox.critical(self, "Invalid order", f"From {cur_addr:#x} must be lower than {end_addr:#x}")
             return False
         if not ida_bytes.is_mapped(cur_addr) or not ida_bytes.is_mapped(end_addr):
             QtWidgets.QMessageBox.critical(self, "Invalid address",
-                                           f"From: 0x{cur_addr:x} or To: 0x{end_addr:x} is not mapped in memory")
+                                           f"From: {cur_addr:#x} or To: {end_addr:#x} is not mapped in memory")
             return False
 
         if self.target_type == TargetType.MEMORY:
@@ -424,10 +424,10 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             if ida_bytes.is_code(ida_bytes.get_flags(cur_addr)):
                 opc = ida_bytes.get_bytes(cur_addr, ida_bytes.get_item_size(cur_addr))
                 if not self.symexec.execute(opc):
-                    QtWidgets.QMessageBox.critical(self, "Symbolic Execution Error", f"Instruction at address 0x{cur_addr:x} seems unsupported by Triton")
+                    QtWidgets.QMessageBox.critical(self, "Symbolic Execution Error", f"Instruction at address {cur_addr:#x} seems unsupported by Triton")
                     return False
             else:
-                QtWidgets.QMessageBox.critical(self, "Invalid byte", f"Stop on address: 0x{cur_addr:x} which is not code")
+                QtWidgets.QMessageBox.critical(self, "Invalid byte", f"Stop on address: {cur_addr:#x} which is not code")
                 return False
             cur_addr = ida_bytes.next_head(cur_addr, stop_addr)
 

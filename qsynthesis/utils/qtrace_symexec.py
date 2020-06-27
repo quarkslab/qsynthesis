@@ -135,7 +135,7 @@ class QtraceSymExec(SimpleSymExec):
             if not mems:
                 logging.warning("no memory read for the instruction")
             mapping = {mem.addr + i: mem.data[i] for mem in mems for i in range(len(mem.data))}
-            logging.debug(f"Mem read: Triton:[0x{addr:x}:{size}] Qtrace-DB:[0x{mems[0].addr:x}:{len(mems[0].data)}]")
+            logging.debug(f"Mem read: Triton:[{addr:#x}:{size}] Qtrace-DB:[{mems[0].addr:#x}:{len(mems[0].data)}]")
 
             for index in range(addr, addr + size):
                 if index in mapping:
@@ -187,7 +187,7 @@ class QtraceSymExec(SimpleSymExec):
 
             if check_regs:
                 self.sync_registers()
-            #logging.debug(f"0x{self._cur_db_inst.addr:x} {self._cur_db_inst}")
+            #logging.debug(f"{self._cur_db_inst.addr:#x} {self._cur_db_inst}")
             self.execute(opcode=self._cur_db_inst.opcode, addr=self._cur_db_inst.addr)
 
     def sync_registers(self):
