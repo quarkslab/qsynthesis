@@ -9,20 +9,19 @@ import random
 from functools import reduce
 
 
-
 AstType = IntEnum("AstNode", {k: v for k, v in triton.AST_NODE.__dict__.items() if isinstance(v, int)})
 
 
-op_mapper = {AST_NODE.ANY: "any", AST_NODE.ASSERT: "assert_", AST_NODE.BV: "bv", AST_NODE.BVADD: "bvadd",
-             AST_NODE.BVAND: "bvand", AST_NODE.BVASHR: "bvashr", AST_NODE.BVLSHR: "bvlshr", AST_NODE.BVMUL: "bvmul",
-             AST_NODE.BVNAND: "bvnand", AST_NODE.BVNEG: "bvneg", AST_NODE.BVNOR: "bvnor", AST_NODE.BVNOT: "bvnot",
-             AST_NODE.BVOR: "bvor", AST_NODE.BVROL: "bvrol", AST_NODE.BVROR: "bvror", AST_NODE.BVSDIV: "bvsdiv",
-             AST_NODE.BVSGE: "bvsge", AST_NODE.BVSGT: "bvsgt", AST_NODE.BVSHL: "bvshl", AST_NODE.BVSLE: "bvsle",
-             AST_NODE.BVSLT: "bvslt", AST_NODE.BVSMOD: "bvsmod", AST_NODE.BVSREM: "bvsrem", AST_NODE.BVSUB: "bvsub",
-             AST_NODE.BVUDIV: "bvudiv", AST_NODE.BVUGE: "bvuge", AST_NODE.BVUGT: "bvugt", AST_NODE.BVULE: "bvule",
-             AST_NODE.BVULT: "bvult", AST_NODE.BVUREM: "bvurem", AST_NODE.BVXNOR: "bvxnor", AST_NODE.BVXOR: "bvxor",
+op_str = {AST_NODE.ANY: "any", AST_NODE.ASSERT: "assert", AST_NODE.BV: "bv", AST_NODE.BVADD: "+",
+             AST_NODE.BVAND: "&", AST_NODE.BVASHR: "bvashr", AST_NODE.BVLSHR: "bvlshr", AST_NODE.BVMUL: "*",
+             AST_NODE.BVNAND: "bvnand", AST_NODE.BVNEG: "-", AST_NODE.BVNOR: "bvnor", AST_NODE.BVNOT: "not",
+             AST_NODE.BVOR: "|", AST_NODE.BVROL: "bvrol", AST_NODE.BVROR: "bvror", AST_NODE.BVSDIV: "bvsdiv",
+             AST_NODE.BVSGE: ">=s", AST_NODE.BVSGT: ">s", AST_NODE.BVSHL: "<<", AST_NODE.BVSLE: "<=s",
+             AST_NODE.BVSLT: "<s", AST_NODE.BVSMOD: "bvsmod", AST_NODE.BVSREM: "bvsrem", AST_NODE.BVSUB: "-",
+             AST_NODE.BVUDIV: "bvudiv", AST_NODE.BVUGE: ">=u", AST_NODE.BVUGT: ">u", AST_NODE.BVULE: "<=u",
+             AST_NODE.BVULT: "<u", AST_NODE.BVUREM: "bvurem", AST_NODE.BVXNOR: "bvxnor", AST_NODE.BVXOR: "^",
              AST_NODE.COMPOUND: "compound", AST_NODE.CONCAT: "concat", AST_NODE.DECLARE: "declare", AST_NODE.DISTINCT: "distinct",
-             AST_NODE.EQUAL: "equal", AST_NODE.EXTRACT: "extract", AST_NODE.FORALL: "forall", AST_NODE.IFF: "iff",
+             AST_NODE.EQUAL: "=", AST_NODE.EXTRACT: "extract", AST_NODE.FORALL: "forall", AST_NODE.IFF: "iff",
              AST_NODE.INTEGER: "integer", AST_NODE.ITE: "ite", AST_NODE.LAND: "land", AST_NODE.LET: "let",
              AST_NODE.LNOT: "lnot", AST_NODE.LOR: "lor", AST_NODE.REFERENCE: "reference", AST_NODE.STRING: "string",
              AST_NODE.SX: "sx", AST_NODE.VARIABLE: "variable", AST_NODE.ZX: "zx"}
@@ -132,6 +131,16 @@ class TritonAst:
     @property
     def depth(self):
         return self._depth
+
+    @property
+    def symbol(self):
+        t = self.type
+        if t == AstType.BV:
+            return str(self.expr)
+        elif t == AstType.VARIABLE:
+            return str(self.expr)
+        else:
+            return op_str[t]
 
     def mk_constant(self, v: int, size: int) -> 'TritonAst':
         return TritonAst(self.ctx, self.ast.bv(v, size), 1, 1, {}, [])
