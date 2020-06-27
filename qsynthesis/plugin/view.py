@@ -7,6 +7,7 @@ from qsynthesis.tables import LookupTableDB, LookupTableREST
 from qsynthesis.algorithms import TopDownSynthesizer, PlaceHolderSynthesizer
 from qsynthesis.utils.symexec import SimpleSymExec
 from qsynthesis.plugin.processor import processor_to_triton_arch, processor_to_qtracedb_arch, Arch, Processor, ProcessorType
+from qsynthesis.plugin.ast_viewer import AstViewer
 from qtraceanalysis.slicing import Slicer
 from qtracedb import DatabaseManager
 from qtracedb.trace import Trace
@@ -498,8 +499,8 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         self.show_deps_triton_button.setText(ShowDepState.HIDE.value if st == ShowDepState.SHOW else ShowDepState.SHOW.value)
 
     def triton_show_ast_clicked(self):
-        print("Not implemented yet")
-        # TODO: To implement
+        viewer = AstViewer("Triton AST", self.ast)
+        viewer.Show()
 
     def run_synthesis_clicked(self):
         if self.algorithm == AlgorithmType.TOPDOWN:
@@ -532,8 +533,8 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         self.synthesis_textarea.append(f"Scale reduction: {self.synth_ast.node_count / self.ast.node_count:.2f}")
 
     def synthesis_show_ast_clicked(self):
-        print("Not Implemented yet")
-        # TODO: to implement
+        viewer = AstViewer("Synthesized AST", self.synth_ast)
+        viewer.Show()
 
     def reassemble_clicked(self):
         print("Not implemented yet")
