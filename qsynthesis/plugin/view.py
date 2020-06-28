@@ -8,6 +8,7 @@ from qsynthesis.algorithms import TopDownSynthesizer, PlaceHolderSynthesizer
 from qsynthesis.utils.symexec import SimpleSymExec
 from qsynthesis.plugin.processor import processor_to_triton_arch, processor_to_qtracedb_arch, Arch, Processor, ProcessorType
 from qsynthesis.plugin.ast_viewer import AstViewer
+from qsynthesis.plugin.popup_actions import SynthetizeFromHere, SynthetizeToHere, SynthetizeOperand
 from qtraceanalysis.slicing import Slicer
 from qtracedb import DatabaseManager
 from qtracedb.trace import Trace
@@ -23,6 +24,7 @@ class TraceDbType(Enum):
 class TargetType(Enum):
     REG = 0
     MEMORY = 1
+    OPERAND = 2
 
 
 class TableType(Enum):
@@ -63,12 +65,20 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         # Visibility state
         self.closed = True
 
+        # Popup actions
+        self.popup_from_here = SynthetizeFromHere(self)
+        self.popup_to_here = SynthetizeToHere(self)
+        self.popup_operand = SynthetizeOperand(self)
+
         # Analysis variables
         self.symexec = None
         self.lookuptable = None
         self.ast = None
         self.synthesizer = None
         self.synth_ast = None
+        # For operand synthesis
+        self.op_num = None
+        self.op_is_read = False  # Negation of if the operand is written
 
         # If working on its own
         self._dbm = None
@@ -116,6 +126,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         """
         print("On Show called !")
         self.closed = False
+        self.enable_popups()
         opts = ida_kernwin.PluginForm.WOPN_PERSIST
         r = ida_kernwin.PluginForm.Show(self, self.NAME, options=opts)
         ida_kernwin.set_dock_pos(self.NAME, "IDA View-A", ida_kernwin.DP_RIGHT)
@@ -124,6 +135,17 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
     def OnClose(self, form):
         # Change visibility state
         self.closed = True
+        self.disable_popups()
+
+    def enable_popups(self):
+        self.popup_from_here.register()
+        self.popup_to_here.register()
+        self.popup_operand.register()
+
+    def disable_popups(self):
+        self.popup_from_here.unregister()
+        self.popup_to_here.unregister()
+        self.popup_operand.unregister()
 
     def set_visible_all_layout(self, layout, val):
         for i in range(layout.count()):
@@ -169,6 +191,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         self.target_box.addItems([x.name for x in TargetType])
         self.target_box.currentIndexChanged.connect(self.target_changed)
         self.mem_line.setVisible(False)
+        self.operand_label.setVisible(False)
 
         # Table configuration
         self.table_type_box.addItems([x.name for x in TableType])
@@ -194,6 +217,9 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         self.run_synthesis_button.clicked.connect(self.run_synthesis_clicked)
         self.show_ast_synthesis_button.clicked.connect(self.synthesis_show_ast_clicked)
         self.reassemble_button.clicked.connect(self.reassemble_clicked)
+
+    def switch_to_target_operand(self):
+        self.target_box.setCurrentIndex(TargetType.OPERAND.value)
 
     def algorithm_type_changed(self):
         self.qtrace_sym_type_box.setEnabled(self.analysis_type == AnalysisType.QTRACE)
@@ -244,9 +270,16 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         if type == TargetType.REG:
             self.register_box.setVisible(True)
             self.mem_line.setVisible(False)
+            self.operand_label.setVisible(False)
         elif type == TargetType.MEMORY:
             self.register_box.setVisible(False)
+            self.operand_label.setVisible(False)
             self.mem_line.setVisible(True)
+        elif type == TargetType.OPERAND:
+            self.register_box.setVisible(False)
+            self.mem_line.setVisible(False)
+            self.operand_label.setVisible(True)
+            self.operand_label.clear()
         else:
             assert False
 
@@ -366,6 +399,9 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             else:
                 mem_addr = int(self.mem_line.text(), 16)
 
+        # Do not execute last instruction if operand & read operand else always execute last instruction
+        off = 0 if self.target_type == TargetType.OPERAND and self.op_is_read else 1
+
         # At this point we are sur to have valid parameters
 
         from qsynthesis.utils.qtrace_symexec import QtraceSymExec, Mode
@@ -373,11 +409,17 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         self.symexec = QtraceSymExec(self.trace, m)
         self.symexec.initialize_register(self.arch.INS_PTR.name, from_inst.INS_PTR)
         self.symexec.initialize_register(self.arch.STK_PTR.name, from_inst.STK_PTR)
-        self.symexec.process_instr_sequence(from_inst.id, to_inst.id)
+        self.symexec.process_instr_sequence(from_inst.id, to_inst.id+off)
         if self.target_type == TargetType.REG:
             self.ast = self.symexec.get_register_ast(self.register_box.currentText())
         elif self.target_type == TargetType.MEMORY:
             self.ast = self.symexec.get_memory_ast(mem_addr, int(self.lookuptable.bitsize/8))
+        elif self.target_type == TargetType.OPERAND:
+            if self.op_is_read: # if read disassemble only the last instruction
+                inst = self.symexec.disassemble(to_inst.opcode, to_inst.addr)
+                self.ast = self.symexec.get_operand_ast(self.op_num, inst)
+            else:  # operand is write can directly get its ast
+                self.ast = self.symexec.get_operand_ast(self.op_num)
         else:
             assert False
         self.symexec.ctx.clearCallbacks()  # Fix the bug from space / can also be fixed by making self.symexec object attribute
@@ -410,8 +452,11 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             else:
                 mem_addr = int(self.mem_line.text(), 16)
 
-        stop_addr = ida_bytes.get_item_end(end_addr)
-        # At this point we are sur to have valid pa  rameters
+        if self.target_type == TargetType.OPERAND and self.op_is_read:
+            stop_addr = end_addr  # Do not execute last address
+        else:
+            stop_addr = ida_bytes.get_item_end(end_addr)  # Do execute 'to' address
+        # At this point we are sur to have valid parameters
 
         # Create the purely symbolic executor
         self.symexec = SimpleSymExec(processor_to_triton_arch())
@@ -435,6 +480,13 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             self.ast = self.symexec.get_register_ast(self.register_box.currentText())
         elif self.target_type == TargetType.MEMORY:
             self.ast = self.symexec.get_memory_ast(mem_addr, int(self.lookuptable.bitsize/8))
+        elif self.target_type == TargetType.OPERAND:
+            if self.op_is_read: # if read disassemble only the last instruction
+                opc = ida_bytes.get_bytes(stop_addr, ida_bytes.get_item_size(stop_addr))
+                inst = self.symexec.disassemble(opc, stop_addr)
+                self.ast = self.symexec.get_operand_ast(self.op_num, inst)
+            else:  # operand is write can directly get its ast
+                self.ast = self.symexec.get_operand_ast(self.op_num)
         else:
             assert False
 
@@ -469,14 +521,14 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         if st == ShowDepState.SHOW:
             if self.target_type == TargetType.REG:
                 sym = self.symexec.get_register_symbolic_expression(self.register_box.currentText())
-            else:
+            elif self.target_type == TargetType.MEMORY:
                 # FIXME: Sanitize memory value before using it
                 mem_addr = int(self.mem_line.text(), 16)
                 sym = self.symexec.get_memory_symbolic_expression(mem_addr, int(self.lookuptable.bitsize/8))
-                # FIXME: Very hacky way to create a new comment for a memory
-                expr_cnt = len(self.symexec.cur_inst.getSymbolicExpressions())+1
-                inst_id = self.symexec._cur_db_inst.id if hasattr(self.symexec, "_cur_db_inst") else self.symexec.inst_count
-                sym.setComment(f"{inst_id}#{expr_cnt}#{self.symexec.cur_inst.getAddress()}")
+            elif self.target_type == TargetType.OPERAND:
+                sym = self.symexec.get_operand_symbolic_expression(self.op_num)
+            else:
+                assert False
 
             # Instanciate the slicer
             sl = Slicer(self.trace)
