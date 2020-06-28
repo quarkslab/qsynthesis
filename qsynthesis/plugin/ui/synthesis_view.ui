@@ -26,8 +26,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>505</width>
-          <height>604</height>
+          <width>558</width>
+          <height>584</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -149,6 +149,16 @@
                    <widget class="QLineEdit" name="mem_line">
                     <property name="enabled">
                      <bool>false</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="operand_label">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="text">
+                     <string>TextLabel</string>
                     </property>
                    </widget>
                   </item>

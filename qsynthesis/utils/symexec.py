@@ -2,7 +2,7 @@
 from typing import List, Set, Iterable, TypeVar, Union, Optional
 
 # third-party libs
-from triton import ARCH, CALLBACK, MODE, MemoryAccess, Instruction, AST_REPRESENTATION
+from triton import ARCH, CALLBACK, MODE, MemoryAccess, Instruction, AST_REPRESENTATION, OPERAND
 from triton import TritonContext
 
 # qsynthesis deps
@@ -163,13 +163,45 @@ class SimpleSymExec:
         actx = self.ctx.getAstContext()
         return TritonAst.make_ast(self.ctx, actx.unroll(ast))
 
+    def get_operand_ast(self, op_num: int, inst: Optional[Instruction] = None) -> TritonAst:
+        inst = self.cur_inst if inst is None else inst
+        op = inst.getOperands()[op_num]
+        actx = self.ctx.getAstContext()
+        t = op.getType()
+        if t == OPERAND.IMM:
+            e = actx.bv(op.getValue(), op.getBitSize())
+        elif t == OPERAND.REG:
+            e = self.ctx.getRegisterAst(op)
+        elif t == OPERAND.MEM:
+            e = self.ctx.getMemoryAst(op)
+        else:
+            assert False
+        return TritonAst.make_ast(self.ctx, actx.unroll(e))
+
     def get_register_symbolic_expression(self, reg_name: Union[str, Register]) -> 'SymbolicExpression':
         reg = getattr(self.ctx.registers, reg_name.lower()) if isinstance(reg_name, str) else reg_name
         return self.ctx.getSymbolicRegister(reg)
 
     def get_memory_symbolic_expression(self, addr: int, size: int) -> 'SymbolicExpression':
         ast = self.ctx.getMemoryAst(MemoryAccess(addr, size))
-        return self.ctx.newSymbolicExpression(ast)
+        sym = self.ctx.newSymbolicExpression(ast)
+        sym.setComment(self.fmt_comment())
+        return sym
+
+    def get_operand_symbolic_expression(self, op_num):
+        op = self.cur_inst.getOperands()[op_num]
+        t = op.getType()
+        if t == OPERAND.IMM:
+            ast = self.ctx.getAstContext().bv(op.getValue(), op.getBitSize())
+            sym = self.ctx.newSymbolicExpression(ast)
+            sym.setComment(self.fmt_comment())
+        elif t == OPERAND.REG:
+            sym = self.get_register_symbolic_expression(op)
+        elif t == OPERAND.MEM:
+            sym = self.get_memory_symbolic_expression(op.getAddress(), op.getSize())
+        else:
+            assert False
+        return sym
 
     def symbolize_register(self, reg, value, comment):
         self.reg_id_seen.add(reg.getId())
@@ -203,6 +235,12 @@ class SimpleSymExec:
         reg = getattr(self.ctx.registers, reg.lower()) if isinstance(reg, str) else reg
         self.reg_id_seen.add(reg.getId())
         self.ctx.setConcreteRegisterValue(reg, value)
+
+    def disassemble(self, opcode: bytes, addr: Optional[int] = None) -> bool:
+        inst = Instruction(addr, opcode) if addr is not None else Instruction(opcode)
+        self.ctx.disassembly(inst)
+        self.cur_inst = inst  # Set it if require to query get_operand_symbolic_expression
+        return inst
 
     def execute(self, opcode: bytes, addr: Optional[int] = None) -> bool:
         inst = Instruction(addr, opcode) if addr is not None else Instruction(opcode)
