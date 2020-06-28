@@ -12,6 +12,7 @@ class SynthetizerViewHook(ida_kernwin.action_handler_t):
         self.view_id = f"{QTRACE_MENU_NAME}:Synthesizer"
         self.name = SynthesizerView.NAME
         self.icon = ICON_DEBUG_ID
+        self.tooltip = "Synthesizing arithmetic expressions along the trace"
         self.qtrace = qtrace
 
     @property
@@ -36,4 +37,5 @@ class SynthetizerViewHook(ida_kernwin.action_handler_t):
         if TRITON_ENABLED:
             return ida_kernwin.AST_DISABLE if self.is_enabled_by_trace else ida_kernwin.AST_ENABLE_ALWAYS
         else:
+            self.tooltip = "Require Triton to run"
             return ida_kernwin.AST_DISABLE_ALWAYS
