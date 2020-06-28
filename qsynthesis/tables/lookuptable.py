@@ -59,6 +59,9 @@ class LookupTablePickle(LookupTable):
 
 
 class LookupTableRaw(LookupTable):
+
+    EXPORT_FILE_CHUNK_LIMIT = 40000000
+
     def __init__(self, gr: TritonGrammar, inputs: Union[int, List[Dict[str, int]]], hash_mode: HashType=HashType.RAW, f_name: str = ""):
         super(LookupTableRaw, self).__init__(gr, inputs, hash_mode, f_name)
 
@@ -90,11 +93,22 @@ class LookupTableRaw(LookupTable):
         hash_fun = lambda x: hashlib.md5(bytes(x)).digest() if self.hash_mode == HashType.MD5 else self.hash
         print("\nExport data")
 
-        with open(str(self.name), "ab") as f:
-            for step in range(0, count, 10000):
-                print(f"process {step}/{count}\r", end="")
-                chk_s = b"\n".join(hash_fun(outs)+s.encode() for s, outs in worklist[step:step+10000])
-                f.write(chk_s)
+        f_id = 1
+        f_counter = 0
+        f = open(self.name, "ab")
+
+        for step in range(0, count, 10000):
+            f_counter += 10000
+            print(f"process {step}/{count}\r", end="")
+            chk_s = b"\n".join(hash_fun(outs)+s.encode() for s, outs in worklist[step:step+10000])+b"\n"
+            f.write(chk_s)
+            if f_counter > self.EXPORT_FILE_CHUNK_LIMIT:
+                f.close()
+                fname = f"{self.name}.{f_id}"
+                LookupTableRaw.create(fname, self.grammar, self.inputs, self.hash_mode)
+                f = open(fname, "ab")
+                f_id += 1
+                f_counter = 0
 
     def save(self, file: Union[Path, str]) -> None:
         logging.info("Saved")
