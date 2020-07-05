@@ -4,12 +4,12 @@ from qsynthesis.plugin.view import SynthesizerView
 
 class SynthetizerViewHook(ida_kernwin.action_handler_t):
 
+    view_id = "QSynthesis"
+
     def __init__(self, qtrace):
         ida_kernwin.action_handler_t.__init__(self)
-        from qtraceida.menu import QTRACE_MENU_NAME
         from qtraceida.icons.raw_icons import ICON_DEBUG_ID
         self.view = None
-        self.view_id = f"{QTRACE_MENU_NAME}:Synthesizer"
         self.name = SynthesizerView.NAME
         self.icon = ICON_DEBUG_ID
         self.tooltip = "Synthesizing arithmetic expressions along the trace"
