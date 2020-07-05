@@ -8,10 +8,10 @@ class SynthetizerViewHook(ida_kernwin.action_handler_t):
 
     def __init__(self, qtrace):
         ida_kernwin.action_handler_t.__init__(self)
-        from qtraceida.icons.raw_icons import ICON_DEBUG_ID
+        from qtraceida.icons.raw_icons import ICON_DEBUG_ID, IDAIcon
         self.view = None
         self.name = SynthesizerView.NAME
-        self.icon = ICON_DEBUG_ID
+        self.icon = IDAIcon.AST_TREE
         self.tooltip = "Synthesizing arithmetic expressions along the trace"
         self.qtrace = qtrace
 
