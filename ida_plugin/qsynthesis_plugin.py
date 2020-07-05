@@ -3,6 +3,8 @@
 from qsynthesis.plugin.dependencies import ida_idaapi, ida_kernwin, QTRACEIDA_ENABLED, TRITON_ENABLED
 import qsynthesis
 
+plugin = None
+
 
 class QSynthesisPlugin(ida_idaapi.plugin_t):
     flags = ida_idaapi.PLUGIN_UNL
@@ -20,26 +22,30 @@ class QSynthesisPlugin(ida_idaapi.plugin_t):
         addon_info.url = "https://gitlab.qb/synthesis/qsynthesis"
         addon_info.freeform = "Copyright (c) 2020 - All Rights Reserved"
         ida_kernwin.register_addon(addon_info)
+        self.view = None
         return ida_idaapi.PLUGIN_OK if TRITON_ENABLED else ida_idaapi.PLUGIN_SKIP
 
     def run(self, arg):
         print("Running QSynthesis")
         if QTRACEIDA_ENABLED:
-            import qtraceida
-            qtr = qtraceida.get_qtrace()
+            # If QtraceIDA enable the action should have been registered
+            from qsynthesis.plugin.actions import SynthetizerViewHook
+            ida_kernwin.process_ui_action(SynthetizerViewHook.view_id)
         else:
-            qtr = None
-        from qsynthesis.plugin.view import SynthesizerView
-        self.view = SynthesizerView(qtr)
-        # self.view.init()
-        self.view.Show()  # Show will call OnCreate that will call init
+            from qsynthesis.plugin.view import SynthesizerView
+            self.view = SynthesizerView(None)
+            # self.view.init()
+            self.view.Show()  # Show will call OnCreate that will call init
 
     def term(self):
         pass
 
 
 def PLUGIN_ENTRY():
-    return QSynthesisPlugin()
+    global plugin
+    if plugin is None:
+        plugin = QSynthesisPlugin()
+    return plugin
 
 
 def main():
