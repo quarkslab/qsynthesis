@@ -15,6 +15,61 @@ from qtracedb.trace import Trace
 from qtracedb.archs import ArchsManager
 from .ui.synthesis_ui import Ui_synthesis_view
 
+TEMPLATE_TRITON = '''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        body { font-size: large; }
+        big { font-size: x-large; }
+        td { padding: 5px; padding-left:10px; padding-right:10px; }
+    </style>
+</head>
+<body>
+    <center><table>
+        <tr><td>Node count</td><td>Depth</td></tr>
+        <tr><td align="center"><big><b>%d</b></big></td><td align="center"><big><b>%d</b></big></td></tr>
+    </table></center>
+    <hr/>
+    <center>Inputs
+    <table border style="border-style:dashed; margin-top:8px;" >
+        %s
+    </table>
+    </center>
+</body>
+</html>
+'''
+
+TEMPLATE_SYNTHESIS = '''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        body { font-size: large; }
+        big { font-size: x-large; }
+        td { padding: 5px; padding-left:10px; padding-right:10px; }
+    </style>
+</head>
+<body>
+    <center>
+        Simplified: <big style="color:%s;">%s</big><br/>
+        Synthesiszed Expression<br/>
+        %s
+    </center>
+    <hr/>
+    <center><table>
+        <tr><td>Node count</td><td>Depth</td><td>Scale</td></tr>
+        <tr>
+            <td align="center"><big><b>%d</b></big></td>
+            <td align="center"><big><b>%d</b></big></td>
+            <td align="center"><big><b>%.2f%c</b></big></td>
+        </tr>
+    </table></center>
+
+    
+</body>
+</html>
+'''
+
+
 
 class TraceDbType(Enum):
     CONFIG = 0
@@ -507,14 +562,21 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         # Enable all buttons related to synthesis
         self.set_enabled_synthesis_widgets(True)
 
+    # def fill_triton_results(self):
+    #     self.triton_textarea.clear()
+    #     self.triton_textarea.append("Inputs:")
+    #     for symvars in self.ast.symvars:
+    #         self.triton_textarea.append(f"  - {symvars}")
+    #     self.triton_textarea.append(f"Node count: {self.ast.node_count}")
+    #     self.triton_textarea.append(f"Depth: {self.ast.depth}")
+
     def fill_triton_results(self):
-        self.triton_textarea.clear()
-        self.triton_textarea.append("Inputs:")
-        for symvars in self.ast.symvars:
-            self.triton_textarea.append(f"  - {symvars}")
-        self.triton_textarea.append(f"Node count: {self.ast.node_count}")
-        self.triton_textarea.append(f"Depth: {self.ast.depth}")
-        pass
+        if self.ast.symvars:
+            tpl = '<tr><td align="center">%s</td><td align="center">%d</td></tr>'
+            inp_s = "\n".join(tpl % (x.getAlias(), x.getBitSize()) for x in self.ast.symvars)
+        else:
+            inp_s = "<big><b>0</b></big>"
+        self.triton_textarea.setHtml(TEMPLATE_TRITON % (self.ast.node_count, self.ast.depth, inp_s))
 
     def triton_show_deps_clicked(self):
         st = ShowDepState(self.show_deps_triton_button.text())
@@ -575,14 +637,10 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         self.fill_synthesis_results()
 
     def fill_synthesis_results(self):
-        self.synthesis_textarea.clear()
-        self.synthesis_textarea.append(f"simplified: {self.ast.node_count > self.synth_ast.node_count}")
-        self.synthesis_textarea.append(f"synthesized expression: {self.synth_ast.pp_str if self.synth_ast.node_count < 15 else 'too large'}")
-
-        self.synthesis_textarea.append(f"Node count: {self.synth_ast.node_count}")
-        self.synthesis_textarea.append(f"Depth: {self.synth_ast.depth}")
-
-        self.synthesis_textarea.append(f"Scale reduction: {self.synth_ast.node_count / self.ast.node_count:.2f}")
+        color, simp = ("green", "Yes") if self.ast.node_count > self.synth_ast.node_count else ("red", "No")
+        ssexpr = "<small>(too large)</small>" if self.synth_ast.node_count > 12 else f"<big><b>{self.synth_ast.pp_str}</b></big>"
+        scale = -(((self.ast.node_count - self.synth_ast.node_count) * 100) / self.ast.node_count)
+        self.synthesis_textarea.setHtml(TEMPLATE_SYNTHESIS % (color, simp, ssexpr, self.synth_ast.node_count, self.synth_ast.depth, scale, '%'))
 
     def synthesis_show_ast_clicked(self):
         viewer = AstViewer("Synthesized AST", self.synth_ast)
