@@ -14,7 +14,7 @@ class SynthetizeFromHere(ida_kernwin.action_handler_t):
         self.text = "Synthesize from here"
         self.shortcut = "Ctrl+Shift+A"
         self.tooltip = "Start synthesizing from the current address"
-        self.icon = 0
+        self.icon = 127 # GREEN_LIGHT  # 84  # BLOCK_DESCENT_FRM
         self.widget = widget
 
     def set_text_widget(self, ea):
@@ -66,7 +66,7 @@ class SynthetizeToHere(SynthetizeFromHere):
         self.text = "Synthesize up to here (included)"
         self.shortcut = "Ctrl+Shift+Z"
         self.tooltip = "Start synthesizing up to the current address (included)"
-        self.icon = 0
+        self.icon = 120 # BREAKPOINT_PLUS
 
     def set_text_widget(self, ea):
         self.widget.to_line.setText(f"{ea:#x}")
@@ -80,7 +80,7 @@ class SynthetizeOperand(SynthetizeFromHere):
         self.text = "Synthesize operand"
         self.shortcut = "Ctrl+Shift+O"
         self.tooltip = "Synthesize the current operand at this address"
-        self.icon = 0
+        self.icon = 12  # STAR_PLUS
 
     def activate(self, ctx):
         ea = ida_kernwin. get_screen_ea()
