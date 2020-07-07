@@ -46,8 +46,8 @@ def test():
     print(f"simplified: {simp}")
     print(f"synthesized expression: {synt_rax.pp_str}")
     print(f"size: {rax.node_count} -> {synt_rax.node_count} scale reduction:{synt_rax.node_count/rax.node_count:.2f}")
-    return symexec
+    return symexec, synt_rax
 
 
 if __name__ == "__main__":
-    sx = test()
+    sx, srax = test()
