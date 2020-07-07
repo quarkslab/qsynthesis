@@ -1,15 +1,24 @@
 import triton
-from triton import AST_NODE
+from triton import TritonContext, AST_NODE, SYMBOLIC, ARCH
 import logging
 # Imports used only for typing
-from triton import TritonContext
 from typing import List, Tuple, Generator, Dict, Union, Optional
+from qtracedb.archs.manager import ArchsManager
 from enum import IntEnum
 import random
 from functools import reduce
 
 
 AstType = IntEnum("AstNode", {k: v for k, v in triton.AST_NODE.__dict__.items() if isinstance(v, int)})
+
+
+class ReassemblyError(Exception):
+    pass
+
+
+class SymVarType(IntEnum):
+    REGISTER = SYMBOLIC.REGISTER_VARIABLE
+    MEMORY = SYMBOLIC.MEMORY_VARIABLE
 
 
 op_str = {AST_NODE.ANY: "any", AST_NODE.ASSERT: "assert", AST_NODE.BV: "bv", AST_NODE.BVADD: "+",
@@ -114,6 +123,10 @@ class TritonAst:
     @property
     def symvars(self):
         return list(self._symvars.values())
+
+    @staticmethod
+    def symvar_type(v):
+        return SymVarType(v.getType())
 
     def get_children(self):
         return self._children
@@ -386,6 +399,38 @@ class TritonAst:
                 if new_expr_to_send is not None and cur_expr == self:  # Changing root node so fusion fields and return
                     self._inplace_replace(new_expr_to_send)
                     return
+
+    def reassemble(self, dst_reg: str, target_arch: Optional[Union['Arch', str]] = None) -> bytes:
+        try:
+            from arybo.tools.triton_ import tritonast2arybo
+            from arybo.lib.exprs_asm import asm_binary
+            if all(TritonAst.symvar_type(x) == SymVarType.REGISTER for x in self.symvars):
+                if target_arch is None:
+                    m = {ARCH.X86: "x86", ARCH.X86_64: "x86_64", ARCH.ARM32: "arm", ARCH.AARCH64: "aarch64"}
+                    arch_name = m[self.ctx.getArchitecture()]
+                else:
+                    arch_name = target_arch if isinstance(target_arch, str) else target_arch.NAME.lower()
+                arybo_expr = tritonast2arybo(self.expr, use_exprs=True, use_esf=False)
+                inps = {x.getName(): (x.getAlias(), x.getBitSize()) for x in self.symvars}
+                return asm_binary(arybo_expr, (dst_reg, self.size), inps, f"{arch_name}-unknown-unknwon")
+            else:
+                raise ReassemblyError("Can only reassemble if variable are registers (at the moment)")
+        except ImportError:
+            raise ReassemblyError("Cannot import arybo, while it is required (pip3 install arybo)")
+        except NameError:
+            raise ReassemblyError(f"Invalid target architecture '{target_arch}' provided")
+        except Exception as e:
+            raise ReassemblyError(f"Something went wrong during reassembly: {e}")
+
+    def reassemble_to_insts(self, dst_reg: str, target_arch: Optional[Union['Arch', str]] = None) -> List['InstrCs']:
+        # Note: let all exception being raised above if any
+        asm = self.reassemble(dst_reg, target_arch)
+        if target_arch is None:
+            m = {ARCH.X86: "x86", ARCH.X86_64: "x86_64", ARCH.ARM32: "arm", ARCH.AARCH64: "aarch64"}
+            arch = ArchsManager.get_arch(m[self.ctx.getArchitecture()])
+        else:
+            arch = ArchsManager.get_arch(target_arch) if isinstance(target_arch, str) else target_arch
+        return arch.disasm(asm, 0x0)
 
     @staticmethod
     def mk_ast_graph(ast: 'TritonAst', show=True) -> 'Graph':
