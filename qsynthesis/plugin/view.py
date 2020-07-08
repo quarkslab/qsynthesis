@@ -562,14 +562,6 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         # Enable all buttons related to synthesis
         self.set_enabled_synthesis_widgets(True)
 
-    # def fill_triton_results(self):
-    #     self.triton_textarea.clear()
-    #     self.triton_textarea.append("Inputs:")
-    #     for symvars in self.ast.symvars:
-    #         self.triton_textarea.append(f"  - {symvars}")
-    #     self.triton_textarea.append(f"Node count: {self.ast.node_count}")
-    #     self.triton_textarea.append(f"Depth: {self.ast.depth}")
-
     def fill_triton_results(self):
         if self.ast.symvars:
             tpl = '<tr><td align="center">%s</td><td align="center">%d</td></tr>'
