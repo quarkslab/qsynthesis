@@ -1,13 +1,16 @@
 from enum import Enum
 from PyQt5 import QtWidgets, QtCore, QtGui
 from pathlib import Path
+from typing import Tuple, Optional, List
 
-from qsynthesis.plugin.dependencies import ida_kernwin, IDA_ENABLED, QTRACEIDA_ENABLED, QTRACEDB_ENABLED, ida_bytes, ida_nalt
+from qsynthesis.plugin.dependencies import ida_kernwin, IDA_ENABLED, QTRACEIDA_ENABLED, QTRACEDB_ENABLED
+from qsynthesis.plugin.dependencies import ida_bytes, ida_nalt, ida_ua, ida_funcs, ida_gdl, ida_loader, ida_auto
 from qsynthesis.tables import LookupTableDB, LookupTableREST
 from qsynthesis.algorithms import TopDownSynthesizer, PlaceHolderSynthesizer
 from qsynthesis.utils.symexec import SimpleSymExec
+from qsynthesis.tritonast import ReassemblyError
 from qsynthesis.plugin.processor import processor_to_triton_arch, processor_to_qtracedb_arch, Arch, Processor, ProcessorType
-from qsynthesis.plugin.ast_viewer import AstViewer
+from qsynthesis.plugin.ast_viewer import AstViewer, BasicBlockViewer
 from qsynthesis.plugin.popup_actions import SynthetizeFromHere, SynthetizeToHere, SynthetizeOperand
 from qtraceanalysis.slicing import Slicer
 from qtracedb import DatabaseManager
@@ -132,6 +135,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         self.synthesizer = None
         self.synth_ast = None
         # For operand synthesis
+        self.stop_addr = None  # Address where to analysis end
         self.op_num = None
         self.op_is_read = False  # Negation of if the operand is written
 
@@ -457,6 +461,9 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         # Do not execute last instruction if operand & read operand else always execute last instruction
         off = 0 if self.target_type == TargetType.OPERAND and self.op_is_read else 1
 
+        # Set the stop addr (for operand reassembly)
+        self.stop_addr = to_inst.addr
+
         # At this point we are sur to have valid parameters
 
         from qsynthesis.utils.qtrace_symexec import QtraceSymExec, Mode
@@ -508,9 +515,9 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
                 mem_addr = int(self.mem_line.text(), 16)
 
         if self.target_type == TargetType.OPERAND and self.op_is_read:
-            stop_addr = end_addr  # Do not execute last address
+            self.stop_addr = end_addr  # Do not execute last address
         else:
-            stop_addr = ida_bytes.get_item_end(end_addr)  # Do execute 'to' address
+            self.stop_addr = ida_bytes.get_item_end(end_addr)  # Do execute 'to' address
         # At this point we are sur to have valid parameters
 
         # Create the purely symbolic executor
@@ -520,7 +527,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         self.symexec.initialize_register(self.arch.STK_PTR.name, 0x800000)
 
         # Execute the range of instructions
-        while cur_addr < stop_addr:  # Retrieve directly bytes from IDA
+        while cur_addr < self.stop_addr:  # Retrieve directly bytes from IDA
             if ida_bytes.is_code(ida_bytes.get_flags(cur_addr)):
                 opc = ida_bytes.get_bytes(cur_addr, ida_bytes.get_item_size(cur_addr))
                 if not self.symexec.execute(opc):
@@ -529,7 +536,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             else:
                 QtWidgets.QMessageBox.critical(self, "Invalid byte", f"Stop on address: {cur_addr:#x} which is not code")
                 return False
-            cur_addr = ida_bytes.next_head(cur_addr, stop_addr)
+            cur_addr = ida_bytes.next_head(cur_addr, self.stop_addr)
 
         if self.target_type == TargetType.REG:
             self.ast = self.symexec.get_register_ast(self.register_box.currentText())
@@ -537,8 +544,8 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             self.ast = self.symexec.get_memory_ast(mem_addr, int(self.lookuptable.bitsize/8))
         elif self.target_type == TargetType.OPERAND:
             if self.op_is_read: # if read disassemble only the last instruction
-                opc = ida_bytes.get_bytes(stop_addr, ida_bytes.get_item_size(stop_addr))
-                inst = self.symexec.disassemble(opc, stop_addr)
+                opc = ida_bytes.get_bytes(self.stop_addr, ida_bytes.get_item_size(self.stop_addr))
+                inst = self.symexec.disassemble(opc, self.stop_addr)
                 self.ast = self.symexec.get_operand_ast(self.op_num, inst)
             else:  # operand is write can directly get its ast
                 self.ast = self.symexec.get_operand_ast(self.op_num)
@@ -573,25 +580,8 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
     def triton_show_deps_clicked(self):
         st = ShowDepState(self.show_deps_triton_button.text())
         if st == ShowDepState.SHOW:
-            if self.target_type == TargetType.REG:
-                sym = self.symexec.get_register_symbolic_expression(self.register_box.currentText())
-            elif self.target_type == TargetType.MEMORY:
-                # FIXME: Sanitize memory value before using it
-                mem_addr = int(self.mem_line.text(), 16)
-                sym = self.symexec.get_memory_symbolic_expression(mem_addr, int(self.lookuptable.bitsize/8))
-            elif self.target_type == TargetType.OPERAND:
-                sym = self.symexec.get_operand_symbolic_expression(self.op_num)
-            else:
-                assert False
-
-            # Instanciate the slicer
-            sl = Slicer(self.trace)
-
-            # Call the backslice with existing context and symbolic expression
-            dg = sl._backslice(self.symexec.ctx, sym)
-
-            # Iterate all addresses
-            for addr in Slicer.to_address_set(dg):
+            addrs = self.get_dependency_addresses()
+            for addr in addrs:
                 back = ida_nalt.get_item_color(addr)
                 self.highlighted_addr[addr] = back
                 ida_nalt.set_item_color(addr, 0xA1F7A1)
@@ -603,6 +593,27 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
 
         # Switch state
         self.show_deps_triton_button.setText(ShowDepState.HIDE.value if st == ShowDepState.SHOW else ShowDepState.SHOW.value)
+
+    def get_dependency_addresses(self) -> List[int]:
+        if self.target_type == TargetType.REG:
+            sym = self.symexec.get_register_symbolic_expression(self.register_box.currentText())
+        elif self.target_type == TargetType.MEMORY:
+            # FIXME: Sanitize memory value before using it
+            mem_addr = int(self.mem_line.text(), 16)
+            sym = self.symexec.get_memory_symbolic_expression(mem_addr, int(self.lookuptable.bitsize / 8))
+        elif self.target_type == TargetType.OPERAND:
+            sym = self.symexec.get_operand_symbolic_expression(self.op_num)
+        else:
+            assert False
+
+        # Instanciate the slicer
+        sl = Slicer(self.trace)
+
+        # Call the backslice with existing context and symbolic expression
+        dg = sl._backslice(self.symexec.ctx, sym)
+
+        # Iterate all addresses
+        return sorted(Slicer.to_address_set(dg))
 
     def triton_show_ast_clicked(self):
         viewer = AstViewer("Triton AST", self.ast)
@@ -638,10 +649,6 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         viewer = AstViewer("Synthesized AST", self.synth_ast)
         viewer.Show()
 
-    def reassemble_clicked(self):
-        print("Not implemented yet")
-        # TODO: to implement
-
     def set_enabled_synthesis_widgets(self, val):
         self.run_synthesis_button.setEnabled(val)
         self.synthesis_textarea.setEnabled(val)
@@ -649,6 +656,196 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             self.synthesis_textarea.clear()  # Clear synthesis view
             self.show_ast_synthesis_button.setEnabled(val)
             self.reassemble_button.setEnabled(val)
+
+    def reassemble_clicked(self):
+        is_reg, reg = self.selected_expr_register()
+        res = self.get_reassembly_options(ask_reg=not is_reg)
+        if res:
+            rg, patch_fun, shrink_fun, snap = res
+            dst_reg = reg.lower() if is_reg else rg.lower()
+            try:
+                if patch_fun:
+                    addrs = self.get_dependency_addresses()
+                    asm_bytes = self.synth_ast.reassemble(dst_reg, self.arch)
+                    if snap:  # Create a snapshot of the database
+                        ss = ida_loader.snapshot_t()
+                        ss.desc = f"Reassembly of {dst_reg} at {self.stop_addr:#x}"
+                        ida_kernwin.take_database_snapshot(ss)
+                    if shrink_fun:
+                        self.patch_and_shrink_reassembly(addrs, asm_bytes)
+                    else:
+                        self.patch_reassembly(addrs, asm_bytes)
+                else:
+                    # Reassemble to instruction and show it in a View
+                    insts = self.synth_ast.reassemble_to_insts(dst_reg, self.arch)
+                    bb_viewer = BasicBlockViewer("Reassembly", insts)
+                    bb_viewer.Show()
+            except ReassemblyError as e:
+                QtWidgets.QMessageBox.critical(self, "Reassembly error", f"Error: {e}")
+        else:
+            pass # Do nothing user click canceled on options
+
+    def coallesce_addrs(self, addrs):
+        blocks = []
+        for addr in addrs:
+            sz = ida_bytes.get_item_size(addr)
+            if not blocks:
+                blocks.append((addr, sz))
+            else:
+                b_addr, b_sz = blocks[-1]
+                if b_addr + b_sz == addr:  # We are next to the previous item
+                    blocks[-1] = (b_addr, b_sz+sz)
+                else:  # The address is not contiguous
+                    blocks.append((addr, sz))
+        return blocks
+
+    def patch_reassembly(self, addrs, asm) -> None:
+        nop = self.arch.nop_instruction
+        insts = self.arch.disasm(asm, 0x0)
+        blocks = self.coallesce_addrs(addrs)
+        if sum(x[1] for x in blocks) < len(asm):
+            QtWidgets.QMessageBox.critical(self, "Reassembly error", f"No enough place to push back reassembled instructions")
+            return
+
+        block_addr, block_sz = blocks.pop()
+        for i in insts[::-1]:
+            data = i.bytes
+            while len(data) > block_sz:  # While blocks are too small fill them with nop
+                if block_sz != 0:
+                    ida_bytes.patch_bytes(block_addr, nop * block_sz)  # Fill space of the block with NOPs
+                if blocks:
+                    block_addr, block_sz = blocks.pop()
+                else:
+                    QtWidgets.QMessageBox.critical(self, "Reassembly error", "No slot to place instruction remaining, abort")
+                    return
+
+            # Here there is meant to be enough space to place instruction
+            p_addr = block_addr + block_sz - len(data)  # compute address where to patch within block
+            self.safe_patch_instruction(p_addr, data)
+            block_sz -= len(data)
+
+        # All instructions have been put in blocks, fill the remaining ones with NOPs
+        while blocks or block_sz:
+            if block_sz:
+                ida_bytes.patch_bytes(block_addr, nop * block_sz)  # Fill space of the block with NOPs
+                block_sz = 0
+            if blocks:
+                block_addr, block_sz = blocks.pop()
+
+    @staticmethod
+    def safe_patch_instruction(ea, data):
+        ida_bytes.patch_bytes(ea, data)  # Patch bytes
+        if not ida_bytes.is_code(ida_bytes.get_flags(ea)):  # Check that the address is now a code instruction, if not:
+            ida_bytes.del_items(ea, 0, len(data))   # Del all types
+            ida_ua.create_insn(ea)                  # Redecode instruction
+        if not ida_bytes.is_code(ida_bytes.get_flags(ea)):
+            print("Really can't create instruction at that location")
+
+    @staticmethod
+    def safe_patch_instruction_block(ea, data):
+        print(f"safe_patch_instruction_block {ea:#x}: {data}")
+        ida_bytes.patch_bytes(ea, data)  # Patch bytes
+        ida_bytes.del_items(ea, 0, len(data))
+        ida_ua.create_insn(ea)
+
+    def patch_and_shrink_reassembly(self, addrs, asm) -> None:
+        init_addr = addrs[0]
+        f = ida_funcs.get_func(init_addr)
+        g = ida_gdl.FlowChart(f)
+        low, high = init_addr, addrs[-1]
+        block = None
+        for bb in g:
+            if bb.start_ea <= low < bb.end_ea and bb.start_ea <= high <= bb.end_ea:
+                block = bb
+        if block is None:
+            QtWidgets.QMessageBox.critical(self, "Reassembly error", "Dependency slice have to be in the same basic block")
+            return
+
+        # Scan all items
+        cur_addr = init_addr
+        payload = b""
+        while cur_addr < block.end_ea:  # Iterate the whole basicblock
+            if cur_addr >= self.stop_addr and asm:  #
+                payload += asm
+                asm = None
+            if cur_addr not in addrs:  # Instruction not in dependency so keep it
+                sz = ida_bytes.get_item_size(cur_addr)
+                payload += ida_bytes.get_bytes(cur_addr, sz)
+            cur_addr = ida_bytes.next_head(cur_addr, block.end_ea)
+
+        # Perform the final patching
+        self.safe_patch_instruction_block(init_addr, payload)
+
+        # If the block was the last of the function (adjust the end of the function)
+        if f.end_ea == block.end_ea:
+            print(f"adjust of the function to {init_addr+len(payload):#x}")
+            ida_funcs.set_func_end(init_addr, init_addr+len(payload))
+
+    def get_reassembly_options(self, ask_reg=False):
+        dlg = QtWidgets.QDialog(parent=self)
+        dlg.setWindowTitle('Reassembly options')
+        dlg.setObjectName("Dialog")
+
+        verticalLayout = QtWidgets.QVBoxLayout(dlg)
+        verticalLayout.setObjectName("verticalLayout")
+        if ask_reg:
+            h_layout = QtWidgets.QHBoxLayout()
+            #self.h_l.setObjectName("experimentalLayout")
+            label_reg = QtWidgets.QLabel(dlg)
+            label_reg.setText("Destination register:")
+            #self.label_9.setObjectName("label_9")
+            h_layout.addWidget(label_reg)
+            comboBox = QtWidgets.QComboBox(dlg)
+            comboBox.addItems([x.name for x in ArchsManager.get_supported_regs(self.arch)])
+            h_layout.addWidget(comboBox)
+            #self.comboBox.setObjectName("register_selection")
+            verticalLayout.addLayout(h_layout)
+
+        patch_fun = QtWidgets.QCheckBox(dlg)
+        patch_fun.setText("patch function bytes")
+        verticalLayout.addWidget(patch_fun)
+
+        shrink_fun = QtWidgets.QCheckBox(dlg)
+        shrink_fun.setText("shrink function\n move some instruction instead of filling with NOPs.\nCan break disassembly"
+                           "for relative instructions. (Works only for linear blocks)")
+        verticalLayout.addWidget(shrink_fun)
+
+        snapshot = QtWidgets.QCheckBox(dlg)
+        snapshot.setText("Snapshot database before patching")
+        verticalLayout.addWidget(snapshot)
+
+        qr = self.geometry()
+        dlg.move(qr.center())
+
+        buttonBox = QtWidgets.QDialogButtonBox(dlg)
+        buttonBox.setOrientation(QtCore.Qt.Horizontal)
+        buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Ok)
+        #buttonBox.setObjectName("buttonBox")
+        verticalLayout.addWidget(buttonBox)
+        buttonBox.accepted.connect(dlg.accept)
+        buttonBox.rejected.connect(dlg.reject)
+
+        dlg.exec()
+
+        if dlg.result():
+            reg = comboBox.currentText() if ask_reg else None
+            return reg, patch_fun.isChecked(), shrink_fun.isChecked(), snapshot.isChecked()
+        else:
+            return None
+
+    def selected_expr_register(self) -> Tuple[bool, Optional[str]]:
+        if self.target_type == TargetType.REG:
+            return True, self.register_box.currentText()
+        elif self.target_type == TargetType.MEMORY:
+            return False, None
+        elif self.target_type == TargetType.OPERAND:
+            opc = ida_bytes.get_bytes(self.stop_addr, ida_bytes.get_item_size(self.stop_addr))
+            inst = self.arch.disasm_one(opc, self.stop_addr)
+            op = inst.operands[self.op_num]
+            if op.is_register():
+                return True, op.register.name
+            else:
+                return False, None
 
 
     # =====================  Trace Database related fields  ======================
@@ -714,3 +911,4 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         else:
             return None
     # ======================================================================
+

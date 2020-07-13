@@ -7,6 +7,9 @@ try:
     import ida_bytes
     import ida_idp
     import ida_nalt
+    import ida_ua
+    import ida_loader
+    import ida_auto
     IDA_ENABLED = True
 except ImportError:
     # If we cannot import ida Mock most of its API to works equally without
@@ -48,6 +51,18 @@ except ImportError:
             return 12
 
     class ida_nalt:
+        pass
+
+    class ida_funcs:
+        pass
+
+    class ida_ua:
+        pass
+
+    class ida_loader:
+        pass
+
+    class ida_auto:
         pass
 
     IDA_ENABLED = False

@@ -35,3 +35,25 @@ class AstViewer(ida_graph.GraphViewer):
                 child_id = self.AddNode(c.symbol)
                 self.AddEdge(node_id, child_id)
                 worklist.append((child_id, c))
+
+
+class BasicBlockViewer(ida_graph.GraphViewer):
+    def __init__(self, title, insts):
+        ida_graph.GraphViewer.__init__(self, title)
+        self.insts = insts
+        # TODO: Using ida_lines stuff to precompute 'colored' lines
+
+    def OnRefresh(self):
+        self.Clear()
+        self.draw()
+        return True
+
+    def OnGetText(self, ida_node_id):
+        return self[ida_node_id]
+
+    def Show(self):
+        return False if not ida_graph.GraphViewer.Show(self) else True
+
+    def draw(self):
+        """ Add a single basic block corresponding to the instructions """
+        self.AddNode("\n".join(str(x) for x in self.insts))
