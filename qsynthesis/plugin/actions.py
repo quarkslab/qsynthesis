@@ -1,5 +1,4 @@
 from qsynthesis.plugin.dependencies import ida_kernwin, TRITON_ENABLED
-from qsynthesis.plugin.view import SynthesizerView
 
 
 class SynthetizerViewHook(ida_kernwin.action_handler_t):
@@ -10,7 +9,7 @@ class SynthetizerViewHook(ida_kernwin.action_handler_t):
         ida_kernwin.action_handler_t.__init__(self)
         from qtraceida.icons.raw_icons import ICON_DEBUG_ID, IDAIcon
         self.view = None
-        self.name = SynthesizerView.NAME
+        self.name = "QSynthesis"  # SynthesizerView.NAME
         self.icon = IDAIcon.AST_TREE
         self.tooltip = "Synthesizing arithmetic expressions along the trace"
         self.qtrace = qtrace
@@ -24,6 +23,7 @@ class SynthetizerViewHook(ida_kernwin.action_handler_t):
         Overridden method called on hook creation
         """
         # pylint: disable=unused-argument
+        from qsynthesis.plugin.view import SynthesizerView
         if self.view is None or self.view.closed:
             self.view = SynthesizerView(self.qtrace)
             # self.view.init()
