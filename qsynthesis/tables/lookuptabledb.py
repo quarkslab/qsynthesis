@@ -94,13 +94,16 @@ class LookupTableDB(LookupTable):
             TableEntry(hash=hash, expression=value)
 
     # @db_session
-    def add_entries(self, entries: List[Tuple[str, List[int]]], chunk_size=10000) -> None:
+    def add_entries(self, entries: List[Tuple[str, List[int]]], calc_hash=False, chunk_size=10000) -> None:
         count = len(entries)
-        hash_fun = lambda x: hashlib.md5(bytes(x)).digest() if self.hash_mode == HashType.MD5 else self.hash
+        if calc_hash:
+            hash_fun = lambda x: hashlib.md5(bytes(x)).digest() if self.hash_mode == HashType.MD5 else self.hash
+        else:
+            hash_fun = lambda x: x
         for step in range(0, count, chunk_size):
             print(f"process {step}/{count}\r", end="")
             with db_session:
-                for s, outs in entries[step:step+chunk_size]:
+                for outs, s in entries[step:step+chunk_size]:
                     TableEntry(hash=hash_fun(outs), expression=s)
 
     @db_session

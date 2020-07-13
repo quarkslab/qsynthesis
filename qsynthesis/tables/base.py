@@ -230,11 +230,11 @@ class LookupTable:
         ArTy = FFI.arrayType(FFI.ULongLongTy, N)
 
         hash_fun = lambda x: hashlib.md5(bytes(x)).digest() if self.hash_mode == HashType.MD5 else self.hash
-        worklist = [(k, ArTy()) for k in self.grammar.vars]
+        worklist = [(ArTy(), k) for k in self.grammar.vars]
         for i, inp in enumerate(self.inputs):
-            for k, v in worklist:
+            for v, k in worklist:
                 v[i] = inp[k]
-        hash_set = set(hash_fun(x[1]) for x in worklist)
+        hash_set = set(hash_fun(x[0]) for x in worklist)
 
         ops = sorted(self.grammar.non_terminal_operators, key=lambda x: x.arity == 1)  # sort operators to iterate on unary first
         cur_depth = depth-1
@@ -248,7 +248,7 @@ class LookupTable:
                 print(f"Depth {depth-cur_depth} (size:{n_items}) (Time:{int(t/60)}m{t%60:.5f}s)")
                 c = 0
 
-                for i, (same, (name1, vals1), (name2, vals2)) in enumerate(self.custom_permutations(worklist)):
+                for i, (same, (vals1, name1), (vals2, name2)) in enumerate(self.custom_permutations(worklist)):
                     if same:
                         c += 1
                         print(f"process: {(c*100)/n_items:.2f}%\r", end="")
@@ -267,7 +267,7 @@ class LookupTable:
                                     fmt = self.try_linearize(fmt, symbols) if linearize else fmt
                                     logging.debug(f"[add] {fmt: <20} {h}")
                                     hash_set.add(h)
-                                    worklist.append((fmt, new_vals))  # add it in worklist if not already in LUT
+                                    worklist.append((new_vals, fmt))  # add it in worklist if not already in LUT
                                 else:
                                     logging.debug(f"[drop] {op.symbol}{name1}  ")
 
@@ -296,7 +296,7 @@ class LookupTable:
 
                                 logging.debug(f"[add] {fmt: <20} {h}")
                                 hash_set.add(h)
-                                worklist.append((fmt, new_vals))
+                                worklist.append((new_vals, fmt))
 
                                 if op.commutative and do_use_blacklist:
                                     fmt = f"{op.symbol}({name2},{name1})" if op.is_prefix else f"{sn2}{op.symbol}{sn1}"
@@ -313,14 +313,14 @@ class LookupTable:
         self.stop = True
         t = time() - t0
         print(f"Depth {depth - cur_depth} (size:{len(worklist)}) (Time:{int(t/60)}m{t%60:.5f}s) [RAM:{self.__size_to_str(self.max_mem)}]")
-        self.add_entries(worklist)
+        self.add_entries(worklist, calc_hash=True)
         if do_watch:
             self.watchdog.join()
 
     def add_entry(self, hash: Hash, value: str) -> None:
         raise NotImplementedError("Should be implemented by child class")
 
-    def add_entries(self, worklist):
+    def add_entries(self, worklist, calc_hash=False):
         raise NotImplementedError("Should be implemented by child class")
 
     @staticmethod
