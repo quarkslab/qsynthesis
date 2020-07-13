@@ -34,7 +34,7 @@ class LookupTableREST(LookupTable):
     def add_entry(self, hash: Hash, value: str):
         raise NotImplementedError("REST Lookup Table are read-only at the moment")
 
-    def add_entries(self, entries: List[Tuple[str, List[int]]], chunk_size=10000) -> None:
+    def add_entries(self, entries, chunk_size=10000) -> None:
         raise NotImplementedError("REST Lookup tables are read-only at the moment")
 
     def __iter__(self) -> Iterator[Tuple[Hash, str]]:

@@ -26,8 +26,8 @@ class LookupTablePickle(LookupTable):
     def add_entry(self, hash: Hash, value: str) -> None:
         self.lookup_table[hash] = value
 
-    def add_entries(self, worklist):
-        for s, outs in worklist:
+    def add_entries(self, worklist, calc_hash=False):
+        for outs, s in worklist:
             h = self.hash(outs)
             self.lookup_table[h] = s
 
@@ -45,7 +45,7 @@ class LookupTablePickle(LookupTable):
         f = Path(file)
         with open(f, 'rb') as f:
             raw = pickle.load(f)
-            hm = HashType[raw['hash-mode']] if "hash-mode" in raw else HashType.RAW
+            hm = HashType[raw['hash_mode']] if "hash_mode" in raw else HashType.RAW
             gr = TritonGrammar.from_dict(raw)
             inp_l = pickle.load(f)
             inputs = TritonGrammar.load_inputs(inp_l)
@@ -87,10 +87,13 @@ class LookupTableRaw(LookupTable):
         with open(str(self.name), "ab") as f:
             f.write(f"{hash},{value}\n".encode())
 
-    def add_entries(self, worklist):
+    def add_entries(self, worklist, calc_hash=False):
         import hashlib
         count = len(worklist)
-        hash_fun = lambda x: hashlib.md5(bytes(x)).digest() if self.hash_mode == HashType.MD5 else self.hash
+        if calc_hash:
+            hash_fun = lambda x: hashlib.md5(bytes(x)).digest() if self.hash_mode == HashType.MD5 else self.hash
+        else:
+            hash_fun = lambda x: x
         print("\nExport data")
 
         f_id = 1
@@ -100,7 +103,7 @@ class LookupTableRaw(LookupTable):
         for step in range(0, count, 10000):
             f_counter += 10000
             print(f"process {step}/{count}\r", end="")
-            chk_s = b"\n".join(hash_fun(outs)+s.encode() for s, outs in worklist[step:step+10000])+b"\n"
+            chk_s = b"\n".join(hash_fun(outs)+s.encode() for outs, s in worklist[step:step+10000])+b"\n"
             f.write(chk_s)
             if f_counter > self.EXPORT_FILE_CHUNK_LIMIT:
                 f.close()
@@ -119,7 +122,7 @@ class LookupTableRaw(LookupTable):
         f = Path(file)
         with open(f, 'rb') as f:
             raw = json.loads(f.readline())
-            hm = HashType[raw['hash-mode']] if "hash-mode" in raw else HashType.RAW
+            hm = HashType[raw['hash_mode']] if "hash_mode" in raw else HashType.RAW
             gr = TritonGrammar.from_dict(raw)
             inp_l = json.loads(f.readline())
             inputs = TritonGrammar.load_inputs(inp_l)
