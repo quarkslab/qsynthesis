@@ -782,23 +782,18 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             ida_funcs.set_func_end(init_addr, init_addr+len(payload))
 
     def get_reassembly_options(self, ask_reg=False):
-        dlg = QtWidgets.QDialog(parent=self)
+        dlg = QtWidgets.QDialog(parent=None)
         dlg.setWindowTitle('Reassembly options')
-        dlg.setObjectName("Dialog")
 
         verticalLayout = QtWidgets.QVBoxLayout(dlg)
-        verticalLayout.setObjectName("verticalLayout")
         if ask_reg:
             h_layout = QtWidgets.QHBoxLayout()
-            #self.h_l.setObjectName("experimentalLayout")
             label_reg = QtWidgets.QLabel(dlg)
             label_reg.setText("Destination register:")
-            #self.label_9.setObjectName("label_9")
             h_layout.addWidget(label_reg)
             comboBox = QtWidgets.QComboBox(dlg)
             comboBox.addItems([x.name for x in ArchsManager.get_supported_regs(self.arch)])
             h_layout.addWidget(comboBox)
-            #self.comboBox.setObjectName("register_selection")
             verticalLayout.addLayout(h_layout)
 
         patch_fun = QtWidgets.QCheckBox(dlg)
@@ -807,20 +802,26 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
 
         shrink_fun = QtWidgets.QCheckBox(dlg)
         shrink_fun.setText("shrink function\n move some instruction instead of filling with NOPs.\nCan break disassembly"
-                           "for relative instructions. (Works only for linear blocks)")
+                           " for relative instructions. (Works only for linear blocks)")
+        shrink_fun.setEnabled(False)
         verticalLayout.addWidget(shrink_fun)
+
+        def patch_checked():
+            if patch_fun.isChecked():
+                shrink_fun.setEnabled(True)
+            else:
+                shrink_fun.setEnabled(False)
+                shrink_fun.setChecked(False)
+
+        patch_fun.stateChanged.connect(patch_checked)
 
         snapshot = QtWidgets.QCheckBox(dlg)
         snapshot.setText("Snapshot database before patching")
         verticalLayout.addWidget(snapshot)
 
-        qr = self.geometry()
-        dlg.move(qr.center())
-
         buttonBox = QtWidgets.QDialogButtonBox(dlg)
         buttonBox.setOrientation(QtCore.Qt.Horizontal)
         buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Ok)
-        #buttonBox.setObjectName("buttonBox")
         verticalLayout.addWidget(buttonBox)
         buttonBox.accepted.connect(dlg.accept)
         buttonBox.rejected.connect(dlg.reject)
