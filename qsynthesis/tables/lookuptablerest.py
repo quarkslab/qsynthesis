@@ -14,7 +14,7 @@ class LookupTableREST(LookupTable):
         self._size = 0
 
     @staticmethod
-    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Dict[str, int]], hash_mode: HashType = HashType.RAW) -> 'LookupTableDB':
+    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Dict[str, int]], hash_mode: HashType = HashType.RAW) -> 'LookupTableREST':
         raise RuntimeError("REST Lookup tables cannot be created only loaded")
 
     @staticmethod
