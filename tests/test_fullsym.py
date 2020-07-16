@@ -36,10 +36,10 @@ def test():
 
     # Load lookup tables
     current = Path(__file__).parent.absolute()
-    ltms = [LookupTableLevelDB.load("../lts/lts15_opt_leveldb")]
+    ltm = LookupTableLevelDB.load("../lts/lts15_opt_leveldb")
 
     # Perform Synthesis of the expression
-    synthesizer = TopDownSynthesizer(ltms)
+    synthesizer = TopDownSynthesizer(ltm)
     synt_rax, simp = synthesizer.synthesize(rax)
 
     # Print synthesis results
