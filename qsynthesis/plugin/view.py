@@ -5,7 +5,7 @@ from typing import Tuple, Optional, List
 
 from qsynthesis.plugin.dependencies import ida_kernwin, IDA_ENABLED, QTRACEIDA_ENABLED, QTRACEDB_ENABLED
 from qsynthesis.plugin.dependencies import ida_bytes, ida_nalt, ida_ua, ida_funcs, ida_gdl, ida_loader, ida_auto
-from qsynthesis.tables import LookupTableDB, LookupTableREST
+from qsynthesis.tables import LookupTableLevelDB, LookupTableREST
 from qsynthesis.algorithms import TopDownSynthesizer, PlaceHolderSynthesizer
 from qsynthesis.utils.symexec import SimpleSymExec
 from qsynthesis.tritonast import ReassemblyError
@@ -86,7 +86,7 @@ class TargetType(Enum):
 
 
 class TableType(Enum):
-    SQLITE = 0
+    LEVELDB = 0
     HTTP = 1
 
 
@@ -360,10 +360,10 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
     def customfocusInEventLookupTableLine(self, event):
         print("Focus in table line !")
         self.table_line.setStyleSheet("")
-        if self.table_type == TableType.SQLITE:
-            filename = QtWidgets.QFileDialog.getOpenFileName()[0]
+        if self.table_type == TableType.LEVELDB:
+            filename = QtWidgets.QFileDialog.getExistingDirectory()
             filepath = Path(filename)
-            if filepath.exists() and filepath.is_file():
+            if filepath.exists() and filepath.is_dir():
                 self.table_line.setText(str(filepath))
             else:
                 print(f"Invalid file: {filepath}")
@@ -414,9 +414,9 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             except ConnectionAbortedError as e:
                 QtWidgets.QMessageBox.critical(self, "Table Loading", f"Error contacting {self.table_line}\n{e}")
                 return False
-        elif self.table_type == TableType.SQLITE:
+        elif self.table_type == TableType.LEVELDB:
             try:
-                self.lookuptable = LookupTableDB.load(self.table_line.text())
+                self.lookuptable = LookupTableLevelDB.load(self.table_line.text())
             except Exception as e:
                 QtWidgets.QMessageBox.critical(self, "Table Loading", f"Error when loading database: {e}")
                 return False
