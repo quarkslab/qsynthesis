@@ -5,13 +5,13 @@ from qtracedb import DatabaseManager
 
 from qsynthesis.utils.qtrace_symexec import QtraceSymExec, Mode
 from qsynthesis.algorithms import TopDownSynthesizer
-from qsynthesis.tables import LookupTablePickle
+from qsynthesis.tables import LookupTableLevelDB
 
 logging.basicConfig(level=logging.DEBUG)
 
 CURRENT_DIR = Path(__file__).parent.absolute()
 DATABASE_FILE = CURRENT_DIR / "../../qsynth-dataset-and-artifact/datasets/custom_EA/trace.db"
-TABLES_DIR = CURRENT_DIR / "../../lts/zlts_15_mirror_str"
+TABLE_DIR = CURRENT_DIR / "../lts/lts15_opt_leveldb"
 
 TARGETS =  [(99, 157), (164, 238), (245, 257), (264, 303), (310, 424), (431, 622), (629, 671), (678, 783), (790, 876),
             (883, 937), (944, 1033), (1040, 1052), (1059, 1078), (1085, 1106), (1113, 1140), (1147, 1221), (1228, 1356),
@@ -100,7 +100,7 @@ def test():
     rax = symexec.get_register_ast("rax")
 
     # Load lookup tables
-    ltms = [LookupTablePickle.load(x) for x in TABLES_DIR.iterdir()]
+    ltms = [LookupTableLevelDB.load(TABLE_DIR)]
 
     # Perform Synthesis of the expression
     synthesizer = TopDownSynthesizer(ltms)
