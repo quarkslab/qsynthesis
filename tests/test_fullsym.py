@@ -5,7 +5,7 @@ from triton import ARCH
 
 from qsynthesis.utils.symexec import SimpleSymExec
 from qsynthesis.algorithms import TopDownSynthesizer
-from qsynthesis.tables import LookupTablePickle
+from qsynthesis.tables import LookupTableLevelDB
 
 #logging.basicConfig(level=logging.DEBUG)
 
@@ -36,7 +36,7 @@ def test():
 
     # Load lookup tables
     current = Path(__file__).parent.absolute()
-    ltms = [LookupTablePickle.load(x) for x in Path(current / "../../lts/zlts_15_mirror_str").iterdir()]
+    ltms = [LookupTableLevelDB.load("../lts/lts15_opt_leveldb")]
 
     # Perform Synthesis of the expression
     synthesizer = TopDownSynthesizer(ltms)
@@ -51,3 +51,8 @@ def test():
 
 if __name__ == "__main__":
     sx, srax = test()
+'''
+simplified: True
+synthesized expression: ((((~(((rsi * rcx)))) ^ ((rcx * rcx))) - rsi))
+size: 95 -> 10 scale reduction:0.11
+'''
