@@ -100,10 +100,10 @@ def test():
     rax = symexec.get_register_ast("rax")
 
     # Load lookup tables
-    ltms = [LookupTableLevelDB.load(TABLE_DIR)]
+    ltm = LookupTableLevelDB.load(TABLE_DIR)
 
     # Perform Synthesis of the expression
-    synthesizer = TopDownSynthesizer(ltms)
+    synthesizer = TopDownSynthesizer(ltm)
     synt_rax, simp = synthesizer.synthesize(rax)
 
     # Print synthesis results
