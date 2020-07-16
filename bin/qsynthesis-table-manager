@@ -10,8 +10,7 @@ from binascii import unhexlify
 
 import qsynthesis
 from qsynthesis.grammar import TritonGrammar, BvOp
-from qsynthesis.tables.lookuptable import LookupTable, HashType, LookupTableRaw
-from qsynthesis.tables.lookuptabledb import LookupTableDB
+from qsynthesis.tables import HashType, LookupTableRaw, LookupTableLevelDB
 
 
 def biased_input_generator(bitsize:int, var_num: int, input_number: int, bs: int, random_level: int = 2):
@@ -53,7 +52,7 @@ def main():
 @click.option('--inputs', type=str, default='', help='specifying input vector to use')
 @click.option('--hash-mode', default=HashType.RAW, type=click.Choice([x.name for x in HashType]), help="Hash function for keys in table")
 @click.option('--watchdog', type=float, help="Activate RAM watchdog (percentage of load when to stop)")
-@click.option('-t', '--type', type=click.Choice(["pkl", "db","bin"]), default="db", help="Type of database to create")
+@click.option('-t', '--type', type=click.Choice(["db", "bin"]), default="db", help="Type of database to create")
 @click.option('--linearization', is_flag=True, type=bool, default=False, help="If set activate linearization of expressions")
 def generate_command(output_file, resume, bitsize, var_num, input_num, random_level, max_depth, op_num, verbosity, k, ops, inputs, hash_mode, watchdog, type, linearization):
     """ Table generation utility """
@@ -98,12 +97,8 @@ def generate_command(output_file, resume, bitsize, var_num, input_num, random_le
             grammar = TritonGrammar([(x, bitsize) for x in vars], operators)
 
             logging.info(f"Watchdog value: {watchdog}")
-            mp = {'pkl': LookupTable, "db": LookupTableDB, "bin": LookupTableRaw}
+            mp = {"db": LookupTableLevelDB, "bin": LookupTableRaw}
             ltm = mp[type].create(p.absolute(), grammar, inputs, HashType[hash_mode])
-            # if type == "pkl":
-            #     ltm = (LookupTable(grammar, inputs, HashType[hash_mode], p.name)
-            # else:
-            #     ltm = LookupTableDB.create()
             try:
                 if watchdog:
                     ltm.generate(depth=max_depth, do_watch=True, watchdog_threshold=watchdog, linearize=linearization)
@@ -125,10 +120,10 @@ def infos_command(table_file):
     logging.basicConfig(level=logging.INFO, format='%(message)s')
     table_file = Path(table_file)
 
-    if table_file.suffix == ".pkl":
-        table = LookupTable.load(table_file)
+    if table_file.suffix == ".bin":
+        table = LookupTableRaw.load(table_file)
     else:
-        table = LookupTableDB.load(table_file)
+        table = LookupTableLevelDB.load(table_file)
 
     logging.info(f"Bitsize: {table.bitsize}")
     logging.info(f"Hash mode: {table.hash_mode.name}")
@@ -149,10 +144,7 @@ def check_command(table_file):
     logging.basicConfig(level=logging.INFO, format='%(message)s')
     table_file = Path(table_file)
 
-    if table_file.suffix == ".pkl":
-        raise click.BadParameter("pickle tables are not supported")
-
-    table = LookupTableDB.load(table_file)
+    table = LookupTableLevelDB.load(table_file)
     count = table.size
     good, bad = 0, 0
 
@@ -175,12 +167,12 @@ def serve_command(table_file, port):
     logging.basicConfig(level=logging.INFO, format='%(message)s')
     table_file = Path(table_file)
 
-    if table_file.suffix == ".pkl":
-        raise click.BadParameter("pickle tables are not supported")
+    try:
+        table = LookupTableLevelDB.load(table_file)
+    except IOError:
+        click.Abort("Lookup table database is invalid")
 
-    table = LookupTableDB.load(table_file)
     logging.info("preload table size")
-    _ = table.size
 
     try:
         from fastapi import FastAPI, Query
@@ -199,7 +191,6 @@ def serve_command(table_file, port):
 
     @app.get("/entry/{hash}")
     def read_item(hash: str = Query(None, min_length=32, max_length=32, regex="^[0-9a-z]+$")):
-        #def read_item(hash: str = Query(None, min_length=32, max_length=32, regex="^[0-9a-z]+$")):
         decoded = unhexlify(hash)
         entry = table.lookup_hash(decoded)
         print(entry)
