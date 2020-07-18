@@ -117,6 +117,7 @@ def generate_command(output_file, resume, bitsize, var_num, input_num, random_le
 @main.command(name="info")
 @click.argument('table_file', type=click.Path(exists=True))
 def infos_command(table_file):
+    """Getting information of a given database"""
     logging.basicConfig(level=logging.INFO, format='%(message)s')
     table_file = Path(table_file)
 
@@ -141,6 +142,7 @@ def infos_command(table_file):
 @main.command(name="check")
 @click.argument('table_file', type=click.Path(exists=True))
 def check_command(table_file):
+    """Checking the equivalence of hashes against evaluation of expressions on inputs"""
     logging.basicConfig(level=logging.INFO, format='%(message)s')
     table_file = Path(table_file)
 
@@ -164,6 +166,7 @@ def check_command(table_file):
 @click.argument('table_file', type=click.Path(exists=True))
 @click.option('-p', '--port', type=int, default=8080, help="Service port to listen on")
 def serve_command(table_file, port):
+    """Run the REST API to serve a given table database"""
     logging.basicConfig(level=logging.INFO, format='%(message)s')
     table_file = Path(table_file)
 
@@ -200,6 +203,99 @@ def serve_command(table_file, port):
             return {}
 
     uvicorn.run(app, host="0.0.0.0", port=port)
+
+
+@main.command(name="compare")
+@click.argument('table1', type=click.Path(exists=True))
+@click.argument('table2', type=click.Path(exists=True))
+def compare_command(table1, table2):
+    """Compare two tables"""
+    table1 = LookupTableLevelDB.load(table1)
+    table2 = LookupTableLevelDB.load(table2)
+
+    only1 = 0
+    only2 = 0
+    common = 0
+    sz1 = table1.size
+    sz2 = table2.size
+    for h, k in table1:
+        if table2.db.get(h):
+            common += 1
+        else:
+            only1 += 1
+    for h, k in table2:
+        if not table1.db.get(h):
+            only2 += 1
+
+    print(f"Table 1 size:{sz1}\tTable 2 size:{sz2}\t[Inputs:{'OK' if table1.inputs == table2.inputs else 'DIFFERENT'}]")
+    print(f"Only table 1:{only1}\tOnly table2:{only2}\tCommons:{common}")
+    # FUTURE: Implementing semantic comparison of common keys
+
+
+@main.command(name="import")
+@click.argument('raw_table', type=click.Path(exists=True))
+@click.argument('out_table', type=click.Path(exists=False))
+def import_command(infile, outfile):
+    """Import a raw table in a Level-DB database"""
+    f_id = 1
+    current_file = infile
+    out_lkp = None
+    i = 0
+    buffer = []
+
+    while True:
+        lkp = LookupTableRaw.load(current_file)
+        if out_lkp is None:
+            out_lkp = LookupTableLevelDB.create(outfile, lkp.grammar, lkp.inputs, lkp.hash_mode)
+        try:
+            for it in lkp:
+                buffer.append(it)
+                i += 1
+                if i % 100000 == 0:
+                    print(f"process: {i}\r", end="")
+                if i % 5000000 == 0:
+                    out_lkp.add_entries(buffer, chunk_size=5000000, update_count=False)
+                    buffer = []
+        except Exception as e:
+            print(f"Exception raised: {e} stop.")
+            break
+        except KeyboardInterrupt as e:
+            print("Keyboard interrupt")
+            break
+
+        p = Path(f"{infile}.{f_id}")
+        if p.exists():
+            print(f"\n Start processing: {p}")
+            current_file = str(p)
+            f_id += 1
+        else:
+            break
+    # flush remaining entries
+    out_lkp.add_entries(buffer,  chunk_size=30000, update_count=False)
+    out_lkp.db.put(b"size", str(i).encode())
+    print(f"Imported: {i}")
+
+
+@main.command(name="merge")
+@click.argument('in_table', type=click.Path(exists=True))
+@click.argument('out_table', type=click.Path(exists=False))
+def merge_command(in_table, out_table):
+    """Merge entries of the first database in the second"""
+    lkp_in = LookupTableLevelDB.load(in_table)
+    lkp_out = LookupTableLevelDB.load(out_table)
+
+    i = 0
+    c = 0
+    sz = lkp_in.size
+    for hash, s in lkp_in:
+        if lkp_out.db.get(hash) is None:
+            lkp_out.add_entry(hash, s)
+            i += 1
+        c += 1
+        if c % 100 == 0:
+            print(f"count:{c}/{sz} (imported:{i})\r", end="")
+
+    print(f"Imported: {i}")
 
 
 if __name__ == "__main__":
