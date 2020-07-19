@@ -28,9 +28,13 @@ class QSynthesisPlugin(ida_idaapi.plugin_t):
     def run(self, arg):
         print("Running QSynthesis")
         if QTRACEIDA_ENABLED:
+            import qtraceida
+            qtrace = qtraceida.get_qtrace()  # Open Qtrace if it was not already done
             # If QtraceIDA enable the action should have been registered
             from qsynthesis.plugin.actions import SynthetizerViewHook
             ida_kernwin.process_ui_action(SynthetizerViewHook.view_id)
+            if not qtrace.trace_opened():
+                print("Please open a trace before using QSynthesis")
         else:
             from qsynthesis.plugin.view import SynthesizerView
             self.view = SynthesizerView(None)
