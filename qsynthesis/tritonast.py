@@ -1,24 +1,33 @@
-import triton
-from triton import TritonContext, AST_NODE, SYMBOLIC, ARCH
-import logging
-# Imports used only for typing
-from typing import List, Tuple, Generator, Dict, Union, Optional, TypeVar
-from qtracedb.archs.manager import ArchsManager
-from qtracedb.archs.arch import Arch, Instr
+# Standard modules
 from enum import IntEnum
 import random
 from functools import reduce
+import logging
 
+# Third-party modules
+from triton import TritonContext, AST_NODE, SYMBOLIC, ARCH
 
-AstType = IntEnum("AstType", {k: v for k, v in triton.AST_NODE.__dict__.items() if isinstance(v, int)})
-AstNode = TypeVar('AstNode')  # Triton AstNode object instance
+# Qtrace imports
+from qtracedb.archs.manager import ArchsManager
+from qtracedb.archs.arch import Arch, Instr
+
+# QSynthesis imports
+from qsynthesis.types import AstNode, List, Tuple, Generator, Dict, Union, Optional, AstType, SymVarMap, \
+                             SymbolicVariable, Char, IOVector, Input, Output
 
 
 class ReassemblyError(Exception):
+    """
+    Wrapping exception for all exceptions that might be raised during the
+    reassembly process.
+    """
     pass
 
 
 class SymVarType(IntEnum):
+    """
+    Enum representing the different types of SymbolicVariables of Triton
+    """
     REGISTER = SYMBOLIC.REGISTER_VARIABLE
     MEMORY = SYMBOLIC.MEMORY_VARIABLE
 
@@ -40,19 +49,31 @@ op_str = {AST_NODE.ANY: "any", AST_NODE.ASSERT: "assert", AST_NODE.BV: "bv", AST
 
 class TritonAst:
     """
-    Helper class to wrap Triton AstNode and
-    use it as an oracle
-    """
-    def __init__(self, ctx: TritonContext, node: AstNode, node_c, depth, vars, children):
-        """
-        Initialize IOAst
+    Wrapping class on top of Triton AstNode objects. This is the main entity manipulated
+    throughout the synthesis process. It provides many utility fonctions on these ASTs
+    like :attr:`TritonAst.node_count` holding the number of node of the AST, or
+    :meth:`TritonAst.reassembly` that allows reassembling the AST into assembly.
 
-        :param ctx: Triton contest
+
+    """
+
+    def __init__(self, ctx: TritonContext, node: AstNode, node_c: int, depth: int, vars: SymVarMap, children: List['TritonAst']) -> 'TritonAst':
+        """
+        Instanciate a TritonAst with some precomputed fields given in parameters.
+
+        :param ctx: Triton context
         :param node: Triton AstNode to wrap
+        :param node_c: Number of nodes contained in the expression
+        :param depth: Depth of the expression (depth of the AST)
+        :param vars: Variables contained in this expression
+        :param children: List of children as TritonAst instances
+
+        .. warning:: This class is not meant to be instanciated directly. It must be instanciated
+             trough the :meth:`~TritonAst.make_ast` method.
         """
         self.ctx = ctx
         self.ast = self.ctx.getAstContext()
-        self.expr = node  # It needs to be unrolled !!!  # node
+        self.expr = node  # It needs to be unrolled !!!
         self.size = self.expr.getBitvectorSize()
         self._symvars = vars  # SymVarName -> SymbolicVariable object
         self._parents = set()
@@ -62,58 +83,91 @@ class TritonAst:
         self._children = children
 
     @property
-    def parents(self):
+    def parents(self) -> List['TritonAst']:
+        """
+        Return the list of parents of a given AST. An AST is meant to have only
+        ONE parent but Triton share common expression with multiple parents (wihtin
+        the same expression)
+        """
         return list(self._parents)
 
-    def is_root(self):
-        return not(bool(self.parents))
-
     @property
-    def mapping(self):
+    def mapping(self) -> Dict[Char, SymbolicVariable]:
+        """
+        Mapping a placeholder character ('a', 'b', 'c' ..) to all the SymbolicVariable
+        of the object.
+        """
         return {x[0]: x[1] for x in zip((chr(x) for x in range(97, 127)), self.symvars)}
 
     @property
-    def sub_map(self):
+    def sub_map(self) -> Dict[Char, AstNode]:
+        """
+        Similar to mapping but map a placeholder character ('a', 'b', 'c' ..) to
+        the AstNode counterpart of SymbolicVariables.
+        """
         return {x[0]: self.ast.variable(x[1]) for x in zip((chr(x) for x in range(97, 127)), self.symvars)}
 
     @property
-    def type(self):
+    def type(self) -> AstType:
+        """
+        Returns the type of current AstNode object. The
+        type is identical to the AST_NODE enum of Triton.
+        """
         return AstType(self.expr.getType())
 
     @property
-    def hash(self):
+    def hash(self) -> int:
+        """
+        Returns the Triton hash of the AstNode. This hash is meant to be unique
+        for all AstNode, but is also meant to be similar to commutative expressions.
+        """
         return self.expr.getHash()
 
     @property
-    def ptr_id(self):
+    def ptr_id(self) -> int:
+        """
+        Returns the hash of the AstNode object. This attribute is meant to differentiate
+        to different python object have the exact same AST structure.
+        """
         return hash(self.expr)
 
-    def is_constant_expr(self):
+    def is_constant_expr(self) -> bool:
+        """Returns whether the AST expression is constant or not (namely does not
+        have any symbolic variables in it)."""
         return len(self.symvars) == 0
 
-    def is_variable(self):
+    def is_variable(self) -> bool:
+        """Returns of the TritonAst is a variable node."""
         return self.type == AstType.VARIABLE
 
     def is_constant(self):
+        """Returns True if the type of the object is Bitvector (namely constant)"""
         return self.type == AstType.BV
 
     @property
     def variable_id(self) -> int:
+        """
+        Get the Triton unique id for a variable.
+        :raises: KeyError
+        """
         if self.is_variable():
             return self.expr.getSymbolicVariable().getId()
         else:
             raise KeyError("not a variable")
 
     @property
-    def var_num(self):
+    def var_num(self) -> int:
+        """Returns the number of different symbolic variables of the expression"""
         return len(self._symvars)
 
     @property
-    def pp_str(self):
+    def pp_str(self) -> str:
+        """Hacky function that strips masks used in the AST_REPRESENTATION.PYTHON
+        of Triton."""
         return str(self.expr).replace(" & 0xFFFFFFFFFFFFFFFF", "")
 
     def visit_expr(self) -> Generator['TritonAst', None, None]:
-        """ Pre-Order visit """
+        """ Pre-Order visit of all the sub-AstNode"""
         def rec(e):
             yield e
             for c in e.get_children():
@@ -121,32 +175,53 @@ class TritonAst:
         yield from rec(self)
 
     @property
-    def symvars(self):
+    def symvars(self) -> List[SymbolicVariable]:
+        """Returns the list of SymbolicVariable object of the current object"""
         return list(self._symvars.values())
 
     @staticmethod
-    def symvar_type(v):
+    def symvar_type(v: SymbolicVariable) -> SymVarType:
+        """
+        Static method returning the type of a given symbolic variable object
+        :param v: symbolic variable object
+        :type v: SymbolicVariable
+        :returns: SymVarType -- Type of the symbolic variables
+        """
         return SymVarType(v.getType())
 
-    def get_children(self):
+    def get_children(self) -> List['TritonAst']:
+        """Return the list of children TritonAst"""
         return self._children
 
-    def has_children(self):
+    def has_children(self) -> bool:
+        """True whether the object has children or not"""
         return self.get_children() != []
 
-    def is_leaf(self):
+    def is_root(self) -> bool:
+        """
+        Return True whether the object is a root node (namely does not have
+        any parents).
+        """
+        return not(bool(self.parents))
+
+    def is_leaf(self) -> bool:
+        """True if the AST has no children"""
         return self.get_children() == []
 
     @property
     def node_count(self) -> int:
+        """Pre-computed O(1) count of the number of node contained in this AST."""
         return self._node_count
 
     @property
     def depth(self):
+        """Pre-computed O(1) count of the depth of the AST."""
         return self._depth
 
     @property
-    def symbol(self):
+    def symbol(self) -> str:
+        """Returns the symbol of the current AstNode, operator if binary expression
+        variable name if variable or constant value if constant."""
         t = self.type
         if t == AstType.BV:
             return str(self.expr)
@@ -156,32 +231,43 @@ class TritonAst:
             return op_str[t]
 
     def mk_constant(self, v: int, size: int) -> 'TritonAst':
+        """Create a new constant as a TritonAst (holding a Triton bv object)."""
         return TritonAst(self.ctx, self.ast.bv(v, size), 1, 1, {}, [])
 
     def mk_variable(self, alias: str, size: int) -> 'TritonAst':
+        """
+        Create a new variable node as a TritonAst (holding a Triton variable object).
+        The variable is created in the TritonContext of the current object.
+        """
         s = self.ctx.newSymbolicVariable(size, alias)
         s.setAlias(alias)
         ast_s = self.ast.variable(s)
         return TritonAst(self.ctx, ast_s, 1, 1, {s.getName(): s}, [])
 
-    def normalized_str_to_ast(self, s: str) -> Optional['TritonAst']:
+    def normalized_str_to_ast(self, s: str) -> 'TritonAst':
         """
-        Evaluate expression like "a + b - 1" creating a triton AST
-        expression out of it. All variables have to be present in the AST
+        Evaluate expression like "a + b - 1" creating a triton AST expression out
+        of it. All variables have to be present in the AST.
+
         :param s: expression to evaluate
         :return: Triton AST node of the expression
-        WARNING: the str expr must be obtain through the eval_oracle of the exact same TritonAst (otherwise
-        names would be shuffled)
+
+        .. warning:: the str expr must be obtained through the eval_oracle of the
+                     exact same TritonAst (otherwise names would be shuffled)
         """
         try:
             e = eval(s, self.sub_map)
-        except NameError:
+        except NameError as e:
             logging.warning(f"Expression {s} evaluation failed {self.sub_map}")
-            return None
+            raise e
         ast = self.make_ast(self.ctx, e)
         return ast
 
     def to_normalized_str(self) -> str:
+        """
+        Normalize the AST (replace variables by placeholder 'a', 'b' ..) and return
+        it as a string.
+        """
         back = {}
         for name, ast_v in self.sub_map:  # Substitute aliases with the normalized names
             sym_v = ast_v.getSymbolicVariable()
@@ -194,6 +280,12 @@ class TritonAst:
         return final_s
 
     def update_all(self) -> None:
+        """
+        Update all children recursively of the current object. Fields being updated
+        are node_count, depth and symvars. This might be used when some of the AST
+        has been rewritten. All pre-computed values are then 'dirty' and have to be
+        updated.
+        """
         def rec(a):
             chs = [rec(x) for x in a.get_children()]
             if chs:  # one of their child might have been updated so update
@@ -204,20 +296,39 @@ class TritonAst:
         rec(self)
 
     def update(self) -> None:
+        """
+        Update the current AST node, with information of its directly children.
+        Information of children are thus considered genuine.
+        """
         chs = self.get_children()
         if chs:
             self._symvars = reduce(lambda acc, x: dict(acc, **x._symvars), chs, {})
             self._depth = max((x.depth for x in chs), default=0)+1
             self._node_count = sum(x.node_count for x in chs)+1
 
-    def update_parents(self, recursive=True):
+    def update_parents(self, recursive: bool = True) -> None:
+        """
+        Update the parent of the current TritonAst. `recursive` indicates
+        if it has to be performed recrusively. If so the complexity of the
+        operation O(depth).
+        :param recursive: whether to apply it recursively on parents
+        """
         for p in self.parents:
             p.update()
         if recursive:
             for p in self.parents:
                 p.update_parents(recursive=recursive)
 
-    def set_child(self, i, ast, update_node=True, update_parents=False) -> None:
+    def set_child(self, i: int, ast: 'TritonAst', update_node: bool = True, update_parents: bool = False) -> None:
+        """
+        Replace the ith child of the current TritonAst with new given ast object. Optional
+        parameters indicates if inner fields of the object and its parent have to be updated.
+
+        :param i: index of the child to replace
+        :param ast: TritonAst to be used as replacement of the child
+        :param update_node: whether to update internal field of the current node (node_count, depth, symvars)
+        :param update_parents: whether to update parents
+        """
         if isinstance(i, TritonAst):
             i = {c: i for i, c in enumerate(self.get_children())}[i]  # retrieve number from instance
         if update_node:
@@ -229,7 +340,13 @@ class TritonAst:
         if update_parents:
             self.update_parents()
 
-    def replace_self(self, repl: 'TritonAst', update_parents=True) -> None:
+    def replace_self(self, repl: 'TritonAst', update_parents: bool = True) -> None:
+        """
+        Replace the current object by the given TritonAst. This function thus replace
+        parents by replace the child that correspond to the current object by the replacement.
+        :param repl: TritonAst used to replace the current object
+        :param update_parents: whether to update parents or not
+        """
         if len(self.parents):
             logging.debug("replace self while multiple parents !")
         is_first = True
@@ -239,7 +356,17 @@ class TritonAst:
             # is_first = False
 
     @staticmethod
-    def make_ast(ctx, exp):
+    def make_ast(ctx: TritonContext, exp: AstNode) -> 'TritonAst':
+        """
+        Main staticmethod meant to create all TritonAst object. This method iterates
+        all the given expression ``expr`` recursively to create TritonAst's
+        all the way down and pre-computing along the way the important fields like
+        node_count, depth and symvars.
+
+        :param ctx: Triton context on which to work on
+        :param exp: AstNode object to iterate
+        :returns: TritonAst instance wrapping the exp object
+        """
         ptr_map = {}  # hash -> TritonAst
 
         def rec(e):
@@ -279,9 +406,9 @@ class TritonAst:
         new_expr = self.ast.duplicate(self.expr)
         return TritonAst.make_ast(self.ctx, new_expr)
 
-    def random_sampling(self, n: int) -> List[Tuple[Dict[str, int], int]]:
+    def random_sampling(self, n: int) -> IOVector:
         """
-        Generates a random list of I/O samples
+        Generates a random list of I/O samples pair.
 
         :param n: number of samples to generate
         :return: a list of n (inputs, output) tuples
@@ -294,38 +421,61 @@ class TritonAst:
             samples.append((inputs, output))
         return samples
 
-    def eval_oracle(self, args: Dict[str, int]) -> int:
+    def eval_oracle(self, inp: Input) -> Output:
         """
-        Oracle corresponding to the wrapped AST
+        Oracle corresponding to the wrapped AST. It takes a valuation for all its
+        symbolic variables and as an oracle returns the associated output.
 
-        :param args: a list of input integers which will be used
-            as concrete values for the symbolic variables in the
-            wrapped AST
-        :return: The result computed by the AST
+        :param inp: a mapping of variable to a given input value which will be used
+                    as concrete values for the symbolic variables in the wrapped AST
+        :return: The result computed by means of evaluating the AST
         """
         for v_name, symvar in self.mapping.items():
-            self.ctx.setConcreteVariableValue(symvar, args[v_name])
+            self.ctx.setConcreteVariableValue(symvar, inp[v_name])
         return self.expr.evaluate()
 
     def to_z3(self) -> 'z3.z3.ExprRef':
+        """Returns the Z3 expression associated with the Triton AST expression"""
         return self.ast.tritonToZ3(self.expr)
 
     @staticmethod
-    def from_z3(expr) -> 'TritonAst':
+    def from_z3(ctx: TritonContext, expr: 'z3.z3.ExprRef') -> 'TritonAst':
         """
-        Create an IOAst out of a Z3 expressions
-        :param expr: Z3 expression
-        :return:
-        """
-        raise NotImplementedError("")
-        # TODO: Do it using new triton version
+        Create a TritonAst out of a Z3 expressions
 
-    def is_semantically_equal(self, other) -> bool:
+        :param ctx: Triton Context in which to create the expression
+        :param expr: Z3 expression
+        :return: TritonAst
+
+        .. warning:: This function is completely untested !
+        """
+        astctx = ctx.getAstContext()
+        ast = astctx.z3ToTriton(expr)
+        return TritonAst.make_ast(ctx, ast)
+
+    def is_semantically_equal(self, other: 'TritonAst') -> bool:
+        """
+        Allows checking if the current AST is semantically equal to the one provided.
+
+        :param other: TritonAst on which to test against
+        :returns: bool -- True if both ASTs are semantically equals
+        """
         cst = self.ast.distinct(self.expr, other.expr)
         return not(self.ctx.isSat(cst))
 
     @staticmethod
-    def dyn_node_count(expr) -> int:
+    def dyn_node_count(expr: AstNode) -> int:
+        """
+        Returns the effective count of node of the expression by iterating the
+        AstNode object recursively. The complexity is O(N) with N the number of node.
+
+        :param expr: AstNode to iterate
+        :returns: Number of nodes in the AST.
+
+        .. note:: The way of counting nodes is different from the number of nodes of
+                  Triton for which bitvector values are composed of 3 nodes. In this
+                  counting they are counted as one.
+        """
         def rec(e):
             typ = e.getType()
             if typ == AST_NODE.REFERENCE:
@@ -337,7 +487,14 @@ class TritonAst:
         return rec(expr)
 
     @staticmethod
-    def dyn_depth(expr) -> int:
+    def dyn_depth(expr: AstNode) -> int:
+        """
+        Returns the effective depth of the node of the expression by iterating the
+        AstNode object recursively. The complexity is O(N) with N the depth of the AST.
+
+        :param expr: AstNode to iterate
+        :returns: AST depth
+        """
         def rec(e):
             typ = e.getType()
             if typ == AST_NODE.REFERENCE:
@@ -380,12 +537,16 @@ class TritonAst:
         self._node_count, self._depth = other._node_count, other._depth
         self._children = other._children
 
-    def visit_replacement(self, update=True) -> Generator['TritonAst', 'TritonAst', None]:
+    def visit_replacement(self, update: bool = True) -> Generator['TritonAst', 'TritonAst', None]:
         """
-        Triton AST expression replacement visitor in a Top-Down and then Bottom-Up manner.
-        It yield every sub-expression and replace it with the expression received
-        throught the send mechanism. While rebuilding the final expression bottom-up
-        re-yield modified expression to know if we can replace it even further.
+        Triton AST expression replacement visitor in a Top-Down manner. It yields
+        every sub-expression and replace it with the expression received throught
+        the send mechanism.
+
+        :param update: whether to update each node after having been replaced
+        :returns: generator of TritonAst, which for each AST yielded wait to
+        receive either None meaning the it should not be replaced or a new
+        TritonAst to be put in replacement.
         """
         v = self._visit_replacement(self)
         new_expr_to_send = None
@@ -402,6 +563,21 @@ class TritonAst:
                     return
 
     def reassemble(self, dst_reg: str, target_arch: Optional[Union['Arch', str]] = None) -> bytes:
+        """
+        Reassemble the TritonAst in assembly. ``dst_reg`` is the destination register of the
+        result of the computation of the AST. Parameter ``target_arch`` is either a QtraceDB
+        architecture object or the string identifier of the architecture as defined by the
+        LLVM architecture triple: https://llvm.org/doxygen/classllvm_1_1Triple.html#a547abd13f7a3c063aa72c8192a868154
+        If no architecture is provided, use the same than the one that the AST.
+
+        :param dst_reg: destination register as lowercase string
+        :param target_arch: target architecture in which to reassemble the AST
+        :returns: bytes of the AST reassembled in the given architecture
+        :raises: ReassemblyError
+
+        .. warning:: This method requires the ``arybo`` library that can be installed with
+           (pip3 install arybo).
+        """
         try:
             from arybo.tools.triton_ import tritonast2arybo
             from arybo.lib.exprs_asm import asm_binary
@@ -424,6 +600,19 @@ class TritonAst:
             raise ReassemblyError(f"Something went wrong during reassembly: {e}")
 
     def reassemble_to_insts(self, dst_reg: str, target_arch: Optional[Union[Arch, str]] = None) -> List[Instr]:
+        """
+        Similar to :meth:`TritonAst.reassemble` but returns Instruction object for each instruction
+        reassembled.
+
+        :param dst_reg: destination register as lowercase string
+        :param target_arch: target architecture in which to reassemble the AST
+        :returns: bytes of the AST reassembled in the given architecture
+        :raises: ReassemblyError
+
+        .. warning:: This method requires the ``arybo`` library that can be installed with
+           (pip3 install arybo).
+        """
+
         # Note: let all exception being raised above if any
         asm = self.reassemble(dst_reg, target_arch)
         if target_arch is None:
