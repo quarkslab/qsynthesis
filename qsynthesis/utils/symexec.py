@@ -7,15 +7,14 @@ from triton import TritonContext
 
 # qsynthesis deps
 from qsynthesis.tritonast import TritonAst
-from qsynthesis.types import SymbolicExpression, Register
+from qsynthesis.types import SymbolicExpression, Register, Addr, ByteSize, SymbolicVariable
 
 
 class SimpleSymExec:
     """
-    Helper class used to process a sequential bunch of instructions
-    using Triton and mark as symbolic all memory and registers
-    reads that occoured before a write to that same register
-    or memory address
+    Helper class used to process a sequential bunch of instructions using Triton
+    and mark as symbolic all memory and registers reads that occoured before a
+    write to that same register or memory address
     """
 
     def __init__(self, arch: ARCH):
@@ -50,57 +49,76 @@ class SimpleSymExec:
         self._expr_id = 0
 
     @property
-    def expr_id(self):
+    def expr_id(self) -> int:
+        """
+        Within a single instruction, used to represent an expression id.
+        Programmed as an auto-increment variable upon each read.
+        """
         self._expr_id += 1
         return self._expr_id - 1
 
     @expr_id.setter
-    def expr_id(self, value):
+    def expr_id(self, value: int) -> None:
+        """Set the given expr_id"""
         self._expr_id = value
 
     @property
-    def arch(self):
+    def arch(self) -> ARCH:
+        """Return the triton architecture identifier of the current context"""
         return self.ctx.getArchitecture()
 
     @property
-    def flags_reg(self):
+    def flags_reg(self) -> Register:
+        """
+        Portable function the get the flag register accross all Triton
+        supported architectures.
+        """
         _mapper = {ARCH.X86: "eflags", ARCH.X86_64: "eflags", ARCH.ARM32: "cpsr", ARCH.AARCH64: "spsr"}  # Not really true for spsr
         return getattr(self.ctx.registers, _mapper[self.arch])
 
     @property
-    def ins_ptr_reg(self):
+    def ins_ptr_reg(self) -> Register:
+        """
+        Portable function get get the instruction pointer register depending
+        on the current architecture.
+        """
         _mapper = {ARCH.X86: "eip", ARCH.X86_64: "rip", ARCH.ARM32: "pc", ARCH.AARCH64: "pc"}
         return getattr(self.ctx.registers, _mapper[self.arch])
 
     @property
-    def current_address(self):
+    def current_address(self) -> Addr:
+        """Return the address of the current instruction."""
         return self.cur_inst.getAddress()
 
     def turn_on(self) -> None:
-        """
-        Turn on capturing
-        """
+        """Turn on capturing"""
         self._capturing = True
 
     def turn_off(self) -> None:
-        """
-        Turn off capturing
-        """
+        """Turn off capturing"""
         self._capturing = False
 
     def _mem_write_callback(self, _: TritonContext, ma: MemoryAccess, __: int) -> None:
+        """
+        Callback called by Triton upon each memory write. It is used to update a map
+        of all addresses written.
+        """
         if not self._capturing:
             return
 
         # Add bytes to set of written bytes
-        self.mem_addr_seen |= self.memacc_to_all_addr(ma)
+        self.mem_addr_seen |= self._memacc_to_all_addr(ma)
 
     def _mem_read_callback(self, ctx: TritonContext, ma: MemoryAccess) -> None:
+        """
+        Callback called by Triton upon each memory read. It is used to dynamically
+        symbolized memory cells accessed that have not been seen before.
+        """
         if not self._capturing:
             return
 
         # Retrieve all addresses of a given mem access
-        addrs = self.memacc_to_all_addr(ma)
+        addrs = self._memacc_to_all_addr(ma)
 
         # Get addrs which have not been written to and are not
         # yet been symbolized (eg. are not yet parameters)
@@ -116,11 +134,14 @@ class SimpleSymExec:
 
         # Symbolize all the memory cells that have not yet been seen
         # Coalesce adjacent bytes and create memory accesses' symvars
-        for ma in self.coalesce_bytes_to_mas(new_addrs):
+        for ma in self._coalesce_bytes_to_mas(new_addrs):
             symvar = self.symbolize_memory(ma)
             self.mem_symvars.append(symvar)
 
     def _reg_write_callback(self, ctx: TritonContext, reg: Register, _: int) -> None:
+        """
+        Callback called by Triton on each register write.
+        """
         if not self._capturing:
             return
 
@@ -129,6 +150,9 @@ class SimpleSymExec:
         self.reg_id_seen.add(parent_reg.getId())
 
     def _reg_read_callback(self, ctx: TritonContext, reg: Register) -> None:
+        """
+        Callback called by Triton on each register read.
+        """
         if not self._capturing:
             return
 
@@ -144,9 +168,16 @@ class SimpleSymExec:
             return
 
         # Symbolize the register
-        self.symbolize_register(reg, 0, self.fmt_comment())
+        self.symbolize_register(reg, 0)
 
     def get_register_ast(self, reg_name: Union[str, Register]) -> TritonAst:
+        """
+        Get the TritonAst associated with the given register. The register
+        can either be a string or a triton register object.
+
+        :param reg_name: register of which to get the AST
+        :returns: the TritonAst associated to that register
+        """
         reg = getattr(self.ctx.registers, reg_name.lower()) if isinstance(reg_name, str) else reg_name
         reg_se = self.ctx.getSymbolicRegister(reg)
         actx = self.ctx.getAstContext()
@@ -156,12 +187,28 @@ class SimpleSymExec:
             e = actx.unroll(reg_se.getAst())
         return TritonAst.make_ast(self.ctx, e)
 
-    def get_memory_ast(self, addr: int, size: int) -> TritonAst:
+    def get_memory_ast(self, addr: Addr, size: ByteSize) -> TritonAst:
+        """
+        Get the TritonAst associated with the given address and size.
+
+        :param addr: address of which to create the AST
+        :param size: Size of the read in memory (in bytes)
+        :returns: the TritonAst of the memory content
+        """
         ast = self.ctx.getMemoryAst(MemoryAccess(addr, size))
         actx = self.ctx.getAstContext()
         return TritonAst.make_ast(self.ctx, actx.unroll(ast))
 
     def get_operand_ast(self, op_num: int, inst: Optional[Instruction] = None) -> TritonAst:
+        """
+        Get the TritonAst of the of the ith operand. The instruction can be provided
+        as an optional parameter. If not provided it takes the current instruction
+        having been processed.
+
+        :param op_num: operand number (starting at 0)
+        :param inst: Triton Instruction of which to get the operand
+        :returns: the TritonAst of the operand
+        """
         inst = self.cur_inst if inst is None else inst
         op = inst.getOperands()[op_num]
         actx = self.ctx.getAstContext()
@@ -176,17 +223,42 @@ class SimpleSymExec:
             assert False
         return TritonAst.make_ast(self.ctx, actx.unroll(e))
 
-    def get_register_symbolic_expression(self, reg_name: Union[str, Register]) -> 'SymbolicExpression':
+    def get_register_symbolic_expression(self, reg_name: Union[str, Register]) -> SymbolicExpression:
+        """
+        Get the current SymbolicExpression (triton object) of the register given in parameter.
+
+        :param reg_name: register name, or Register object
+        :returns: current symbolic expression of the register
+        """
         reg = getattr(self.ctx.registers, reg_name.lower()) if isinstance(reg_name, str) else reg_name
         return self.ctx.getSymbolicRegister(reg)
 
-    def get_memory_symbolic_expression(self, addr: int, size: int) -> 'SymbolicExpression':
+    def get_memory_symbolic_expression(self, addr: Addr, size: ByteSize) -> SymbolicExpression:
+        """
+        Get the current SymbolicExpression of the given address. As no symbolic expression are
+        assigned to single memory bytes. The function creates a new symbolic expression representing
+        the addr+size expression.
+
+        :param addr: address in memory
+        :param size: size in bytes of the memory read
+        :returns: symbolic expression representing the memory content value
+        """
         ast = self.ctx.getMemoryAst(MemoryAccess(addr, size))
         sym = self.ctx.newSymbolicExpression(ast)
         sym.setComment(self.fmt_comment())
         return sym
 
-    def get_operand_symbolic_expression(self, op_num):
+    def get_operand_symbolic_expression(self, op_num: int) -> SymbolicExpression:
+        """
+        Get the symbolic expression of the ith operand of the current instruction being
+        processed by the symbolic executor. Depending on the type of the operand
+        calls :meth:`SimpleSymExec.get_register_symbolic_expression`, or
+        :meth:`SimpleSymExec.get_memory_symbolic_expression`. For constants create
+        a new symbolic expression.
+
+        :param op_num: operand number
+        :returns: the symbolic expression of the operand
+        """
         op = self.cur_inst.getOperands()[op_num]
         t = op.getType()
         if t == OPERAND.IMM:
@@ -201,24 +273,47 @@ class SimpleSymExec:
             assert False
         return sym
 
-    def symbolize_register(self, reg, value, comment):
+    def symbolize_register(self, reg: Register, value: int) -> SymbolicVariable:
+        """
+        Symbolize the given register with the associated concrete value.
+
+        :param reg: Register to symbolize
+        :param value: Concrete value to assign the register (required for soundness)
+        :returns: the symbolic variable created for the register
+        """
         self.reg_id_seen.add(reg.getId())
         symvar = self.ctx.symbolizeRegister(reg, reg.getName())
-        symvar.setComment(comment)
+        #symvar.setComment(comment)
 
         # Set comment on the register reference
         sreg = self.ctx.getSymbolicRegister(reg)
-        sreg.setComment(comment)
+        sreg.setComment(self.fmt_comment())
 
         # We also set the symbolic var to the actual value of the register
         self.ctx.setConcreteVariableValue(symvar, value)
         self.reg_symvars.append(symvar)
+        return symvar
 
-    def symbolize_memory(self, mem: MemoryAccess):
-        # Explaining how that shit works
+    def symbolize_memory(self, mem: MemoryAccess) -> SymbolicVariable:
+        """
+        Symbolize the given triton MemoryAccess. Into a new SymbolicVariable.
+
+        :param mem: memory access to symbolize
+        :returns: symbolic variable representing the content
+        """
+        # The issue here is that we need to assign a specific comment
+        # on symbolic expression to attach them to a specific instruction
+        # and being able to perform slicing afterward. But there is no
+        # direct manner to get symbolic expressions created by the
+        # symbolizeMemory
+
+        # symbolize the MemAccess and obtain a SymbolicVariable object
         alias = f"mem_{mem.getAddress():#x}_{mem.getSize()}_{self.inst_id}"
         symvar = self.ctx.symbolizeMemory(mem, alias)
         symvar.setComment(self.fmt_comment())
+
+        # Iterate each address of the MemAccess to obtain the SymbolicExpression
+        # of the address. Put for each of them the right comment
         addr = mem.getAddress()
         end = addr + mem.getSize()
         cur_mem_exp = None
@@ -226,26 +321,60 @@ class SimpleSymExec:
             cur_mem_exp = self.ctx.getSymbolicMemory(addr)
             cur_mem_exp.setComment(self.fmt_comment())
             addr += 1
+
+        # Each SymbolicExpression have a uniq Id. The way they are created
+        # (I heuristically know that the one before the last cur_mem_exp)
+        # is the expression concating all of them thus also add a comment on it
         var_exp = self.ctx.getSymbolicExpression(cur_mem_exp.getId()-1)
         var_exp.setComment(self.fmt_comment())
         return symvar
 
-    def initialize_register(self, reg: Union[str, Register], value: int):
+    def initialize_register(self, reg: Union[str, Register], value: int) -> None:
+        """
+        Initialize a register by giving it an initial value. Register can
+        either be a string or a Register object.
+
+        :param reg: reg name string or register object
+        :param value: integer value of the register
+        """
         reg = getattr(self.ctx.registers, reg.lower()) if isinstance(reg, str) else reg
         self.reg_id_seen.add(reg.getId())
         self.ctx.setConcreteRegisterValue(reg, value)
 
-    def disassemble(self, opcode: bytes, addr: Optional[int] = None) -> bool:
+    def disassemble(self, opcode: bytes, addr: Optional[Addr] = None) -> Instruction:
+        """
+        Disassemble a given opcode using Triton. Returns a Triton Instruction object.
+        The Instruction is not been symbolically executed but the internal `cur_inst`
+        attribute is set. The address is optional.
+        If not provided the current instruction pointer in the internal context is used.
+
+        :param opcode: bytes of the instruction
+        :param addr: address of the instruction
+        :returns: Triton Instruction object
+        """
         inst = Instruction(addr, opcode) if addr is not None else Instruction(opcode)
         self.ctx.disassembly(inst)
         self.cur_inst = inst  # Set it if require to query get_operand_symbolic_expression
         return inst
 
-    def execute(self, opcode: bytes, addr: Optional[int] = None) -> bool:
+    def execute(self, opcode: bytes, addr: Optional[Addr] = None) -> bool:
+        """
+        Symbolically execute the given opcode at the given optional address.
+
+        :param opcode: bytes of the instruction
+        :param addr: optional address of the instruction
+        :returns: True if the instruction has sucessfully been processed
+        """
         inst = Instruction(addr, opcode) if addr is not None else Instruction(opcode)
         return self.execute_instruction(inst)
 
     def execute_instruction(self, instr: Instruction) -> bool:
+        """
+        Symbolically execute the given triton Instruction already instanciated.
+
+        :param instr: Triton Instruction
+        :returns: True if the processing has successfully been performed
+        """
         # Update object values
         self.cur_inst = instr
         self.inst_id += 1
@@ -262,16 +391,18 @@ class SimpleSymExec:
         self.turn_off()
         return r
 
-    def fmt_comment(self):
+    def fmt_comment(self) -> str:
+        """Return a string identifying a SymbolicExpression in a unique manner"""
         return f"{self.inst_id}#{self.expr_id}#{self.current_address}"
 
     @staticmethod
-    def memacc_to_all_addr(ma: MemoryAccess) -> Set[int]:
+    def _memacc_to_all_addr(ma: MemoryAccess) -> Set[int]:
+        """Return a set of all addresses of a MemoryAccess"""
         addr = ma.getAddress()
         return set(range(addr, addr+ma.getSize()))
 
     @staticmethod
-    def split_unaligned_access(addr: int, size: int) -> List[MemoryAccess]:
+    def _split_unaligned_access(addr: Addr, size: ByteSize) -> List[MemoryAccess]:
         max_ma_size = 64  # Max aligned memory access size
         ma_size = 1
         splitted_ma = []
@@ -288,7 +419,8 @@ class SimpleSymExec:
         return splitted_ma
 
     @staticmethod
-    def coalesce_bytes_to_mas(ma_bytes: Iterable[int]) -> List[MemoryAccess]:
+    def _coalesce_bytes_to_mas(ma_bytes: Iterable[Addr]) -> List[MemoryAccess]:
+        """Convert a bunch of addresses into a list of MemoryAccess"""
         tmp_mem_accesses = []
         sorted_bytes = sorted(ma_bytes)
         addr, size = sorted_bytes[0], 1
@@ -302,5 +434,5 @@ class SimpleSymExec:
         tmp_mem_accesses.append((addr, size))
         coalesced_ma = []
         for addr, size in tmp_mem_accesses:
-            coalesced_ma.extend(SimpleSymExec.split_unaligned_access(addr, size))
+            coalesced_ma.extend(SimpleSymExec._split_unaligned_access(addr, size))
         return coalesced_ma

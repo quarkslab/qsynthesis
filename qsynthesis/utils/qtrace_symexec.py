@@ -80,7 +80,7 @@ class QtraceSymExec(SimpleSymExec):
         if not self._capturing:
             return
         # Retrieve all addresses of a given mem access
-        addrs = self.memacc_to_all_addr(ma)
+        addrs = self._memacc_to_all_addr(ma)
 
         # Get addrs which have not been written to and are not
         # yet been symbolized (eg. are not yet parameters)
@@ -101,7 +101,7 @@ class QtraceSymExec(SimpleSymExec):
             # Symbolize all the memory cells that have not yet been seen
 
             # Coalesce adjacent bytes and create memory accesses' symvars
-            for ma in self.coalesce_bytes_to_mas(new_addrs):
+            for ma in self._coalesce_bytes_to_mas(new_addrs):
                 symvar = self.symbolize_memory(ma)
 
                 # Set symbolic variable value according to memory content
@@ -161,7 +161,7 @@ class QtraceSymExec(SimpleSymExec):
             return
 
         if self.mode == Mode.FULL_SYMBOLIC or (self.mode == Mode.PARAM_SYMBOLIC and parent_reg in self.parameter_regs):
-            self.symbolize_register(reg, 0, self.fmt_comment())
+            self.symbolize_register(reg, 0)
         else:
             logging.debug(f"Concretizing the never seen register: {reg.getName()}")
             self.concretize_register(reg)
