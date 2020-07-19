@@ -1,11 +1,17 @@
-from triton import AST_NODE
-from enum import IntEnum
-from typing import Dict, List, Tuple
+# Standard modules
 import random
 import operator
 from collections import namedtuple
+from enum import IntEnum
 
+# Third-party modules
+from triton import AST_NODE
 import pydffi
+
+# Qsynthesis types
+from qsynthesis.types import BitSize, Char, Input, Optional, Dict, List, Tuple
+from qsynthesis.tritonast import TritonAst
+
 
 # First, declare an FFI context
 CODE = '''
@@ -58,6 +64,10 @@ CU = ffi_ctx.compile(CODE)
 
 
 class BoolOp(IntEnum):
+    """
+    Enum of SMT boolean operators using Triton AST_NODE
+    enum value
+    """
     # Bool x Bool -> Bool
     AND = AST_NODE.LAND
     NOT = AST_NODE.LNOT
@@ -68,6 +78,9 @@ class BoolOp(IntEnum):
 
 
 class BvOp(IntEnum):
+    """
+    Enum of SMT Bitvector operators as declared by Triton AST_NODE
+    """
     # Basic ops
     NOT = AST_NODE.BVNOT
     AND = AST_NODE.BVAND
@@ -157,10 +170,17 @@ OPERATORS = {               # ID               strop    Trit op         Py op   
 
 class TritonGrammar(object):
     """
-    Triton Grammar
+    Triton Grammar class. It represent a set of operators, and variables
+    of a given size (only 64 bits at the moment).
     """
 
-    def __init__(self, vars: List[Tuple[str, int]], ops: List[BvOp]):
+    def __init__(self, vars: List[Tuple[Char, BitSize]], ops: List[BvOp]):
+        """
+        Constructor taking a set of variables (name and size) and a set of operators.
+
+        :param vars: list of tuple of (name ,size)
+        :param ops: list of BvOp representing operators
+        """
         self.ops = ops
         self.vars_dict = {x[0]: x[1] for x in vars}  # Dict of str->size
         self.vars = list(self.vars_dict.keys())
@@ -169,29 +189,54 @@ class TritonGrammar(object):
 
     @property
     def non_terminal_operators(self) -> List[Operator]:
+        """
+        Return the list of non-terminal operators. All unary and
+        binary operators are non terminal as they can be derived.
+
+        :return: list of operators namedtuples
+        """
         return [OPERATORS[x] for x in self.ops]
 
-    def gen_test_inputs(self, n: int) -> List[Dict[str, int]]:
+    def gen_test_inputs(self, n: int) -> List[Input]:
+        """
+        Generate a list of ``n`` input. Thus it generate a random
+        valuation for each variables of the grammar and that n times.
+
+        :param n: Number of Input to generate (size of the list)
+        :returns: list of inputs
+        """
         return [{var: random.getrandbits(self.vars_dict[var]) for var in self.vars} for _ in range(n)]
 
-    def str_to_expr(self, s, *args):
+    def str_to_expr(self, s: str, *args) -> TritonAst:
+        """
+        Convert a string in the format of the grammar into a TritonAst.
+        In practice an args[0] should be a TritonAst from which to spawn
+        a new TritonAst. That is required to get the same mapping of normalized
+        variables than the one used by expr.
+
+        :param s: expression string to convert to TritonAst
+        :return: the TritonAst representing the expressions string
+        :raises: NameError
+        """
         expr = args[0]
         return expr.normalized_str_to_ast(s)
 
     def to_dict(self) -> Dict:
-        return {
-            'vars': [(n, sz) for n, sz in self.vars_dict.items()],
-            'operators': [x.name for x in self.ops]
-        }
+        """
+        Return a dictionnary representation of the grammar.
+        This is used for serialization in database etc.
+        """
+        return dict(
+            vars=[(n, sz) for n, sz in self.vars_dict.items()],
+            operators=[x.name for x in self.ops]
+        )
 
     @staticmethod
     def from_dict(g_dict: Dict) -> 'TritonGrammar':
+        """
+        Static method instanciating a TritonGrammar from its representation as
+        a dictionnary.
+        :param g_dict: dictionarry representation of the grammar
+        :returns: TritonGrammar object
+        """
         return TritonGrammar(g_dict['vars'], [BvOp[x] for x in g_dict['operators']])
-
-    @staticmethod
-    def dump_inputs(inputs):
-        return [{(k, 0): v for k, v in inp.items()} for inp in inputs]
-
-    @staticmethod
-    def load_inputs(inp_l):
-        return [{x[0]: v for x, v in inp.items()} for inp in inp_l]

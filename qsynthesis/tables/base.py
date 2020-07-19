@@ -88,9 +88,12 @@ class LookupTable:
             v = self._get_item(h)
             if v:
                 self.lookup_found += 1
-                e = self.grammar.str_to_expr(v, *args)
-                self.expr_cache[h] = e
-                return e
+                try:
+                    e = self.grammar.str_to_expr(v, *args)
+                    self.expr_cache[h] = e
+                    return e
+                except NameError:
+                    return None
             else:
                 return None
 
