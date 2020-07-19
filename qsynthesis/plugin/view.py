@@ -4,12 +4,12 @@ from pathlib import Path
 from typing import Tuple, Optional, List
 
 from qsynthesis.plugin.dependencies import ida_kernwin, IDA_ENABLED, QTRACEIDA_ENABLED, QTRACEDB_ENABLED
-from qsynthesis.plugin.dependencies import ida_bytes, ida_nalt, ida_ua, ida_funcs, ida_gdl, ida_loader, ida_auto
+from qsynthesis.plugin.dependencies import ida_bytes, ida_nalt, ida_ua, ida_funcs, ida_gdl, ida_loader
 from qsynthesis.tables import LookupTableLevelDB, LookupTableREST
 from qsynthesis.algorithms import TopDownSynthesizer, PlaceHolderSynthesizer
 from qsynthesis.utils.symexec import SimpleSymExec
 from qsynthesis.tritonast import ReassemblyError
-from qsynthesis.plugin.processor import processor_to_triton_arch, processor_to_qtracedb_arch, Arch, Processor, ProcessorType
+from qsynthesis.plugin.processor import processor_to_triton_arch, Arch, Processor, ProcessorType
 from qsynthesis.plugin.ast_viewer import AstViewer, BasicBlockViewer
 from qsynthesis.plugin.popup_actions import SynthetizeFromHere, SynthetizeToHere, SynthetizeOperand
 from qtraceanalysis.slicing import Slicer
@@ -71,7 +71,6 @@ TEMPLATE_SYNTHESIS = '''<!DOCTYPE html>
 </body>
 </html>
 '''
-
 
 
 class TraceDbType(Enum):
@@ -142,11 +141,10 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         # If working on its own
         self._dbm = None
         self._trace = None
-        self._arch = processor_to_qtracedb_arch()
+        self._arch = None
 
         # Expresssion highlighted
         self.highlighted_addr = {}  # addr -> backed_color
-
 
     @property
     def arch(self) -> Arch:
@@ -162,13 +160,16 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         else:
             return self._trace
 
+    def get_instruction(self, ea):
+        opc = ida_bytes.get_bytes(ea, ida_bytes.get_item_size(ea))
+        return self.arch.disasm_one(opc, ea)
+
     def is_lookuptable_loaded(self):
         return self.lookuptable is not None
 
     def OnCreate(self, form):
         print("On Create called !")
         self.parent_widget = self.FormToPyQtWidget(form)
-        #self.setupUi(self.parent_widget)
         # Init of the view has to be done here ?
         self.init()
 
@@ -236,7 +237,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             self.trace_line.focusInEvent = self.customfocusInEventTraceLine
 
         # Target configuration
-        reg = QtCore.QRegExp("^(0x)?[a-fA-F0-9]+$")#(:\d+)?$")
+        reg = QtCore.QRegExp("^(0x)?[a-fA-F0-9]+$")
         validator = QtGui.QRegExpValidator(reg)
         self.from_line.setValidator(validator)
         self.from_line.textChanged.connect(self.from_line_changed)
@@ -257,7 +258,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         self.table_type_box.currentIndexChanged.connect(self.table_type_changed)
         self.table_line.focusInEvent = self.customfocusInEventLookupTableLine
 
-        #Algorithm configuration
+        # Algorithm configuration
         self.algorithm_box.addItems([x.value for x in AlgorithmType])
         if QTRACEDB_ENABLED:
             self.algorithm_type_box.addItem(AnalysisType.QTRACE.name)
@@ -318,23 +319,17 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         self.set_enabled_all_layout(self.algorithmLayout, True)
         self.run_triton_button.setEnabled(True)
 
-        #QtWidgets.QApplication.processEvents()
-        # if IDA_ENABLED:
-        #     print("Try refreshing")
-        #     widget = self.TWidgetToPyQtWidget(self.GetWidget())
-        #     widget.update()
-
     def target_changed(self, index):
-        type = TargetType(index)
-        if type == TargetType.REG:
+        t = TargetType(index)
+        if t == TargetType.REG:
             self.register_box.setVisible(True)
             self.mem_line.setVisible(False)
             self.operand_label.setVisible(False)
-        elif type == TargetType.MEMORY:
+        elif t == TargetType.MEMORY:
             self.register_box.setVisible(False)
             self.operand_label.setVisible(False)
             self.mem_line.setVisible(True)
-        elif type == TargetType.OPERAND:
+        elif t == TargetType.OPERAND:
             self.register_box.setVisible(False)
             self.mem_line.setVisible(False)
             self.operand_label.setVisible(True)
@@ -350,7 +345,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
     def table_type(self) -> TableType:
         return TableType(self.table_type_box.currentIndex())
 
-    def table_type_changed(self, idx):
+    def table_type_changed(self, _):
         self.table_line.setText("")
         if self.table_type == TableType.HTTP:
             self.table_line.setPlaceholderText('e.g: http://localhost')
@@ -685,7 +680,8 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         else:
             pass # Do nothing user click canceled on options
 
-    def coallesce_addrs(self, addrs):
+    @staticmethod
+    def coallesce_addrs(addrs):
         blocks = []
         for addr in addrs:
             sz = ida_bytes.get_item_size(addr)
@@ -785,26 +781,26 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         dlg = QtWidgets.QDialog(parent=None)
         dlg.setWindowTitle('Reassembly options')
 
-        verticalLayout = QtWidgets.QVBoxLayout(dlg)
+        v_layout = QtWidgets.QVBoxLayout(dlg)
         if ask_reg:
             h_layout = QtWidgets.QHBoxLayout()
             label_reg = QtWidgets.QLabel(dlg)
             label_reg.setText("Destination register:")
             h_layout.addWidget(label_reg)
-            comboBox = QtWidgets.QComboBox(dlg)
-            comboBox.addItems([x.name for x in ArchsManager.get_supported_regs(self.arch)])
-            h_layout.addWidget(comboBox)
-            verticalLayout.addLayout(h_layout)
+            combobox = QtWidgets.QComboBox(dlg)
+            combobox.addItems([x.name for x in ArchsManager.get_supported_regs(self.arch)])
+            h_layout.addWidget(combobox)
+            v_layout.addLayout(h_layout)
 
         patch_fun = QtWidgets.QCheckBox(dlg)
         patch_fun.setText("patch function bytes")
-        verticalLayout.addWidget(patch_fun)
+        v_layout.addWidget(patch_fun)
 
         shrink_fun = QtWidgets.QCheckBox(dlg)
         shrink_fun.setText("shrink function\n move some instruction instead of filling with NOPs.\nCan break disassembly"
                            " for relative instructions. (Works only for linear blocks)")
         shrink_fun.setEnabled(False)
-        verticalLayout.addWidget(shrink_fun)
+        v_layout.addWidget(shrink_fun)
 
         def patch_checked():
             if patch_fun.isChecked():
@@ -817,19 +813,19 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
 
         snapshot = QtWidgets.QCheckBox(dlg)
         snapshot.setText("Snapshot database before patching")
-        verticalLayout.addWidget(snapshot)
+        v_layout.addWidget(snapshot)
 
-        buttonBox = QtWidgets.QDialogButtonBox(dlg)
-        buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Ok)
-        verticalLayout.addWidget(buttonBox)
-        buttonBox.accepted.connect(dlg.accept)
-        buttonBox.rejected.connect(dlg.reject)
+        buttonbox = QtWidgets.QDialogButtonBox(dlg)
+        buttonbox.setOrientation(QtCore.Qt.Horizontal)
+        buttonbox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Ok)
+        v_layout.addWidget(buttonbox)
+        buttonbox.accepted.connect(dlg.accept)
+        buttonbox.rejected.connect(dlg.reject)
 
         dlg.exec()
 
         if dlg.result():
-            reg = comboBox.currentText() if ask_reg else None
+            reg = combobox.currentText() if ask_reg else None
             return reg, patch_fun.isChecked(), shrink_fun.isChecked(), snapshot.isChecked()
         else:
             return None
@@ -854,7 +850,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
     def trace_type(self) -> TraceDbType:
         return TraceDbType(self.trace_type_box.currentIndex())
 
-    def trace_type_changed(self, idx):
+    def trace_type_changed(self, _):
         self.trace_line.setText("")
 
     def customfocusInEventTraceLine(self, event):
@@ -888,28 +884,24 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         dlg.setWindowTitle('Qtrace-DB connection')
         dlg.setObjectName("Dialog")
 
-        self.verticalLayout = QtWidgets.QVBoxLayout(dlg)
-        self.verticalLayout.setObjectName("verticalLayout")
-        self.comboBox = QtWidgets.QComboBox(dlg)
-        self.comboBox.setObjectName("comboBox")
-        self.verticalLayout.addWidget(self.comboBox)
-        self.buttonBox = QtWidgets.QDialogButtonBox(dlg)
-        self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
-        self.buttonBox.setObjectName("buttonBox")
-        self.verticalLayout.addWidget(self.buttonBox)
+        v_layout = QtWidgets.QVBoxLayout(dlg)
+        combobox = QtWidgets.QComboBox(dlg)
+        v_layout.addWidget(combobox)
+        buttonbox = QtWidgets.QDialogButtonBox(dlg)
+        buttonbox.setOrientation(QtCore.Qt.Horizontal)
+        buttonbox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Ok)
+        v_layout.addWidget(buttonbox)
 
         # Fill list of traces
-        self.comboBox.addItems(self._dbm.list_traces())
+        combobox.addItems(self._dbm.list_traces())
 
-        self.buttonBox.accepted.connect(dlg.accept)
-        self.buttonBox.rejected.connect(dlg.reject)
+        buttonbox.accepted.connect(dlg.accept)
+        buttonbox.rejected.connect(dlg.reject)
 
         dlg.exec()
 
         if dlg.result():
-            return self.comboBox.currentText()
+            return combobox.currentText()
         else:
             return None
     # ======================================================================
-

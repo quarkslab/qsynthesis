@@ -1,14 +1,12 @@
 from pathlib import Path
-import logging
-from enum import IntEnum, Enum
 import hashlib
 import json
-from typing import Optional, List, Dict, Union, Tuple, TypeVar, Iterable, Generator, Iterator
+from typing import Optional, List, Dict, Union, Tuple, Iterator
 
 import plyvel
 
 from qsynthesis.grammar import TritonGrammar, BvOp
-from qsynthesis.tables.base import LookupTable, Expr, HashType, Hash
+from qsynthesis.tables.base import LookupTable, HashType, Hash
 
 META_KEY = b"metadatas"
 VARS_KEY = b"variables"
@@ -39,9 +37,9 @@ class LookupTableLevelDB(LookupTable):
         db = plyvel.DB(str(file))
         metas = json.loads(db.get(META_KEY))
         ops = [BvOp(x) for x in metas['operators']]
-        vars = list(json.loads(db.get(VARS_KEY)).items())
+        vrs = list(json.loads(db.get(VARS_KEY)).items())
         inps = json.loads(db.get(INPUTS_KEY))
-        grammar = TritonGrammar(vars=vars, ops=ops)
+        grammar = TritonGrammar(vars=vrs, ops=ops)
         lkp = LookupTableLevelDB(grammar=grammar, inputs=inps, hash_mode=HashType[metas['hash_mode']], f_name=file)
         lkp.db = db
         return lkp
@@ -50,16 +48,16 @@ class LookupTableLevelDB(LookupTable):
         self.db.put(hash, value.encode())
         self.db.put(SIZE_KEY, (str(int(self.db.get(SIZE_KEY))+1)).encode())
 
-    def add_entries(self, entries: List[Tuple[List[int], str]], calc_hash=False, chunk_size=10000, update_count=True) -> None:
+    def add_entries(self, entries: List[Tuple[Union[bytes, int, Tuple[int]], str]], calc_hash=False, chunk_size=10000, update_count=True) -> None:
         count = len(entries)
-        if calc_hash:
-            hash_fun = lambda x: hashlib.md5(bytes(x)).digest() if self.hash_mode == HashType.MD5 else self.hash
-        else:
-            hash_fun = lambda x: x
+
+        def do_hash(x):
+            return x if not calc_hash else (hashlib.md5(bytes(x)).digest() if self.hash_mode == HashType.MD5 else self.hash)
+
         for step in range(0, count, chunk_size):
             with self.db.write_batch(sync=True) as wb:
                 for outs, s in entries[step:step+chunk_size]:
-                    wb.put(hash_fun(outs), s.encode())
+                    wb.put(do_hash(outs), s.encode())
         if update_count:
             self.db.put(SIZE_KEY, (str(int(self.db.get(SIZE_KEY)) + count)).encode())
 

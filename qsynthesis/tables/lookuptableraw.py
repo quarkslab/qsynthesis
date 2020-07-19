@@ -1,8 +1,6 @@
-import pickle
 from pathlib import Path
 import logging
-from typing import Optional, List, Dict, Union, Generator, Tuple, Any, TypeVar, Iterable
-from binascii import unhexlify, hexlify
+from typing import Optional, List, Dict, Union, Tuple, Iterable
 
 from qsynthesis.grammar import TritonGrammar
 from qsynthesis.tables.base import LookupTable, HashType, Hash
@@ -12,7 +10,7 @@ class LookupTableRaw(LookupTable):
 
     EXPORT_FILE_CHUNK_LIMIT = 40000000
 
-    def __init__(self, gr: TritonGrammar, inputs: Union[int, List[Dict[str, int]]], hash_mode: HashType=HashType.RAW, f_name: str = ""):
+    def __init__(self, gr: TritonGrammar, inputs: Union[int, List[Dict[str, int]]], hash_mode: HashType = HashType.RAW, f_name: str = ""):
         super(LookupTableRaw, self).__init__(gr, inputs, hash_mode, f_name)
 
     @property
@@ -40,11 +38,11 @@ class LookupTableRaw(LookupTable):
     def add_entries(self, worklist, calc_hash=False):
         import hashlib
         count = len(worklist)
-        if calc_hash:
-            hash_fun = lambda x: hashlib.md5(bytes(x)).digest() if self.hash_mode == HashType.MD5 else self.hash
-        else:
-            hash_fun = lambda x: x
-        print("\nExport data")
+
+        def do_hash(x):
+            return x if not calc_hash else (hashlib.md5(bytes(x)).digest() if self.hash_mode == HashType.MD5 else self.hash)
+
+        logging.info("\nExport data")
 
         f_id = 1
         f_counter = 0
@@ -53,7 +51,7 @@ class LookupTableRaw(LookupTable):
         for step in range(0, count, 10000):
             f_counter += 10000
             print(f"process {step}/{count}\r", end="")
-            chk_s = b"\n".join(hash_fun(outs)+s.encode() for outs, s in worklist[step:step+10000])+b"\n"
+            chk_s = b"\n".join(do_hash(outs)+s.encode() for outs, s in worklist[step:step+10000])+b"\n"
             f.write(chk_s)
             if f_counter > self.EXPORT_FILE_CHUNK_LIMIT:
                 f.close()

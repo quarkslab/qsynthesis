@@ -6,7 +6,7 @@ from typing import List
 
 # third-party libs
 from triton import ARCH, MemoryAccess
-from triton import TritonContext, Instruction
+from triton import TritonContext
 
 from qtracedb.trace import Trace, MemAccessType
 from qtracedb.archs import ArchsManager
@@ -79,7 +79,6 @@ class QtraceSymExec(SimpleSymExec):
     def _mem_read_callback(self, ctx: TritonContext, ma: MemoryAccess) -> None:
         if not self._capturing:
             return
-        #logging.debug(f"READ Triton:{ma} Qtrace-DB:{self.trace.get_memacc_by_instr(self._cur_db_inst)}")
         # Retrieve all addresses of a given mem access
         addrs = self.memacc_to_all_addr(ma)
 
@@ -187,7 +186,7 @@ class QtraceSymExec(SimpleSymExec):
 
             if check_regs:
                 self.sync_registers()
-            #logging.debug(f"{self._cur_db_inst.addr:#x} {self._cur_db_inst}")
+
             self.execute(opcode=self._cur_db_inst.opcode, addr=self._cur_db_inst.addr)
 
     def sync_registers(self):

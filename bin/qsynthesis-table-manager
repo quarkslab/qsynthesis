@@ -13,7 +13,7 @@ from qsynthesis.grammar import TritonGrammar, BvOp
 from qsynthesis.tables import HashType, LookupTableRaw, LookupTableLevelDB
 
 
-def biased_input_generator(bitsize:int, var_num: int, input_number: int, bs: int, random_level: int = 2):
+def biased_input_generator(bitsize: int, var_num: int, input_number: int, bs: int, random_level: int = 2):
     n = max(var_num-3, random_level)
     minus_one = pow(2, bitsize)-1
     vals = [1, 0, minus_one] + [None] * n
@@ -23,8 +23,7 @@ def biased_input_generator(bitsize:int, var_num: int, input_number: int, bs: int
 
 def operator_generator(nb_operator: int):
     """ Generate infinite operators set (making sure all combinations  """
-    ops = [BvOp.NOT, BvOp.AND, BvOp.OR, BvOp.XOR, BvOp.NEG, BvOp.ADD, BvOp.MUL, BvOp.SUB]#, BvOp.SDIV]
-    # FIXME: Take random operators among all!
+    ops = [BvOp.NOT, BvOp.AND, BvOp.OR, BvOp.XOR, BvOp.NEG, BvOp.ADD, BvOp.MUL, BvOp.SUB]
     while 1:
         l = list(combinations(ops, nb_operator))
         random.shuffle(l)
@@ -54,17 +53,17 @@ def main():
 @click.option('--watchdog', type=float, help="Activate RAM watchdog (percentage of load when to stop)")
 @click.option('-t', '--type', type=click.Choice(["db", "bin"]), default="db", help="Type of database to create")
 @click.option('--linearization', is_flag=True, type=bool, default=False, help="If set activate linearization of expressions")
-def generate_command(output_file, resume, bitsize, var_num, input_num, random_level, max_depth, op_num, verbosity, k, ops, inputs, hash_mode, watchdog, type, linearization):
+def generate_command(output_file, resume, bitsize, var_num, input_num, random_level, max_depth, op_num, verbosity, k, ops, inputs, hash_mode, watchdog, type_, linearization):
     """ Table generation utility """
     logging.basicConfig(level=logging.DEBUG if verbosity else logging.INFO, format='%(message)s')
 
     try:
         import pydffi
-    except ImportError as e:
+    except ImportError:
         raise click.Abort("Cannot import dragonffi (pip3 install pydffi")
     try:
         import sympy
-    except ImportError as e:
+    except ImportError:
         raise click.Abort("Cannot import sympy (pip3 install sympy")
 
     if resume is not None:
@@ -83,22 +82,22 @@ def generate_command(output_file, resume, bitsize, var_num, input_num, random_le
 
         for i in range(k):
             logging.info(f"Generate Table #{i}")
-            p = out_dir/f"{i}.{type}" if k > 1 else out_dir
+            p = out_dir/f"{i}.{type_}" if k > 1 else out_dir
 
             operators = next(operator_generator(op_num)) if ops is None else ops
-            vars = [chr(ord('a') + x) for x in range(var_num)]
+            vrs = [chr(ord('a') + x) for x in range(var_num)]
             if inputs:
-                inputs = [{n: v for n, v in zip(vars, inputs[i:i + len(vars)])} for i in
-                          range(0, len(inputs), len(vars))]
+                inputs = [{n: v for n, v in zip(vrs, inputs[i:i + len(vrs)])} for i in
+                          range(0, len(inputs), len(vrs))]
             else:
                 inputs = biased_input_generator(bitsize, var_num, input_num, bitsize, random_level)
-                inputs = [{n: v for n, v in zip(vars, i)} for i in inputs]
+                inputs = [{n: v for n, v in zip(vrs, i)} for i in inputs]
 
-            grammar = TritonGrammar([(x, bitsize) for x in vars], operators)
+            grammar = TritonGrammar([(x, bitsize) for x in vrs], operators)
 
             logging.info(f"Watchdog value: {watchdog}")
             mp = {"db": LookupTableLevelDB, "bin": LookupTableRaw}
-            ltm = mp[type].create(p.absolute(), grammar, inputs, HashType[hash_mode])
+            ltm = mp[type_].create(p.absolute(), grammar, inputs, HashType[hash_mode])
             try:
                 if watchdog:
                     ltm.generate(depth=max_depth, do_watch=True, watchdog_threshold=watchdog, linearize=linearization)
@@ -180,7 +179,7 @@ def serve_command(table_file, port):
     try:
         from fastapi import FastAPI, Query
         import uvicorn
-    except ImportError as e:
+    except ImportError:
         raise click.Abort("Cannot import fastapi or uvicorn (pip3 install fastapi uvicorn")
 
     app = FastAPI()
@@ -259,7 +258,7 @@ def import_command(infile, outfile):
         except Exception as e:
             print(f"Exception raised: {e} stop.")
             break
-        except KeyboardInterrupt as e:
+        except KeyboardInterrupt as _:
             print("Keyboard interrupt")
             break
 

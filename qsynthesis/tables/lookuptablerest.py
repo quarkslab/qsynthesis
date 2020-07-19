@@ -1,10 +1,10 @@
 from pathlib import Path
-from typing import Optional, List, Dict, Union, Tuple, TypeVar, Iterator, Generator
+from typing import Optional, List, Dict, Union, Tuple, Iterator
 import requests
 import binascii
 
 from qsynthesis.grammar import TritonGrammar
-from qsynthesis.tables.base import LookupTable, Expr, HashType, Hash
+from qsynthesis.tables.base import LookupTable, HashType, Hash
 
 
 class LookupTableREST(LookupTable):

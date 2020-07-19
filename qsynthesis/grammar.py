@@ -7,9 +7,6 @@ from collections import namedtuple
 
 import pydffi
 
-SZ = 64  # FIXME: make it variadic
-SZ_MASK = 0xffffffffffffffff  # FIXME: make it variadic
-
 # First, declare an FFI context
 CODE = '''
 #include <stdio.h>
@@ -59,42 +56,6 @@ void mod_arr(uint64_t* dst, uint64_t* a, uint64_t* b, size_t n) { for(int i=0; i
 ffi_ctx = pydffi.FFI()
 CU = ffi_ctx.compile(CODE)
 
-to_uint = CU.funcs.to_uint
-
-#
-# def bnd(f):
-#     return lambda x, y: SZ_MASK & f(x, y)
-
-#
-# def left_rotate(i, n):
-#     return (n << i) | (n >> (SZ - i))
-#
-#
-# def right_rotate(i, n):
-#     return (n >> i)|(n << (SZ - i))
-
-
-def sign_ext(sz, ext, v):
-    if v < 0:
-        return v
-    if sz == v.bit_length():  # on integer means it is one
-        ext_bits = (pow(2, ext)-1)
-        return concat(sz, ext_bits, v)
-    else:
-        return v
-
-
-def concat(sz, a, b):
-    return (a << sz) | b
-
-
-def extract(to, frm, v):
-    return v >> frm & (pow(2, to-frm+1)-1)
-
-
-def ite(b_cond, a, b):
-    return a if b_cond else b
-
 
 class BoolOp(IntEnum):
     # Bool x Bool -> Bool
@@ -107,10 +68,10 @@ class BoolOp(IntEnum):
 
 
 class BvOp(IntEnum):
-    #Basic ops
+    # Basic ops
     NOT = AST_NODE.BVNOT
     AND = AST_NODE.BVAND
-    OR  = AST_NODE.BVOR
+    OR = AST_NODE.BVOR
     XOR = AST_NODE.BVXOR
     NEG = AST_NODE.BVNEG
     ADD = AST_NODE.BVADD
@@ -157,7 +118,7 @@ OPERATORS = {               # ID               strop    Trit op         Py op   
     # BoolOp.LOR:      Operator(BoolOp.LOR,      "lor",   "lor",          lambda x,y: x or y,                     2,   True,  True,  False,  True,   False, True),
     # BoolOp.AND:      Operator(BoolOp.AND,      "land",  "land",         lambda x,y: x and y,                    2,   True,  True,  False,  True,   False, True),
     # BoolOp.NOT:      Operator(BoolOp.NOT,      "lnot",  "lnot",         lambda x: not x,                        1,   False, False, False,  True,   False, True),
-    BvOp.NOT:        Operator(BvOp.NOT,        "~",     operator.invert,CU.funcs.invert,     CU.funcs.invert_arr, 1,   False, False, False,  True,   False, False),
+    BvOp.NOT:        Operator(BvOp.NOT,        "~",     operator.invert, CU.funcs.invert,    CU.funcs.invert_arr, 1,   False, False, False,  True,   False, False),
     BvOp.AND:        Operator(BvOp.AND,        "&",     operator.and_,  operator.and_,       CU.funcs.and_arr,    2,   True,  True,  False,  False,  False, False),
     BvOp.OR:         Operator(BvOp.OR,         '|',     operator.or_,   operator.or_,        CU.funcs.or_arr,     2,   True,  True,  False,  False,  False, False),
     BvOp.XOR:        Operator(BvOp.XOR,        '^',     operator.xor,   operator.xor,        CU.funcs.xor_arr,    2,   True,  False, True,   False,  False, False),
@@ -165,8 +126,8 @@ OPERATORS = {               # ID               strop    Trit op         Py op   
     BvOp.ADD:        Operator(BvOp.ADD,        '+',     operator.add,   CU.funcs.add,        CU.funcs.add_arr,    2,   True,  False, False,  False,  True,  False),
     BvOp.MUL:        Operator(BvOp.MUL,        '*',     operator.mul,   CU.funcs.mul,        CU.funcs.mul_arr,    2,   True,  False, False,  False,  True,  False),
     BvOp.SUB:        Operator(BvOp.SUB,        '-',     operator.sub,   CU.funcs.sub,        CU.funcs.sub_arr,    2,   False, False, True,   False,  False, False),
-    BvOp.SHL:        Operator(BvOp.SHL,        "<<",    operator.lshift,CU.funcs.lshift,     CU.funcs.lshift_arr, 2,   False, False, False,  False,  True,  False),
-    BvOp.LSHR:       Operator(BvOp.LSHR,       ">>",    operator.rshift,CU.funcs.rshift,     CU.funcs.rshift_arr, 2,   False, False, False,  False,   False, False),
+    BvOp.SHL:        Operator(BvOp.SHL,        "<<",    operator.lshift, CU.funcs.lshift,    CU.funcs.lshift_arr, 2,   False, False, False,  False,  True,  False),
+    BvOp.LSHR:       Operator(BvOp.LSHR,       ">>",    operator.rshift, CU.funcs.rshift,    CU.funcs.rshift_arr, 2,   False, False, False,  False,   False, False),
     # BvOp.ROL:        Operator(BvOp.ROL,        "bvrol", "bvrol",        CU.funcs.rol,        2,   False, False, False,  True,   False, False),
     # BvOp.ROR:        Operator(BvOp.ROR,        "bvror", "bvror",        CU.funcs.ror,        2,   False, False, False,  True,   False, False),
     # BvOp.UDIV:       Operator(BvOp.UDIV,       "/",     operator.truediv,CU.funcs.udiv,      2,   False, False, False,  True,   False, False),

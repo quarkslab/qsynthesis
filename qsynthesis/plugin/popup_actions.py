@@ -1,7 +1,4 @@
-import ida_kernwin
-import ida_bytes
-import ida_lines
-import ida_ua
+from qsynthesis.plugin.dependencies import ida_kernwin, ida_bytes, ida_ua, ida_lines
 from PyQt5 import QtWidgets
 
 
@@ -32,7 +29,7 @@ class SynthetizeFromHere(ida_kernwin.action_handler_t):
             QtWidgets.QMessageBox.critical(self.widget, "Invalid byte", f"Current address: {ea:#x} is not code")
             return False
 
-    def update(self, ctx):
+    def update(self, _):
         """
         Overridden method called on hook update
         """
@@ -107,4 +104,3 @@ class SynthetizeOperand(SynthetizeFromHere):
         else:
             QtWidgets.QMessageBox.critical(self.widget, "Invalid byte", f"Current address: {ea:#x} is not code")
             return False
-

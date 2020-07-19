@@ -18,7 +18,7 @@ class SynthetizerViewHook(ida_kernwin.action_handler_t):
     def is_enabled_by_trace(self):
         return True
 
-    def activate(self, ctx):
+    def activate(self, _):
         """
         Overridden method called on hook creation
         """
@@ -30,7 +30,7 @@ class SynthetizerViewHook(ida_kernwin.action_handler_t):
             self.view.Show()
         return True
 
-    def update(self, ctx):
+    def update(self, _):
         """
         Overridden method called on hook update
         """

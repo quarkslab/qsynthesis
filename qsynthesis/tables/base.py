@@ -1,6 +1,6 @@
-import pickle
 from pathlib import Path
 from qsynthesis.grammar import TritonGrammar
+from qsynthesis.types import AstNode, Expr, Hash
 import logging
 from enum import IntEnum
 import array
@@ -8,11 +8,8 @@ import hashlib
 import threading
 import psutil
 
-from typing import Optional, List, Dict, Union, Generator, Tuple, Any, TypeVar, Iterable
+from typing import Optional, List, Dict, Union, Tuple, Iterable
 from time import time, sleep
-
-Expr = TypeVar('Expr')  # Expression type in the associated grammar
-Hash = Union[bytes, int, Tuple[int]]
 
 
 class HashType(IntEnum):
@@ -40,7 +37,7 @@ class _EvalCtx(object):
         # Create mapping to triton operators
         self.tops = {x: getattr(self.ast, x) for x in dir(self.ast) if not x.startswith("__")}
 
-    def eval_str(self, s: str) -> 'AstNode':
+    def eval_str(self, s: str) -> AstNode:
         e = eval(s, self.tops, self.vars)
         if isinstance(e, int):  # In case the expression was in fact an int
             return self.ast.bv(e, 64)
@@ -57,7 +54,7 @@ class LookupTable:
     Base Lookup table class. Specify the interface that child
     class have to implement to be interoperable with other the synthesizer
     """
-    def __init__(self, gr: TritonGrammar, inputs: Union[int, List[Dict[str, int]]], hash_mode: HashType=HashType.RAW, f_name: str = ""):
+    def __init__(self, gr: TritonGrammar, inputs: Union[int, List[Dict[str, int]]], hash_mode: HashType = HashType.RAW, f_name: str = ""):
         self._name = Path(f_name)
         self.grammar = gr
         self._bitsize = self.grammar.size
@@ -202,7 +199,7 @@ class LookupTable:
             return str(lin).replace(" ", "")
         except TypeError:
             return s
-        except AttributeError as e:
+        except AttributeError as _:
             return s
 
     @staticmethod
@@ -213,7 +210,7 @@ class LookupTable:
                 yield False, l[j], l[i]
             yield True, l[i], l[i]
 
-    def generate(self, depth, max_count=0, do_watch=False, watchdog_threshold=90, linearize=True, do_use_blacklist=False):
+    def generate(self, depth, do_watch=False, watchdog_threshold=90, linearize=True, do_use_blacklist=False):
         if do_watch:
             self.watchdog = threading.Thread(target=self.watchdog_worker, args=[watchdog_threshold], daemon=True)
             logging.info("Start watchdog")
@@ -258,18 +255,18 @@ class LookupTable:
 
                     for op in ops:  # Iterate over all operators
                         if op.arity == 1:
-                                new_vals = ArTy()
-                                op.eval_a(new_vals, vals1, N)
+                            new_vals = ArTy()
+                            op.eval_a(new_vals, vals1, N)
 
-                                h = hash_fun(new_vals)
-                                if h not in hash_set:
-                                    fmt = f"{op.symbol}({name1})" if len(name1) > 1 else f"{op.symbol}{name1}"
-                                    fmt = self.try_linearize(fmt, symbols) if linearize else fmt
-                                    logging.debug(f"[add] {fmt: <20} {h}")
-                                    hash_set.add(h)
-                                    worklist.append((new_vals, fmt))  # add it in worklist if not already in LUT
-                                else:
-                                    logging.debug(f"[drop] {op.symbol}{name1}  ")
+                            h = hash_fun(new_vals)
+                            if h not in hash_set:
+                                fmt = f"{op.symbol}({name1})" if len(name1) > 1 else f"{op.symbol}{name1}"
+                                fmt = self.try_linearize(fmt, symbols) if linearize else fmt
+                                logging.debug(f"[add] {fmt: <20} {h}")
+                                hash_set.add(h)
+                                worklist.append((new_vals, fmt))  # add it in worklist if not already in LUT
+                            else:
+                                logging.debug(f"[drop] {op.symbol}{name1}  ")
 
                         else:  # arity is 2
                             # for identity (a op a) ignore it if the result is known to be 0 or a
@@ -336,7 +333,7 @@ class LookupTable:
 
     @staticmethod
     def __size_to_str(value):
-        units = [(float(1024), "Kb"), (float(1024 **2), "Mb"), (float(1024 **3), "Gb")]
+        units = [(float(1024), "Kb"), (float(1024 ** 2), "Mb"), (float(1024 ** 3), "Gb")]
         for unit, s in units[::-1]:
             if value / unit < 1:
                 continue

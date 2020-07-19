@@ -2,14 +2,16 @@ import triton
 from triton import TritonContext, AST_NODE, SYMBOLIC, ARCH
 import logging
 # Imports used only for typing
-from typing import List, Tuple, Generator, Dict, Union, Optional
+from typing import List, Tuple, Generator, Dict, Union, Optional, TypeVar
 from qtracedb.archs.manager import ArchsManager
+from qtracedb.archs.arch import Arch, Instr
 from enum import IntEnum
 import random
 from functools import reduce
 
 
-AstType = IntEnum("AstNode", {k: v for k, v in triton.AST_NODE.__dict__.items() if isinstance(v, int)})
+AstType = IntEnum("AstType", {k: v for k, v in triton.AST_NODE.__dict__.items() if isinstance(v, int)})
+AstNode = TypeVar('AstNode')  # Triton AstNode object instance
 
 
 class ReassemblyError(Exception):
@@ -22,18 +24,18 @@ class SymVarType(IntEnum):
 
 
 op_str = {AST_NODE.ANY: "any", AST_NODE.ASSERT: "assert", AST_NODE.BV: "bv", AST_NODE.BVADD: "+",
-             AST_NODE.BVAND: "&", AST_NODE.BVASHR: "bvashr", AST_NODE.BVLSHR: "bvlshr", AST_NODE.BVMUL: "*",
-             AST_NODE.BVNAND: "bvnand", AST_NODE.BVNEG: "-", AST_NODE.BVNOR: "bvnor", AST_NODE.BVNOT: "not",
-             AST_NODE.BVOR: "|", AST_NODE.BVROL: "bvrol", AST_NODE.BVROR: "bvror", AST_NODE.BVSDIV: "bvsdiv",
-             AST_NODE.BVSGE: ">=s", AST_NODE.BVSGT: ">s", AST_NODE.BVSHL: "<<", AST_NODE.BVSLE: "<=s",
-             AST_NODE.BVSLT: "<s", AST_NODE.BVSMOD: "bvsmod", AST_NODE.BVSREM: "bvsrem", AST_NODE.BVSUB: "-",
-             AST_NODE.BVUDIV: "bvudiv", AST_NODE.BVUGE: ">=u", AST_NODE.BVUGT: ">u", AST_NODE.BVULE: "<=u",
-             AST_NODE.BVULT: "<u", AST_NODE.BVUREM: "bvurem", AST_NODE.BVXNOR: "bvxnor", AST_NODE.BVXOR: "^",
-             AST_NODE.COMPOUND: "compound", AST_NODE.CONCAT: "concat", AST_NODE.DECLARE: "declare", AST_NODE.DISTINCT: "distinct",
-             AST_NODE.EQUAL: "=", AST_NODE.EXTRACT: "extract", AST_NODE.FORALL: "forall", AST_NODE.IFF: "iff",
-             AST_NODE.INTEGER: "integer", AST_NODE.ITE: "ite", AST_NODE.LAND: "land", AST_NODE.LET: "let",
-             AST_NODE.LNOT: "lnot", AST_NODE.LOR: "lor", AST_NODE.REFERENCE: "reference", AST_NODE.STRING: "string",
-             AST_NODE.SX: "sx", AST_NODE.VARIABLE: "variable", AST_NODE.ZX: "zx"}
+          AST_NODE.BVAND: "&", AST_NODE.BVASHR: "bvashr", AST_NODE.BVLSHR: "bvlshr", AST_NODE.BVMUL: "*",
+          AST_NODE.BVNAND: "bvnand", AST_NODE.BVNEG: "-", AST_NODE.BVNOR: "bvnor", AST_NODE.BVNOT: "not",
+          AST_NODE.BVOR: "|", AST_NODE.BVROL: "bvrol", AST_NODE.BVROR: "bvror", AST_NODE.BVSDIV: "bvsdiv",
+          AST_NODE.BVSGE: ">=s", AST_NODE.BVSGT: ">s", AST_NODE.BVSHL: "<<", AST_NODE.BVSLE: "<=s",
+          AST_NODE.BVSLT: "<s", AST_NODE.BVSMOD: "bvsmod", AST_NODE.BVSREM: "bvsrem", AST_NODE.BVSUB: "-",
+          AST_NODE.BVUDIV: "bvudiv", AST_NODE.BVUGE: ">=u", AST_NODE.BVUGT: ">u", AST_NODE.BVULE: "<=u",
+          AST_NODE.BVULT: "<u", AST_NODE.BVUREM: "bvurem", AST_NODE.BVXNOR: "bvxnor", AST_NODE.BVXOR: "^",
+          AST_NODE.COMPOUND: "compound", AST_NODE.CONCAT: "concat", AST_NODE.DECLARE: "declare", AST_NODE.DISTINCT: "distinct",
+          AST_NODE.EQUAL: "=", AST_NODE.EXTRACT: "extract", AST_NODE.FORALL: "forall", AST_NODE.IFF: "iff",
+          AST_NODE.INTEGER: "integer", AST_NODE.ITE: "ite", AST_NODE.LAND: "land", AST_NODE.LET: "let",
+          AST_NODE.LNOT: "lnot", AST_NODE.LOR: "lor", AST_NODE.REFERENCE: "reference", AST_NODE.STRING: "string",
+          AST_NODE.SX: "sx", AST_NODE.VARIABLE: "variable", AST_NODE.ZX: "zx"}
 
 
 class TritonAst:
@@ -41,7 +43,7 @@ class TritonAst:
     Helper class to wrap Triton AstNode and
     use it as an oracle
     """
-    def __init__(self, ctx: TritonContext, node: 'triton.AstNode', node_c, depth, vars, children):
+    def __init__(self, ctx: TritonContext, node: AstNode, node_c, depth, vars, children):
         """
         Initialize IOAst
 
@@ -69,12 +71,10 @@ class TritonAst:
     @property
     def mapping(self):
         return {x[0]: x[1] for x in zip((chr(x) for x in range(97, 127)), self.symvars)}
-        #return self._map_norm_symvar
 
     @property
     def sub_map(self):
         return {x[0]: self.ast.variable(x[1]) for x in zip((chr(x) for x in range(97, 127)), self.symvars)}
-        #return self._map_norm_astnode
 
     @property
     def type(self):
@@ -236,11 +236,12 @@ class TritonAst:
         for p in self.parents:
             p.set_child(self, repl, update_node=is_first, update_parents=update_parents)
             self._parents.remove(p)  # remove its own parent
-            #is_first = False
+            # is_first = False
 
     @staticmethod
     def make_ast(ctx, exp):
         ptr_map = {}  # hash -> TritonAst
+
         def rec(e):
             h = hash(e)
             if h in ptr_map:  # if the pointer as already been seen
@@ -422,7 +423,7 @@ class TritonAst:
         except Exception as e:
             raise ReassemblyError(f"Something went wrong during reassembly: {e}")
 
-    def reassemble_to_insts(self, dst_reg: str, target_arch: Optional[Union['Arch', str]] = None) -> List['InstrCs']:
+    def reassemble_to_insts(self, dst_reg: str, target_arch: Optional[Union[Arch, str]] = None) -> List[Instr]:
         # Note: let all exception being raised above if any
         asm = self.reassemble(dst_reg, target_arch)
         if target_arch is None:
@@ -431,26 +432,3 @@ class TritonAst:
         else:
             arch = ArchsManager.get_arch(target_arch) if isinstance(target_arch, str) else target_arch
         return arch.disasm(asm, 0x0)
-
-    @staticmethod
-    def mk_ast_graph(ast: 'TritonAst', show=True) -> 'Graph':
-        from graph_tool.all import Graph, interactive_window
-        g = Graph(directed=True)
-        g.vp['sym'] = g.new_vertex_property('string')
-        g.vp['pos'] = g.new_vertex_property('vector<double>')
-        v = g.add_vertex(1)
-        sc = (pow(2, ast.depth)-1)
-        g.vp['pos'][v] = [1, (sc*0.5)]
-        print("depth", ast.depth)
-        worklist = [(v, ast.expr, (1, 1, sc/2))]
-        while worklist:
-            v, expr, (x, y, sc) = worklist.pop(0)
-            for i, c in enumerate(expr.getChildren()):
-                vc = g.add_vertex(1)
-                g.add_edge(v, vc)
-                nx = (x-sc if i % 2 == 0 else x+sc)
-                g.vp['pos'][vc] = [nx, y+(sc/0.7)]
-                worklist.append((vc, c, (nx, y+sc, sc/2)))
-        if show:
-            interactive_window(g, pos=g.vp['pos'], update_layout=False)
-        return g
