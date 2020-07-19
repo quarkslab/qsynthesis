@@ -72,8 +72,7 @@ class LookupTableRaw(LookupTable):
             raw = json.loads(f.readline())
             hm = HashType[raw['hash_mode']] if "hash_mode" in raw else HashType.RAW
             gr = TritonGrammar.from_dict(raw)
-            inp_l = json.loads(f.readline())
-            inputs = TritonGrammar.load_inputs(inp_l)
+            inputs = json.loads(f.readline())
             lkp = LookupTableRaw(gr, inputs, hm, f.name)
             return lkp
 

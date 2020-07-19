@@ -53,7 +53,7 @@ def main():
 @click.option('--watchdog', type=float, help="Activate RAM watchdog (percentage of load when to stop)")
 @click.option('-t', '--type', type=click.Choice(["db", "bin"]), default="db", help="Type of database to create")
 @click.option('--linearization', is_flag=True, type=bool, default=False, help="If set activate linearization of expressions")
-def generate_command(output_file, resume, bitsize, var_num, input_num, random_level, max_depth, op_num, verbosity, k, ops, inputs, hash_mode, watchdog, type_, linearization):
+def generate_command(output_file, resume, bitsize, var_num, input_num, random_level, max_depth, op_num, verbosity, k, ops, inputs, hash_mode, watchdog, type, linearization):
     """ Table generation utility """
     logging.basicConfig(level=logging.DEBUG if verbosity else logging.INFO, format='%(message)s')
 
@@ -82,7 +82,7 @@ def generate_command(output_file, resume, bitsize, var_num, input_num, random_le
 
         for i in range(k):
             logging.info(f"Generate Table #{i}")
-            p = out_dir/f"{i}.{type_}" if k > 1 else out_dir
+            p = out_dir/f"{i}.{type}" if k > 1 else out_dir
 
             operators = next(operator_generator(op_num)) if ops is None else ops
             vrs = [chr(ord('a') + x) for x in range(var_num)]
@@ -97,7 +97,7 @@ def generate_command(output_file, resume, bitsize, var_num, input_num, random_le
 
             logging.info(f"Watchdog value: {watchdog}")
             mp = {"db": LookupTableLevelDB, "bin": LookupTableRaw}
-            ltm = mp[type_].create(p.absolute(), grammar, inputs, HashType[hash_mode])
+            ltm = mp[type].create(p.absolute(), grammar, inputs, HashType[hash_mode])
             try:
                 if watchdog:
                     ltm.generate(depth=max_depth, do_watch=True, watchdog_threshold=watchdog, linearize=linearization)
