@@ -310,7 +310,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         self.mem_line.setStyleSheet(f"border: 1px solid {color}")
 
     def on_trace_opened(self, trace):
-        print("Executer on trace_opened")
+        print("QSynthesis: on_trace_opened")
         # Activate all configuration lines
         self.set_enabled_all_layout(self.targetLayout, True)
         # Initialize registers of the targetcombobox
