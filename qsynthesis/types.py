@@ -9,6 +9,8 @@ BitSize = int
 ByteSize = int
 """Integer representing a size in bytes"""
 
+Addr = int
+"""Integer representing an address"""
 
 # Triton Types
 AstNode = TypeVar("AstNode")
