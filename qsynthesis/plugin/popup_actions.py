@@ -1,7 +1,9 @@
 import ida_kernwin
 import ida_bytes
+import ida_lines
+import ida_ua
 from PyQt5 import QtWidgets
-import sark
+
 
 POPUP_PATH = "QSynthesis/"
 
@@ -87,20 +89,20 @@ class SynthetizeOperand(SynthetizeFromHere):
         ea = ida_bytes.get_item_head(ea)  # Make sure we are on the head of the instruction
         if ida_bytes.is_code(ida_bytes.get_flags(ea)):
             op_num = ida_kernwin.get_opnum()
-            i = sark.instruction.Instruction(ea)
+            i = self.widget.get_instruction(ea)
             op = i.operands[op_num]
-            t = op.type
-            if t.is_reg or t.is_mem or t.is_phrase or t.is_displ:
+            if op.is_register() or op.is_memory():
                 self.widget.to_line.setText(f"{ea:#x}")
                 self.widget.op_num = op_num
-                self.widget.op_is_read = not op.is_write
+                self.widget.op_is_read = not op.is_written()
 
                 # Switch to operand mode and set text
                 self.widget.switch_to_target_operand()
-                self.widget.operand_label.setText(f"{op_num}:{op.text} ({'write' if op.is_write else 'read'})")
+                text = ida_lines.tag_remove(ida_ua.print_operand(ea, op_num))
+                self.widget.operand_label.setText(f"{op_num}:{text} ({'write' if op.is_written() else 'read'})")
                 return True
             else:
-                QtWidgets.QMessageBox.critical(self.widget, "Invalid operand", f"Invalid operand type: {t}\nCannot synthesize such type")
+                QtWidgets.QMessageBox.critical(self.widget, "Invalid operand", f"Invalid operand type: {op.type}\nCannot synthesize such type")
                 return False
         else:
             QtWidgets.QMessageBox.critical(self.widget, "Invalid byte", f"Current address: {ea:#x} is not code")
