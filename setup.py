@@ -21,7 +21,7 @@ setup(
     description="Python API to synthesize Triton AST's",
     packages=find_packages(),
     setup_requires=[],
-    install_requires=["orderedset", "psutil", "click", "plyvel"],
+    install_requires=["orderedset", "psutil", "click", "plyvel", "pydffi", "requests"],  # Full deps: arybo, fastapi, sympy
     tests_require=[],
     license="qb",
     author="Quarkslab",

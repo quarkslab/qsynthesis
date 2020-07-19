@@ -1,5 +1,5 @@
 # built-in libs
-from typing import List, Set, Iterable, TypeVar, Union, Optional
+from typing import List, Set, Iterable, Union, Optional
 
 # third-party libs
 from triton import ARCH, CALLBACK, MODE, MemoryAccess, Instruction, AST_REPRESENTATION, OPERAND
@@ -7,9 +7,7 @@ from triton import TritonContext
 
 # qsynthesis deps
 from qsynthesis.tritonast import TritonAst
-
-
-Register = TypeVar("Register")  # Triton Register type
+from qsynthesis.types import SymbolicExpression, Register
 
 
 class SimpleSymExec:
@@ -223,6 +221,7 @@ class SimpleSymExec:
         symvar.setComment(self.fmt_comment())
         addr = mem.getAddress()
         end = addr + mem.getSize()
+        cur_mem_exp = None
         while addr < end:
             cur_mem_exp = self.ctx.getSymbolicMemory(addr)
             cur_mem_exp.setComment(self.fmt_comment())

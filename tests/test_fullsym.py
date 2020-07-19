@@ -7,7 +7,6 @@ from qsynthesis.utils.symexec import SimpleSymExec
 from qsynthesis.algorithms import TopDownSynthesizer
 from qsynthesis.tables import LookupTableLevelDB
 
-#logging.basicConfig(level=logging.DEBUG)
 
 RIP_ADDR = 0x40B160
 RSP_ADDR = 0x800000
@@ -35,7 +34,6 @@ def test():
     rax = symexec.get_register_ast("rax")
 
     # Load lookup tables
-    current = Path(__file__).parent.absolute()
     ltm = LookupTableLevelDB.load("../lts/lts15_opt_leveldb")
 
     # Perform Synthesis of the expression

@@ -1,4 +1,4 @@
-import ida_graph
+from qsynthesis.plugin.dependencies import ida_graph
 
 
 class AstViewer(ida_graph.GraphViewer):
