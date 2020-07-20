@@ -234,10 +234,10 @@ def compare_command(table1, table2):
 @main.command(name="import")
 @click.argument('raw_table', type=click.Path(exists=True))
 @click.argument('out_table', type=click.Path(exists=False))
-def import_command(infile, outfile):
+def import_command(raw_table, out_table):
     """Import a raw table in a Level-DB database"""
     f_id = 1
-    current_file = infile
+    current_file = raw_table
     out_lkp = None
     i = 0
     buffer = []
@@ -245,7 +245,7 @@ def import_command(infile, outfile):
     while True:
         lkp = LookupTableRaw.load(current_file)
         if out_lkp is None:
-            out_lkp = LookupTableLevelDB.create(outfile, lkp.grammar, lkp.inputs, lkp.hash_mode)
+            out_lkp = LookupTableLevelDB.create(out_table, lkp.grammar, lkp.inputs, lkp.hash_mode)
         try:
             for it in lkp:
                 buffer.append(it)
@@ -262,7 +262,7 @@ def import_command(infile, outfile):
             print("Keyboard interrupt")
             break
 
-        p = Path(f"{infile}.{f_id}")
+        p = Path(f"{raw_table}.{f_id}")
         if p.exists():
             print(f"\n Start processing: {p}")
             current_file = str(p)
