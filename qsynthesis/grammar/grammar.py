@@ -1,12 +1,5 @@
 # Standard modules
 import random
-import operator
-from collections import namedtuple
-from enum import IntEnum
-
-# Third-party modules
-from triton import AST_NODE
-import pydffi
 
 # Qsynthesis types
 from qsynthesis.types import BitSize, Char, Input, Dict, List, Tuple
