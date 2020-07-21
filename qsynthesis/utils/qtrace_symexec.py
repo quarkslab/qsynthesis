@@ -24,23 +24,29 @@ TRITON_ARCH_MAP = {
 
 
 class Mode(Enum):
+    """
+    Mode to select the initial state of the symbolic executor.
+    FULL_SYMBOLIC: Keeps everything symbolic (all new unread register / memory will be new inputs
+    PARAM_SYMBOLIC: Concretize everything but function parameters (use arch calling convention)
+                    This mode is usefull when executing only a single function.
+    """
     FULL_SYMBOLIC = 1  # Symbolize any reg/mem newly read without having been previously written
     PARAM_SYMBOLIC = 2  # Symbolize only parameters keeps all the rest concrete
 
 
 class QtraceSymExec(SimpleSymExec):
     """
-    Helper class used to process a range of instructions
-    using Triton and mark as symbolic all memory and registers
-    reads that occoured before a write to that same register
-    or memory address
+    Helper class to perform symbolic execution on a Qtrace-DB trace.
+    It allows to process a range of instructions. Provide two simple
+    concretization modes.
     """
 
     def __init__(self, trace: Trace, mode: Mode = Mode.FULL_SYMBOLIC):
         """
-        Initialize VarSymbolizer
+        Instanciate QtraceSymExec with a trace object and a mode to
 
         :param trace: a qtrace-db trace object
+        :param mode: a Mode enum value
         """
         self.trace_arch = trace.get_arch()
         if self.trace_arch.NAME not in TRITON_ARCH_MAP:
@@ -53,16 +59,21 @@ class QtraceSymExec(SimpleSymExec):
         self._sup_regs = None
 
     @property
-    def inst_id(self):
-        """ Overwrite Full Symbolic instruction identifier by trace one """
+    def inst_id(self) -> int:
+        """Overwrite Full Symbolic instruction identifier by the trace one"""
         return self._cur_db_inst.id
 
     @inst_id.setter
     def inst_id(self, value):
+        """Set the current inst_id value"""
         pass
 
     @property
     def parameter_regs(self) -> List[Register]:
+        """
+        Return the ordered list of Register for the call convention of the current architecture.
+        :returns: list of registers involved in the calling convention
+        """
         return [getattr(self.ctx.registers, x.name.lower()) for x in self.trace_arch.registers_cc]
 
     @property
@@ -70,6 +81,7 @@ class QtraceSymExec(SimpleSymExec):
         """
         Map Qtrace-DB supported registers to Triton registers.
         It assumes registers strings exists in Triton in lowercase
+        :returns: list of Triton registers supported in the trace (namely gathered and present in DB)
         """
         if self._sup_regs is None:  # Lazily compute it. Only done once
             rgs = ArchsManager.get_supported_regs(self.trace_arch)
@@ -77,6 +89,10 @@ class QtraceSymExec(SimpleSymExec):
         return self._sup_regs
 
     def _mem_read_callback(self, ctx: TritonContext, ma: MemoryAccess) -> None:
+        """
+        Callback called by Triton upon each memory read. It is used to dynamically
+        symbolized memory cells accessed that have not been seen before.
+        """
         if not self._capturing:
             return
         # Retrieve all addresses of a given mem access
@@ -143,6 +159,9 @@ class QtraceSymExec(SimpleSymExec):
                     logging.error(f"address {index:02X} not in the mapping")
 
     def _reg_read_callback(self, ctx: TritonContext, reg: Register) -> None:
+        """
+        Callback called by Triton on each register read.
+        """
         if not self._capturing:
             return
 
@@ -166,16 +185,34 @@ class QtraceSymExec(SimpleSymExec):
             logging.debug(f"Concretizing the never seen register: {reg.getName()}")
             self.concretize_register(reg)
 
-    def register_value(self, reg: Register):
+    def register_value(self, reg: Register) -> int:
+        """
+        Get concrete value of the given triton Register in the trace.
+
+        :param reg: triton Register
+        :returns: dynamic value in the trace
+        """
         return getattr(self._cur_db_inst, reg.getName().upper())
 
-    def concretize_register(self, reg):
+    def concretize_register(self, reg: Register) -> None:
+        """
+        Concretize the given register using its dynamic value
+        read in the trace.
+
+        :param reg: triton Register
+        :returns: None
+        """
         self.reg_id_seen.add(reg.getId())
         self.ctx.setConcreteRegisterValue(reg, self.register_value(reg))
 
-    def process_instr_sequence(self, start_id: int, stop_id: int, check_regs=False) -> None:
+    def process_instr_sequence(self, start_id: int, stop_id: int, check_regs: bool = False) -> None:
         """
-        Process a given instruction sequence
+        Process a given instruction sequence in the trace.
+
+        :param start_id: Trace ID (offset) where to start
+        :param stop_id: trace ID (offset) where to stop (the instruction at this address is not executed).
+        :param check_regs: Activate checking register values for desynchronization
+        :returns: None
         """
 
         # Process instructions
@@ -189,7 +226,11 @@ class QtraceSymExec(SimpleSymExec):
 
             self.execute(opcode=self._cur_db_inst.opcode, addr=self._cur_db_inst.addr)
 
-    def sync_registers(self):
+    def sync_registers(self) -> None:
+        """
+        Synchronize Triton registers and trace registers. If the value
+        mismatch, patch the triton register value with the one of the trace.
+        """
         # Find and fix mismatches in registers values
         for reg in self.supported_regs:
 
