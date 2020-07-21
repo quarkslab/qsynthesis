@@ -1,5 +1,5 @@
 from triton import AST_NODE
-from typing import TypeVar, Union, Tuple, List, Generator, Dict, Optional
+from typing import TypeVar, Union, Tuple, List, Generator, Dict, Optional, Iterable
 from enum import IntEnum
 
 # Utils types
@@ -45,7 +45,7 @@ table a Hash value might be hashed before being used to perform the lookup."""
 Char = str
 """String of size one. Used to represent normalized variables names"""
 
-Input = Dict[str, int]
+Input = Dict[Char, int]
 """An Input is a valuation of all inputs variables of an expression"""
 
 Output = int
@@ -56,3 +56,4 @@ IOPair = Tuple[Input, Output]
 
 IOVector = List[IOPair]
 """List of input-outputs pairs"""
+
