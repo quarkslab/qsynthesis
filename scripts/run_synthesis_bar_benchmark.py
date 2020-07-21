@@ -406,3 +406,5 @@ if __name__ == "__main__":
 
     if args.output:
         json.dump(analyzer.results, open(args.output, 'w'), default=ResultEntry.json_encoder, indent=2)
+
+    analyzer.trace.close()
