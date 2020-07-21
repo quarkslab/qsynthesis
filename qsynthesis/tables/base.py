@@ -1,24 +1,38 @@
+# built-in libs
 from pathlib import Path
-from qsynthesis.grammar import TritonGrammar
-from qsynthesis.types import AstNode, Expr, Hash
 import logging
 from enum import IntEnum
 import array
 import hashlib
 import threading
+from time import time, sleep
+
+# third-party libs
 import psutil
 
-from typing import Optional, List, Dict, Union, Tuple, Iterable
-from time import time, sleep
+# qsynthesis deps
+from qsynthesis.grammar import TritonGrammar
+from qsynthesis.tritonast import TritonAst
+from qsynthesis.types import AstNode, Hash, Optional, List, Dict, Union, Tuple, Iterable, Input, Output, BitSize, Any, \
+                             Generator
 
 
 class HashType(IntEnum):
+    """
+    Hash types supported by the Lookup table database. In practice solely md5
+    is used, has it is the fastest of all
+    """
     RAW = 1
     FNV1A_128 = 2
     MD5 = 3
 
 
 class _EvalCtx(object):
+    """
+    Small debugging Triton evaluation context. It is used when manipulating
+    tables in a standalone manner. It enables obtaining TritonAst out of
+    the databqse entries.
+    """
     def __init__(self, grammar):
         from triton import TritonContext, ARCH, AST_REPRESENTATION
         # Create the context
@@ -38,23 +52,32 @@ class _EvalCtx(object):
         self.tops = {x: getattr(self.ast, x) for x in dir(self.ast) if not x.startswith("__")}
 
     def eval_str(self, s: str) -> AstNode:
+        """Eval the string expression to create an AstNode object"""
         e = eval(s, self.tops, self.vars)
         if isinstance(e, int):  # In case the expression was in fact an int
             return self.ast.bv(e, 64)
         else:
             return e
 
-    def set_symvar_values(self, args) -> None:
+    def set_symvar_values(self, args: Input) -> None:
         for v_name, value in args.items():
             self.ctx.setConcreteVariableValue(self.symvars[v_name], value)
 
 
 class LookupTable:
     """
-    Base Lookup table class. Specify the interface that child
-    class have to implement to be interoperable with other the synthesizer
+    Base Lookup table class. Specify the interface that child class have to
+    implement to be interoperable with other the synthesizer.
     """
-    def __init__(self, gr: TritonGrammar, inputs: Union[int, List[Dict[str, int]]], hash_mode: HashType = HashType.RAW, f_name: str = ""):
+    def __init__(self, gr: TritonGrammar, inputs: List[Input], hash_mode: HashType = HashType.RAW, f_name: str = ""):
+        """
+        Constructor making a lookuptable from a grammar a set of inputs and an hash type.
+
+        :param gr: triton grammar
+        :param inputs: List of inputs
+        :param hash_mode: type of hash to be used as keys in tables
+        :param f_name: file name of the table (when being loaded)
+        """
         self._name = Path(f_name)
         self.grammar = gr
         self._bitsize = self.grammar.size
@@ -72,13 +95,33 @@ class LookupTable:
         self.inputs = inputs
 
     @property
-    def size(self):
+    def size(self) -> int:
+        """Size of the table (number of entries)"""
         raise NotImplementedError("Should be implemented by child class")
 
     def _get_item(self, h: Hash) -> Optional[str]:
+        """
+        From a given hash return the associated expression string if
+        found in the lookup table.
+
+        :param h: hash of the item to get
+        :returns: raw expression string if found
+        """
         raise NotImplementedError("Should be implemented by child class")
 
-    def lookup(self, outputs: Union[Tuple[int], List[int]], *args,  use_cache=True) -> Optional[Expr]:
+    def lookup(self, outputs: List[Output], *args,  use_cache: bool = True) -> Optional[TritonAst]:
+        """
+        Perform a lookup in the table with a given set of outputs corresponding
+        to the evaluation of an AST against the Input of this exact same table.
+        If an entry is found a TritonAst is created and returned.
+
+        :param outputs: list of output result of evaluating an ast against the inputs of this table
+        :param args: args forwarded to grammar and ultimately to the tritonAst in charge of build a
+                     new TritonAst.
+        :param use_cache: Boolean enabling caching the the hash of outputs. A second call if the same outputs
+                          (which is common) will not trigger a lookup in the database
+        :returns: optional TritonAst corresponding of the expression found in the table
+        """
         self.lookup_count += 1
         h = self.hash(outputs)
         if h in self.expr_cache and use_cache:
@@ -94,42 +137,69 @@ class LookupTable:
                     return e
                 except NameError:
                     return None
+                except TypeError:
+                    return None
             else:
                 return None
 
-    def lookup_raw(self, outputs: Union[Tuple[int], List[int]]) -> Optional[str]:
+    def lookup_raw(self, outputs: List[Output]) -> Optional[str]:
+        """
+        Identical to :meth:`~LookupTable.lookup` but does not create the TritonAst
+        object. Simply returns the expression string.
+
+        :param outputs: list of output result of evaluating an ast against the inputs of this table
+        :returns: string of the expression if found
+        """
         h = self.hash(outputs)
         return self._get_item(h)
 
     def lookup_hash(self, h: Hash) -> Optional[str]:
+        """
+        Raw lookup for a given key in database.
+
+        :param h: hash key to look for in database
+        :returns: string of the expression if found
+        """
         return self._get_item(h)
 
     @property
     def is_writable(self) -> bool:
+        """ Whether the table enable being written (with new expressions) """
         return False
 
     @property
     def name(self) -> str:
+        """ Name of the table """
         return str(self._name)
 
     @property
-    def bitsize(self):
+    def bitsize(self) -> BitSize:
+        """ Size of expression in bit """
         return self._bitsize
 
     @property
-    def var_number(self):
+    def var_number(self) -> int:
+        """ Maximum number of variables contained in the table """
         return len(self.grammar.vars)
 
     @property
-    def operator_number(self):
+    def operator_number(self) -> int:
+        """ Number of operators used in this table """
         return len(self.grammar.ops)
 
     @property
-    def input_number(self):
+    def input_number(self) -> int:
+        """ Number of inputs used in this table """
         return len(self.inputs)
 
     @staticmethod
-    def fnv1a_128(outs) -> int:
+    def fnv1a_128(outs: List[Output]) -> Hash:
+        """
+        Hash the outputs using fnv1a_128 algorithm
+
+        :param outs: list of outputs to hash
+        :returns: Hash value (int) corresponding to the fnv1a of outputs
+        """
         a = array.array('Q', outs)
         FNV1A_128_OFFSET = 0x6c62272e07bb014262b821756295c58d
         FNV1A_128_PRIME = 0x1000000000000000000013b  # 2^88 + 2^8 + 0x3b
@@ -149,12 +219,27 @@ class LookupTable:
         return hash
 
     @staticmethod
-    def md5(outs) -> bytes:
+    def md5(outs: List[Output]) -> Hash:
+        """
+        Hash the outputs using MD5 algorithm. Outputs are transformed into an array.
+        That means the final bytes hashed are the concatenation of uint64 in little
+        endian.
+
+        :param outs: list of outputs to hash
+        :returns: Bytes corresponding to MD5 hash
+        """
         a = array.array('Q', outs)
         h = hashlib.md5(a.tobytes())
         return h.digest()
 
-    def hash(self, outs):
+    def hash(self, outs: List[Output]) -> Hash:
+        """
+        Main hashing method that dispatch the outputs to the appropriate hashing
+        function depending on the ``hash_mode`` of the table.
+
+        :param outs: list of outputs to hash
+        :returns: Hash type (bytes, int ..) of the outputs
+        """
         if self.hash_mode == HashType.RAW:
             return tuple(outs)
         elif self.hash_mode == HashType.FNV1A_128:
@@ -163,26 +248,57 @@ class LookupTable:
             return self.md5(outs)
 
     def __iter__(self) -> Iterable[Tuple[Hash, str]]:
+        """ Iterator of all the entries as an iterator of pair, hash, expression as string """
         raise NotImplementedError("Should be implemented by child class")
 
-    def get_expr(self, expr: str):
+    def get_expr(self, expr: str) -> TritonAst:
+        """
+        Utility function that returns a TritonAst from a given expression string.
+        A TritonContext local to the table is created to enable generating such ASTs.
+
+        :param expr: Expression
+        :returns: TritonAst resulting of the parsing of s
+        """
         if self._ectx is None:
             self._ectx = _EvalCtx(self.grammar)
         return self._ectx.eval_str(expr)
 
-    def set_input_lcontext(self, i: Union[int, Dict]):
+    def set_input_lcontext(self, i: Union[int, Input]) -> None:
+        """
+        Set the given concrete values of variables in the local TritonContext.
+        The parameter is either the ith input of the table, or directly an Input
+        given a valuation for each variables. This function must be called before
+        performing any evaluation of an AST.
+
+        :param i: index of the input, or Input object (dict)
+        :returns: None
+        """
         if self._ectx is None:
             self._ectx = _EvalCtx(self.grammar)
         self._ectx.set_symvar_values(self.inputs[i] if isinstance(i, int) else i)
 
-    def eval_expr_inputs(self, expr) -> List[int]:
+    def eval_expr_inputs(self, expr: AstNode) -> List[Output]:
+        """
+        Evaluate a given Triton AstNode object on all inputs of the
+        table. The result is a list of Output values.
+
+        :param expr: Triton AstNode to evaluate
+        :returns: list of output values (ready to be hashed)
+        """
         outs = []
         for i in range(len(self.inputs)):
             self.set_input_lcontext(i)
             outs.append(expr.evaluate())
         return outs
 
-    def watchdog_worker(self, threshold):
+    def watchdog_worker(self, threshold: Union[float, int]) -> None:
+        """
+        Function where the memory watchdog thread is running. This function
+        allows interrupting table generation when it happens to fill the
+        given threshold of RAM.
+
+        :param threshold: percentage of RAM load that triggers the stop of generation
+        """
         while not self.stop:
             sleep(2)
             mem = psutil.virtual_memory()
@@ -192,7 +308,15 @@ class LookupTable:
                 self.stop = True  # Should stop self and also main thread
 
     @staticmethod
-    def try_linearize(s: str, symbols) -> str:
+    def try_linearize(s: str, symbols: Dict[str, object]) -> str:
+        """
+        Try applying sympy to linearize ``s`` with the variable symbols
+        ``symbols``. If any exception is raised in between to expression
+        string is returned unchanged.
+
+        :param s: expression string to linearize
+        :param symbols: dictionnary of variables names to sympy symbol objects
+        """
         import sympy
         try:
             lin = eval(s, symbols)
@@ -206,14 +330,34 @@ class LookupTable:
             return s
 
     @staticmethod
-    def custom_permutations(l):
+    def custom_permutations(l: List[Any]) -> Generator[Tuple[bool, Any, Any], None, None]:
+        """
+        Custom generator generating all the possible tuples from a list. But instead
+        of iterating item i with all others 0..n, iterates i with all the previous 0..i.
+        It generates a somewhat sorted generated that ensure pairs of items appearing
+        first in the list will be yielded before.
+
+        :param l: list of any item
+        :returns: genreator of tuples generating all possibles pairs
+        """
         for i in range(len(l)):
             for j in range(0, i):
                 yield False, l[i], l[j]
                 yield False, l[j], l[i]
             yield True, l[i], l[i]
 
-    def generate(self, depth, do_watch=False, watchdog_threshold=90, linearize=True, do_use_blacklist=False):
+    def generate(self, depth: int, do_watch: bool = False, watchdog_threshold: Union[int, float] = 90, linearize: bool = False, do_use_blacklist: bool = False) -> None:
+        """
+        Generate a new lookup table from scratch with the variables and operators
+        set in the constructor of the table.
+
+        :param depth: AST depths at which to stop generating (fairly useless)
+        :param do_watch: Enable RAM watching thread to monitor memory
+        :param watchdog_threshold: threshold to be sent to the memory watchdog
+        :param linearize: whether or not to apply linearization on expressions
+        :param do_use_blacklist: enable blacklist mechanism on commutative operators. Slower but less memory consuming
+        :returns: None
+        """
         if do_watch:
             self.watchdog = threading.Thread(target=self.watchdog_worker, args=[watchdog_threshold], daemon=True)
             logging.info("Start watchdog")
@@ -318,24 +462,53 @@ class LookupTable:
             self.watchdog.join()
 
     def add_entry(self, hash: Hash, value: str) -> None:
+        """
+        Abstract function to add an entry in the lookuptable.
+
+        :param hash: already computed hash to add
+        :param value: expression value to add in the table
+        """
         raise NotImplementedError("Should be implemented by child class")
 
-    def add_entries(self, worklist, calc_hash=False):
+    def add_entries(self, worklist: List[Tuple[Hash, str]], calc_hash: bool = False) -> None:
+        """
+        Add the given list of entries in the database. The boolean ``calc_hash`` indicates
+        whether hashes are already computed or not. If false the function should hash the
+        hash first.
+
+        :param worklist: list of entries to add
+        :param calc_hash: whether or not hash should be performed on entries keys
+        :returns: None
+        """
         raise NotImplementedError("Should be implemented by child class")
 
     @staticmethod
-    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Dict[str, int]], hash_mode: HashType = HashType.RAW) -> 'LookupTable':
+    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Input], hash_mode: HashType = HashType.RAW) -> 'LookupTable':
+        """
+        Create a new empty lookup table with the given initial parameters, grammars, inputs
+        and hash_mode.
+
+        :param filename: filename of the table to create
+        :param grammar: TritonGrammar object representing variables and operators
+        :param inputs: list of inputs on which to perform evaluation
+        :param hash_mode: Hashing mode for keys
+        :returns: lookuptable instance object
+        """
         raise NotImplementedError("Should be implemented by child class")
 
     @staticmethod
     def load(file: Union[Path, str]) -> 'LookupTable':
-        raise NotImplementedError("Should be implemented by child class")
+        """
+        Load the given lookup table and returns an instance object.
 
-    def save(self, file: Optional[Union[Path, str]]):
+        :param file: Database file to load
+        :returns: LookupTable object
+        """
         raise NotImplementedError("Should be implemented by child class")
 
     @staticmethod
-    def __size_to_str(value):
+    def __size_to_str(value: int) -> str:
+        """ Return pretty printed representation of RAM usage for table generation """
         units = [(float(1024), "Kb"), (float(1024 ** 2), "Mb"), (float(1024 ** 3), "Gb")]
         for unit, s in units[::-1]:
             if value / unit < 1:

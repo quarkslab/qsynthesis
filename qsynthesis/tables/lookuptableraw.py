@@ -61,9 +61,6 @@ class LookupTableRaw(LookupTable):
                 f_id += 1
                 f_counter = 0
 
-    def save(self, file: Union[Path, str]) -> None:
-        logging.info("Saved")
-
     @staticmethod
     def load(file: Union[Path, str]) -> 'LookupTableRaw':
         import json
