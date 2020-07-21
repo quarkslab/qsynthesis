@@ -48,7 +48,7 @@ class LookupTableLevelDB(LookupTable):
         self.db.put(hash, value.encode())
         self.db.put(SIZE_KEY, (str(int(self.db.get(SIZE_KEY))+1)).encode())
 
-    def add_entries(self, entries: List[Tuple[Union[bytes, int, Tuple[int]], str]], calc_hash=False, chunk_size=10000, update_count=True) -> None:
+    def add_entries(self, entries: List[Tuple[Hash, str]], calc_hash=False, chunk_size=10000, update_count=True) -> None:
         count = len(entries)
 
         def do_hash(x):
@@ -77,6 +77,3 @@ class LookupTableLevelDB(LookupTable):
     def _get_item(self, h: Hash) -> Optional[str]:
         entry = self.db.get(h)
         return entry.decode() if entry else None
-
-    def save(self, file: Optional[Union[Path, str]]):
-        pass

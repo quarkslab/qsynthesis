@@ -106,7 +106,6 @@ def generate_command(output_file, resume, bitsize, var_num, input_num, random_le
             except KeyboardInterrupt:
                 logging.warning("Stop required")
 
-            ltm.save(p)
         elapsed = time.time() - t1
         hours, rem = divmod(elapsed, 3600)
         minutes, seconds = divmod(rem, 60)
