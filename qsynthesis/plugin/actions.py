@@ -19,7 +19,8 @@ class SynthetizerViewHook(ida_kernwin.action_handler_t):
         return True
 
     def on_trace_opened(self, t):
-        self.view.on_trace_opened(t)
+        if self.view:  # If the view has been instanciated
+            self.view.on_trace_opened(t)
 
     def on_trace_closed(self):
         pass # TODO: Implementing proper deactivation of the view
