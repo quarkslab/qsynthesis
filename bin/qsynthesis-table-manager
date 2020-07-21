@@ -270,6 +270,7 @@ def import_command(raw_table, out_table):
         else:
             break
     # flush remaining entries
+    print(f"Flush remaining entries: {len(buffer)}")
     out_lkp.add_entries(buffer,  chunk_size=30000, update_count=False)
     out_lkp.db.put(b"size", str(i).encode())
     print(f"Imported: {i}")
