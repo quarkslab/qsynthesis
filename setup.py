@@ -15,13 +15,18 @@ except ImportError:
     print("Triton module should be installed first")
     sys.exit(1)
 
+#base_deps = ["orderedset", "psutil", "click", "plyvel", "requests", "arybo"]
+generate_deps = ['pydffi', 'sympy']
+server_deps = ['fastapi']
+
+
 setup(
     name="qsynthesis",
     version="0.1",
     description="Python API to synthesize Triton AST's",
     packages=find_packages(),
     setup_requires=[],
-    install_requires=["orderedset", "psutil", "click", "plyvel", "pydffi", "requests"],  # Full deps: arybo, fastapi, sympy
+    install_requires=["orderedset", "psutil", "click", "plyvel", "arybo", "requests"],
     tests_require=[],
     license="qb",
     author="Quarkslab",
@@ -30,6 +35,11 @@ setup(
         'Environment :: Console',
         'Operating System :: OS Independent',
     ],
+    extras_require={
+        'all': generate_deps+server_deps,
+        'generator': generate_deps,
+        'server': server_deps
+    },
     test_suite="",
     scripts=['bin/qsynthesis-table-manager']
 )
