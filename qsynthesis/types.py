@@ -1,5 +1,5 @@
 from triton import AST_NODE
-from typing import TypeVar, Union, Tuple, List, Generator, Dict, Optional, Iterable, Any
+from typing import TypeVar, Union, Tuple, List, Generator, Dict, Optional, Iterable, Any, Iterator
 from enum import IntEnum
 
 # Utils types
