@@ -1,8 +1,17 @@
+# built-in modules
 from enum import Enum
-from PyQt5 import QtWidgets, QtCore, QtGui
 from pathlib import Path
-from typing import Tuple, Optional, List
+from typing import Tuple, Optional, List, Iterable
 
+# third-party modules
+from PyQt5 import QtWidgets, QtCore, QtGui  # provided by IDA
+from qtraceanalysis.slicing import Slicer
+from qtracedb import DatabaseManager
+from qtracedb.trace import Trace, InstrCtx
+from qtracedb.archs.arch import Instr
+from qtracedb.archs import ArchsManager
+
+# qsynthesis modules
 from qsynthesis.plugin.dependencies import ida_kernwin, IDA_ENABLED, QTRACEIDA_ENABLED, QTRACEDB_ENABLED
 from qsynthesis.plugin.dependencies import ida_bytes, ida_nalt, ida_ua, ida_funcs, ida_gdl, ida_loader
 from qsynthesis.tables import LookupTableLevelDB, LookupTableREST
@@ -12,11 +21,9 @@ from qsynthesis.tritonast import ReassemblyError
 from qsynthesis.plugin.processor import processor_to_triton_arch, Arch, Processor, ProcessorType
 from qsynthesis.plugin.ast_viewer import AstViewer, BasicBlockViewer
 from qsynthesis.plugin.popup_actions import SynthetizeFromHere, SynthetizeToHere, SynthetizeOperand
-from qtraceanalysis.slicing import Slicer
-from qtracedb import DatabaseManager
-from qtracedb.trace import Trace
-from qtracedb.archs import ArchsManager
-from .ui.synthesis_ui import Ui_synthesis_view
+from qsynthesis.plugin.ui.synthesis_ui import Ui_synthesis_view
+from qsynthesis.types import Addr
+
 
 TEMPLATE_TRITON = '''<!DOCTYPE html>
 <html lang="en">
@@ -66,54 +73,66 @@ TEMPLATE_SYNTHESIS = '''<!DOCTYPE html>
             <td align="center"><big><b>%.2f%c</b></big></td>
         </tr>
     </table></center>
-
-    
 </body>
 </html>
 '''
 
 
 class TraceDbType(Enum):
+    """ Enum of the Trace type (either database defined in config or a direct sqlite trace """
     CONFIG = 0
     SQLITE = 1
 
 
 class TargetType(Enum):
+    """ Enum of the target expression to be synthesized """
     REG = 0
     MEMORY = 1
     OPERAND = 2
 
 
 class TableType(Enum):
+    """ Enum of the different kind of Lookup Table usable """
     LEVELDB = 0
     HTTP = 1
 
 
 class AlgorithmType(Enum):
+    """ Algorithm type to perform """
     TOPDOWN = "Top-Down"
     PLHDR = "PlaceHolders"
 
 
 class AnalysisType(Enum):
+    """ Type of analysis either based on trace or fully symbolic using Triton only """
     QTRACE = 0
     FULL_SYMBOLIC = 1
 
 
 class QtraceSymType(Enum):
+    """ Mode for trace based DSE. Keeping everything symbolic or just parameters (w.r.t ABI) """
     FULL_SYMBOLIC = 0
     PARAM_SYMBOLIC = 1
 
 
 class ShowDepState(Enum):
+    """ Enum state for buttons showing dependencies """
     SHOW = "Highlight Deps"
     HIDE = "Hide Deps"
 
 
 class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_view):
+    """
+    Main view of the QSynthesis plugin. Contains all the features implemented
+    in the plugin.
+    """
 
     NAME = "QSynthesis"
 
-    def __init__(self, qtrace):
+    def __init__(self, qtrace: Optional['QtraceIDA']):
+        """
+        Constructor. Take the QtraceIDA object if launched through QtraceIDA
+        """
         QtWidgets.QWidget.__init__(self)
         ida_kernwin.PluginForm.__init__(self)
         self.qtrace = qtrace
@@ -148,6 +167,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
 
     @property
     def arch(self) -> Arch:
+        """ Return current QtraceDB Arch object whether it comes from qtraceida or the trace directly """
         if QTRACEIDA_ENABLED:
             return self.qtrace.arch
         else:
@@ -155,20 +175,35 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
 
     @property
     def trace(self) -> Trace:
+        """ Return current Trace object whether it comes from qtraceida or a manual loading """
         if QTRACEIDA_ENABLED:
             return self.qtrace.trace
         else:
             return self._trace
 
-    def get_instruction(self, ea):
+    def get_instruction(self, ea: Addr) -> Instr:
+        """
+        Disassemble the current instruction as a QtraceDB Instruction object
+
+        :param ea: address of the head of the instruction
+        :return: instruction object
+
+        .. warning:: The current address have to be code and being
+                     the head of an instruction
+        """
         opc = ida_bytes.get_bytes(ea, ida_bytes.get_item_size(ea))
         return self.arch.disasm_one(opc, ea)
 
-    def is_lookuptable_loaded(self):
+    def is_lookuptable_loaded(self) -> bool:
+        """ Return true if the lookup table is loaded """
         return self.lookuptable is not None
 
-    def OnCreate(self, form):
-        print("On Create called !")
+    def OnCreate(self, form) -> None:
+        """
+        PluginForm callback called when view is created. It initialize
+        the whole view with all the widgets.
+        """
+        print("QSynthesis: Create View (OnCreate called)")
         self.parent_widget = self.FormToPyQtWidget(form)
         # Init of the view has to be done here ?
         self.init()
@@ -180,11 +215,9 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         else:
             print("Trace is none it should not show up like this")
 
-    def Show(self):
-        """
-        Creates the form if not created or focuses it if it was
-        """
-        print("On Show called !")
+    def Show(self) -> bool:
+        """ Creates the form if not created or focuses it if it was """
+        print("QSynthesis: Showing view (Show called)")
         self.closed = False
         self.enable_popups()
         opts = ida_kernwin.PluginForm.WOPN_PERSIST
@@ -192,22 +225,32 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         ida_kernwin.set_dock_pos(self.NAME, "IDA View-A", ida_kernwin.DP_RIGHT)
         return r
 
-    def OnClose(self, form):
+    def OnClose(self, form) -> None:
+        """ Window closed callback. Disable all popup actions """
         # Change visibility state
         self.closed = True
         self.disable_popups()
 
-    def enable_popups(self):
+    def enable_popups(self) -> None:
+        """ Enable IDA View popup actions """
         self.popup_from_here.register()
         self.popup_to_here.register()
         self.popup_operand.register()
 
-    def disable_popups(self):
+    def disable_popups(self) -> None:
+        """ Disabled IDA View popup actions """
         self.popup_from_here.unregister()
         self.popup_to_here.unregister()
         self.popup_operand.unregister()
 
-    def set_visible_all_layout(self, layout, val):
+    def set_visible_all_layout(self, layout: QtWidgets.QLayout, val: bool) -> None:
+        """
+        Change the visibility of all the widgets contained in a layout
+
+        :param layout: Layout widget in which to show/hide all sub-components
+        :param val: Boolean value to either set visible or invisible
+        :return: None
+        """
         for i in range(layout.count()):
             item = layout.itemAt(i)
             item_w = item.widget()
@@ -217,7 +260,14 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             else:
                 item_w.setVisible(val)
 
-    def set_enabled_all_layout(self, layout, val):
+    def set_enabled_all_layout(self, layout: QtWidgets.QLayout, val: bool) -> None:
+        """
+        Change the 'enabled' state of all the widgets contained in a layout
+
+        :param layout: Layout widget in which to enable/disable all sub-components
+        :param val: Boolean value to either set enabled or disabled
+        :return: None
+        """
         for i in range(layout.count()):
             item = layout.itemAt(i)
             item_w = item.widget()
@@ -227,7 +277,11 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             else:
                 item_w.setEnabled(val)
 
-    def init(self):
+    def init(self) -> None:
+        """
+        Initialization function called on view creation to instanciate
+        all widgets and its default state.
+        """
         self.setupUi(self.parent_widget)
         if QTRACEIDA_ENABLED or not QTRACEDB_ENABLED:  # The trace will be provided by qtraceida so not showing this
             self.set_visible_all_layout(self.traceLayout, False)
@@ -278,38 +332,65 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         self.show_ast_synthesis_button.clicked.connect(self.synthesis_show_ast_clicked)
         self.reassemble_button.clicked.connect(self.reassemble_clicked)
 
-    def switch_to_target_operand(self):
+    def switch_to_target_operand(self) -> None:
+        """ Change target type to operand. (Meant to be called by the popup action) """
         self.target_box.setCurrentIndex(TargetType.OPERAND.value)
 
-    def algorithm_type_changed(self):
+    def algorithm_type_changed(self) -> None:
+        """
+        When changing algorithm type. Enable or disable the mode
+        associated with Qtrace.
+        """
         self.qtrace_sym_type_box.setEnabled(self.analysis_type == AnalysisType.QTRACE)
 
     @property
     def qtrace_sym_type(self) -> QtraceSymType:
+        """ Return the current symbolic mode of analysis for trace DSE """
         return QtraceSymType(self.qtrace_sym_type_box.currentIndex())
 
-    def from_line_reset_style(self):
+    def from_line_reset_style(self) -> None:
+        """ Reset from_line stylesheet """
         self.from_line.setStyleSheet("")
 
-    def from_line_changed(self):
+    def from_line_changed(self) -> None:
+        """
+        Callback called when something change in 'From' field. Validated it
+        against the validator (and either show red / green around the box)
+        """
         color = "green" if self.from_line.hasAcceptableInput() else "red"
         self.from_line.setStyleSheet(f"border: 1px solid {color}")
 
-    def to_line_reset_style(self):
+    def to_line_reset_style(self) -> None:
+        """ Reset to_line stylesheet """
         self.to_line.setStyleSheet("")
 
-    def to_line_changed(self):
+    def to_line_changed(self) -> None:
+        """
+        Callback called when something change in 'To' field. Validated it
+        against the validator (and either show red / green around the box)
+        """
         color = "green" if self.to_line.hasAcceptableInput() else "red"
         self.to_line.setStyleSheet(f"border: 1px solid {color}")
 
-    def mem_line_reset_style(self):
+    def mem_line_reset_style(self) -> None:
+        """ Reset the memory line stylesheet """
         self.mem_line.setStyleSheet("")
 
-    def mem_line_changed(self):
+    def mem_line_changed(self) -> None:
+        """
+        Callback called when something change in 'Memory' field. Validated it
+        against the validator (and either show red / green around the box)
+        """
         color = "green" if self.mem_line.hasAcceptableInput() else "red"
         self.mem_line.setStyleSheet(f"border: 1px solid {color}")
 
-    def on_trace_opened(self, trace):
+    def on_trace_opened(self, trace: Trace) -> None:
+        """
+        Callback called when a trace is opened either via Qtrace-IDA
+        or directly when Qtrace-IDA is not available.
+
+        :param trace: Trace just having been opened
+        """
         print("QSynthesis: on_trace_opened")
         # Activate all configuration lines
         self.set_enabled_all_layout(self.targetLayout, True)
@@ -319,7 +400,8 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         self.set_enabled_all_layout(self.algorithmLayout, True)
         self.run_triton_button.setEnabled(True)
 
-    def target_changed(self, index):
+    def target_changed(self, index: int) -> None:
+        """ Enable and disable appropriate widget when changing the target selector """
         t = TargetType(index)
         if t == TargetType.REG:
             self.register_box.setVisible(True)
@@ -339,21 +421,28 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
 
     @property
     def target_type(self) -> TargetType:
+        """ Return target type as an enum """
         return TargetType(self.target_box.currentIndex())
 
     @property
     def table_type(self) -> TableType:
+        """ Return table type as an enum """
         return TableType(self.table_type_box.currentIndex())
 
-    def table_type_changed(self, _):
+    def table_type_changed(self, _) -> None:
+        """ Called when table type changed. (just set a placeholder string) """
         self.table_line.setText("")
         if self.table_type == TableType.HTTP:
             self.table_line.setPlaceholderText('e.g: http://localhost')
         else:
             self.table_line.setPlaceholderText("")
 
-    def customfocusInEventLookupTableLine(self, event):
-        print("Focus in table line !")
+    def customfocusInEventLookupTableLine(self, event) -> None:
+        """
+        Callback called when to focus is given to the table field.
+        Instead of leaving the user writing a path, open a dialog
+        to open a given file.
+        """
         self.table_line.setStyleSheet("")
         if self.table_type == TableType.LEVELDB:
             filename = QtWidgets.QFileDialog.getExistingDirectory()
@@ -367,13 +456,21 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
 
     @property
     def algorithm(self) -> AlgorithmType:
+        """ Return algorithm type as an enum """
         return AlgorithmType(self.algorithm_box.currentText())
 
     @property
     def analysis_type(self) -> AnalysisType:
+        """ Return analysis type as an enum """
         return AnalysisType[self.algorithm_type_box.currentText()]
 
-    def run_triton_clicked(self):
+    def run_triton_clicked(self) -> None:
+        """
+        Triton button clicked callback. Verifies that all parameters are
+        valid before triggering the symbolic execution. At the end delegate
+        the computation to :meth:`SynthesizerView.run_triton_qtrace` or
+        :meth:`SynthesizerView.run_triton_fullsym`.
+        """
         self.ast = None  # Reset the AST variable
         self.triton_textarea.clear()  # clear
         self.set_enabled_synthesis_widgets(False)
@@ -400,6 +497,12 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             self.on_triton_finished()
 
     def load_lookup_table(self) -> bool:
+        """
+        Open the lookup table selected. If LevelDB open database and if REST
+        checks that the remote URL is reachable.
+
+        :return: True if the opening succeeded
+        """
         if not self.table_line.text():
             self.table_line.setStyleSheet("border: 1px solid red")
             return False
@@ -417,7 +520,14 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
                 return False
         return True
 
-    def line_to_qtrace_inst(self, widget):
+    def line_to_qtrace_inst(self, widget: QtWidgets.QLineEdit) -> Optional[InstrCtx]:
+        """
+        Retrieve a trace instruction from a LineEdit widget which content
+        is meant to be an address.
+
+        :param widget: LineEdit widget containing an address (in our context from_line and to_line)
+        :return: First instruction in the trace hitting the address (if valid)
+        """
         if not widget.hasAcceptableInput():
             widget.setStyleSheet("border: 1px solid red")
             return None
@@ -431,6 +541,13 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
                 return inst
 
     def run_triton_qtrace(self) -> bool:
+        """
+        Run the symbolic execution with Triton on the Trace. First performs
+        all the sanitization on the fields and then delegate computation to
+        the `QtraceSymExec` object of qsynthesis.utils.
+
+        :return: True if the symbolic execution procceeded without errors
+        """
         # Make sure a trace is loaded before proceeding
         if self.trace is None:
             QtWidgets.QMessageBox.critical(self, "No trace", f"A trace should be loaded first ")
@@ -483,6 +600,13 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         return True
 
     def run_triton_fullsym(self) -> bool:
+        """
+        Run the symbolic execution in 'pure' symbolic (without trace). First performs
+        all the sanitization on the fields and then delegate computation to the
+        `SimpleSymExec` object of qsynthesis.utils.
+
+        :return: True if the symbolic execution procceeded without errors
+        """
         if Processor.type == ProcessorType.UNKNOWN:
             QtWidgets.QMessageBox.critical(self, "Unsupported arch", f"Architecture {Processor.name} is not supported by Triton")
             return False
@@ -550,7 +674,11 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         self.symexec.ctx.clearCallbacks()
         return True
 
-    def on_triton_finished(self):
+    def on_triton_finished(self) -> None:
+        """
+        Function called when symbolic execution terminated successfully.
+        Enable all the synthesis related widget in the view.
+        """
         # Enable Triton fields
         self.triton_textarea.setEnabled(True)
         if IDA_ENABLED:
@@ -564,7 +692,8 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         # Enable all buttons related to synthesis
         self.set_enabled_synthesis_widgets(True)
 
-    def fill_triton_results(self):
+    def fill_triton_results(self) -> None:
+        """ Generate the resulting analysis HTML and fill the widget """
         if self.ast.symvars:
             tpl = '<tr><td align="center">%s</td><td align="center">%d</td></tr>'
             inp_s = "\n".join(tpl % (x.getAlias(), x.getBitSize()) for x in self.ast.symvars)
@@ -572,7 +701,12 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             inp_s = "<big><b>0</b></big>"
         self.triton_textarea.setHtml(TEMPLATE_TRITON % (self.ast.node_count, self.ast.depth, inp_s))
 
-    def triton_show_deps_clicked(self):
+    def triton_show_deps_clicked(self) -> None:
+        """
+        Callback called when Show Dependencies is clicked. The function
+        retrieve the dependencies (pre-computed during symbolic execution)
+        and color the appropriate lines in the IDA view.
+        """
         st = ShowDepState(self.show_deps_triton_button.text())
         if st == ShowDepState.SHOW:
             addrs = self.get_dependency_addresses()
@@ -589,7 +723,16 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         # Switch state
         self.show_deps_triton_button.setText(ShowDepState.HIDE.value if st == ShowDepState.SHOW else ShowDepState.SHOW.value)
 
-    def get_dependency_addresses(self) -> List[int]:
+    def get_dependency_addresses(self) -> List[Addr]:
+        """
+        Retrieve Triton 'SymbolicExpression' of the expression to synthesize as
+        'SymbolicExpression' contain a comment field which contain the link between
+        expressions and Instructions. The expression is given to the slicer that
+        will build the dependency graph from which is simply extracted the set of
+        addresses (which are returned).
+
+        :return: list of addresses involved in the computation of the expression
+        """
         if self.target_type == TargetType.REG:
             sym = self.symexec.get_register_symbolic_expression(self.register_box.currentText())
         elif self.target_type == TargetType.MEMORY:
@@ -610,11 +753,15 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         # Iterate all addresses
         return sorted(Slicer.to_address_set(dg))
 
-    def triton_show_ast_clicked(self):
+    def triton_show_ast_clicked(self) -> None:
+        """ Show the AST of the triton expression """
         viewer = AstViewer("Triton AST", self.ast)
         viewer.Show()
 
-    def run_synthesis_clicked(self):
+    def run_synthesis_clicked(self) -> None:
+        """
+        Run the synthesis using the algorithm selected.
+        """
         if self.algorithm == AlgorithmType.TOPDOWN:
             synthesizer = TopDownSynthesizer(self.lookuptable)
         else:
@@ -623,7 +770,10 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
 
         self.on_synthesis_finished()
 
-    def on_synthesis_finished(self):
+    def on_synthesis_finished(self) -> None:
+        """
+        Upon synthesis termination. Enable the remaining buttons
+        """
         # Enable Synthesis fields
         self.synthesis_textarea.setEnabled(True)
         if QTRACEIDA_ENABLED:
@@ -634,17 +784,26 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         # Fill the text area with the results
         self.fill_synthesis_results()
 
-    def fill_synthesis_results(self):
+    def fill_synthesis_results(self) -> None:
+        """
+        Fill synthesis result widget as pre-formatted HTML
+        """
         color, simp = ("green", "Yes") if self.ast.node_count > self.synth_ast.node_count else ("red", "No")
         ssexpr = "<small>(too large)</small>" if self.synth_ast.node_count > 12 else f"<big><b>{self.synth_ast.pp_str}</b></big>"
         scale = -(((self.ast.node_count - self.synth_ast.node_count) * 100) / self.ast.node_count)
         self.synthesis_textarea.setHtml(TEMPLATE_SYNTHESIS % (color, simp, ssexpr, self.synth_ast.node_count, self.synth_ast.depth, scale, '%'))
 
-    def synthesis_show_ast_clicked(self):
+    def synthesis_show_ast_clicked(self) -> None:
+        """ Show the AST of the synthesized expression """
         viewer = AstViewer("Synthesized AST", self.synth_ast)
         viewer.Show()
 
-    def set_enabled_synthesis_widgets(self, val):
+    def set_enabled_synthesis_widgets(self, val: bool) -> None:
+        """
+        Enable or Disable synthesis related widgets
+
+        :param val: boolean on whether to enable or disable the widgets
+        """
         self.run_synthesis_button.setEnabled(val)
         self.synthesis_textarea.setEnabled(val)
         if not val:  # In case we disable everything
@@ -652,7 +811,12 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             self.show_ast_synthesis_button.setEnabled(val)
             self.reassemble_button.setEnabled(val)
 
-    def reassemble_clicked(self):
+    def reassemble_clicked(self) -> None:
+        """
+        Callback clicked when Reassembly is clicked. Shows an additional
+        window to select various parameters and the call the appropriate
+        auxiliary function.
+        """
         is_reg, reg = self.selected_expr_register()
         res = self.get_reassembly_options(ask_reg=not is_reg)
         if res:
@@ -681,7 +845,8 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             pass # Do nothing user click canceled on options
 
     @staticmethod
-    def coallesce_addrs(addrs):
+    def coallesce_addrs(addrs: Iterable[Addr]) -> List[Tuple[Addr, int]]:
+        """ Convert list of addresses into blocks of addr+size """
         blocks = []
         for addr in addrs:
             sz = ida_bytes.get_item_size(addr)
@@ -695,7 +860,15 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
                     blocks.append((addr, sz))
         return blocks
 
-    def patch_reassembly(self, addrs, asm) -> None:
+    def patch_reassembly(self, addrs: List[Addr], asm: bytes) -> None:
+        """
+        Patch given addresses with NOPs and put `asm` bytes corresponding
+        to reassembled instruction on the last addresses to put reassembled
+        byte near the location the expression was extracted from.
+
+        :param addrs: sorted list of addresses to strip
+        :param asm: reassembled instructino bytes
+        """
         nop = self.arch.nop_instruction
         insts = self.arch.disasm(asm, 0x0)
         blocks = self.coallesce_addrs(addrs)
@@ -729,7 +902,14 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
                 block_addr, block_sz = blocks.pop()
 
     @staticmethod
-    def safe_patch_instruction(ea, data):
+    def safe_patch_instruction(ea: Addr, data: bytes) -> None:
+        """
+        Patch a single instruction with its bytes (data). Make sure IDA
+        recognize it as an instruction after patching.
+
+        :param ea: address to patch
+        :param data: instruction bytes
+        """
         ida_bytes.patch_bytes(ea, data)  # Patch bytes
         if not ida_bytes.is_code(ida_bytes.get_flags(ea)):  # Check that the address is now a code instruction, if not:
             ida_bytes.del_items(ea, 0, len(data))   # Del all types
@@ -738,7 +918,14 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             print("Really can't create instruction at that location")
 
     @staticmethod
-    def safe_patch_instruction_block(ea, data):
+    def safe_patch_instruction_block(ea: Addr, data: bytes) -> None:
+        """
+        Patch an address with a bunch of instruction bytes (data). Make sure
+        IDA recognize all of them as instruction after patching.
+
+        :param ea: address where to patch
+        :param data: instruction bytes to put as patch
+        """
         print(f"safe_patch_instruction_block {ea:#x}: {data}")
         ida_bytes.patch_bytes(ea, data)  # Patch bytes
         ida_bytes.del_items(ea, 0, len(data))
@@ -777,7 +964,13 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             print(f"adjust of the function to {init_addr+len(payload):#x}")
             ida_funcs.set_func_end(init_addr, init_addr+len(payload))
 
-    def get_reassembly_options(self, ask_reg=False):
+    def get_reassembly_options(self, ask_reg: bool = False) -> Optional[Tuple[str, bool, bool, bool]]:
+        """
+        Function showing a Dialog to ask reassembly parameters.
+
+        :param ask_reg: boolean on whether to ask the destination register or not
+        :return: optional list of options
+        """
         dlg = QtWidgets.QDialog(parent=None)
         dlg.setWindowTitle('Reassembly options')
 
@@ -831,6 +1024,10 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             return None
 
     def selected_expr_register(self) -> Tuple[bool, Optional[str]]:
+        """
+        Return the currently selected register depending on target type.
+        None if no register is selected
+        """
         if self.target_type == TargetType.REG:
             return True, self.register_box.currentText()
         elif self.target_type == TargetType.MEMORY:
@@ -844,16 +1041,18 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             else:
                 return False, None
 
-
-    # =====================  Trace Database related fields  ======================
+    # =====================  Utility functions when Qtrace-IDA is NOT available  ======================
     @property
     def trace_type(self) -> TraceDbType:
+        """ Trace type to load as an enum """
         return TraceDbType(self.trace_type_box.currentIndex())
 
     def trace_type_changed(self, _):
+        """ Trace field changed """
         self.trace_line.setText("")
 
     def customfocusInEventTraceLine(self, event):
+        """ Triggered when getting the focus on trace line edit. To help to user selecting a trace. """
         self.trace_line.setText("")
         if self.trace_type == TraceDbType.CONFIG:
             self._dbm = DatabaseManager.from_qtracedb_config()
@@ -879,7 +1078,12 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
                 print(f"Invalid file: {filepath}")
         self.trace_line.focusNextChild()
 
-    def get_trace_from_db(self):
+    def get_trace_from_db(self) -> Optional[str]:
+        """
+        Show a custom Dialog to select a trace from a list of traces
+        retrieved via de qtracedb configuration.
+        :return: optional name of the trace
+        """
         dlg = QtWidgets.QDialog(parent=self)
         dlg.setWindowTitle('Qtrace-DB connection')
         dlg.setObjectName("Dialog")
@@ -904,4 +1108,3 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             return combobox.currentText()
         else:
             return None
-    # ======================================================================
