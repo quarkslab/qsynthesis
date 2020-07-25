@@ -1,8 +1,8 @@
+# built-in module
 import logging
-from typing import List, Optional, Tuple, Set, Dict, Generator, Union
-import triton
-from enum import IntEnum
+from typing import Tuple
 
+# qsynthesis deps
 from qsynthesis.tritonast import TritonAst
 from qsynthesis.algorithms.synthesizer_base import SynthesizerBase
 
@@ -10,11 +10,25 @@ from qsynthesis.algorithms.synthesizer_base import SynthesizerBase
 class TopDownSynthesizer(SynthesizerBase):
     """
     Synthesize with Top-Down ONLY AST search based on Triton AST.
-    This synthesis mechanism always converges
+    The complexity in worst case of the search is then O(n) with
+    n the number of nodes in the AST to synthesize.
     """
 
     def synthesize(self, ioast: TritonAst, check_sem: bool = False) -> Tuple[TritonAst, bool]:
-        ioast = ioast.duplicate()  # Make a copy of the AST to to modify it
+        """
+        Perform the Top-Down search on the ioast to try synthesizing it. The algorithm first
+        tries to synthesize the root node. If not successful descend recursively in all children
+        of the AST to try substituting sub-ASTs.
+
+        :param ioast: TritonAst object to synthesize
+        :param check_sem: boolean one whether to check the semantic equivalence of expression
+                          before substituting them. That ensure soundness of the synthesis
+        :returns: tuple with new TritonAst and whether some replacement took place or not
+
+        .. warning:: Activating the `check_sem` parameter implies a strong overhead
+                     on the synthesis as SMT queries are being performed for any candidates
+        """
+        ioast = ioast.duplicate()  # Make a copy of the AST to modify it with breaking the one given in parameter
         self.expr_cache = {}
         self.eval_cache = {}
         self.call_to_eval = 0

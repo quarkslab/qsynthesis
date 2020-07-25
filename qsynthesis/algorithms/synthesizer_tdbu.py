@@ -1,34 +1,63 @@
+# built-in modules
 import logging
-from qsynthesis.tables.base import LookupTable
-from typing import List, Optional, Tuple, Set, Dict, Generator, Union
-import triton
+from typing import List, Tuple, Generator, Union
 from enum import IntEnum
+
+# third-party modules
 from orderedset import OrderedSet
 
+# qsynthesis modules
+from qsynthesis.tables.base import LookupTable
 from qsynthesis.tritonast import TritonAst
 from qsynthesis.algorithms.synthesizer_base import SynthesizerBase
 
-AstType = IntEnum("AstNode", {k: v for k, v in triton.AST_NODE.__dict__.items() if isinstance(v, int)})
-
 
 class YieldT(IntEnum):
+    """
+    Enum to identify the yield type in the huge
+    generator that performs the AST search and
+    substitution.
+    """
     TopBottom = 1
     BottomUp = 2
 
 
 class TopDownBottomUpSynthesizer(SynthesizerBase):
     """
-    Synthesize with Top-Down then Bottom-Up AST search based on
-    Triton AST.
-    This synthesis mechanism always converges
+    Synthesize with Top-Down then Bottom-Up AST search based on Triton AST.
+    The idea behind this bi-directional search is that a node simplified in
+    a sub-AST might enable synthesizing one of its parent by means of simplification
+    if for instance we turn a two-variable AST in a one-variable AST.
+
+    .. warning:: This class is not meant to be instanciated directly but rather
+                 serving a common base for children class using this search strategy.
     """
 
     def __init__(self, ltms: Union[LookupTable, List[LookupTable]], only_first_match: bool = False, learning_new_exprs: bool = False):
+        """
+        Constructor that takes lookup tables as input.
+
+        :param ltms: Single lookup table of a list of them
+        :param only_first_match: boolean that stop interating over tables as soon as the lookup is successfull for one
+        :param learning_new_exprs: boolean that enables improving the current table if if a synthesized entry appears
+                                   to be bigger than the one submitted
+        """
         super(TopDownBottomUpSynthesizer, self).__init__(ltms, only_first_match, learning_new_exprs)
         self.total_repl_td = 0
         self.total_repl_bu = 0
 
     def synthesize(self, ioast: TritonAst, check_sem: bool = False) -> Tuple[TritonAst, bool]:
+        """
+        Performs the Top-Down and then Bottom-Search to synthesize the AST
+
+        :param ioast: TritonAst object to synthesize
+        :param check_sem: boolean one whether to check the semantic equivalence of expression
+                          before substituting them. That ensure soundness of the synthesis
+        :returns: tuple with new TritonAst and whether some replacement took place or not
+
+        .. warning:: Activating the `check_sem` parameter implies a strong overhead
+                     on the synthesis as SMT queries are being performed for any candidates
+        """
         ioast = ioast.duplicate()  # Make a copy of the ast not tamper it
         self.expr_cache = {}
         self.eval_cache = {}
@@ -40,12 +69,12 @@ class TopDownBottomUpSynthesizer(SynthesizerBase):
         expr_modified = False
 
         while 1:
-            #logging.debug(f"Sending: {new_expr_to_send}")
+            # logging.debug(f"Sending: {new_expr_to_send}")
             cur_expr, info = expr_repl_visitor.send(new_expr_to_send)  # Iterate generator
-            #logging.debug(f"Receiving: {cur_expr}")
+            # logging.debug(f"Receiving: {cur_expr}")
             if isinstance(info, bool):
-                final_expr = cur_expr[0]
-                #logging.debug("final expression:", final_expr.replace("\n"," "))
+                final_expr = cur_expr
+                # logging.debug("final expression:", final_expr.replace("\n"," "))
                 final_expr.update_all()
                 return final_expr, expr_modified
 
@@ -57,6 +86,13 @@ class TopDownBottomUpSynthesizer(SynthesizerBase):
                 new_expr_to_send = synt_res  # Send the result to the generator (thus either new expr or None)
 
     def _visit_replacement(self, ast: TritonAst, iff_replace=True, update=True) -> Generator[Tuple[TritonAst, Union[YieldT, bool]], TritonAst, None]:
+        """
+        Generator that will iterate over the AST. It will yield each sub-AST and is expecting
+        through the send mechanism to receive None (meaning nothing has been found) or a TritonAst
+        which means the AST just yielded have to be substituted by this one.
+
+        .. note:: Deprecated to use. Use _visit_replacement_bfs instead
+        """
         chs = ast.get_children()
         if not chs:  # If arity is 0 (variable and constant)
             yield ast, False  # Yield the final expr as-is
@@ -95,7 +131,18 @@ class TopDownBottomUpSynthesizer(SynthesizerBase):
                 else:
                     yield ast, False
 
-    def _visit_replacement_bfs(self, orig_ast: TritonAst, iff_replace=True, update=True) -> Generator[Tuple[TritonAst, Union[YieldT, bool]], TritonAst, None]:
+    def _visit_replacement_bfs(self, orig_ast: TritonAst) -> Generator[Tuple[TritonAst, Union[YieldT, bool]], TritonAst, None]:
+        """
+        Generator that will iterate over the AST. It will yield each sub-AST and is expecting
+        through the send mechanism to receive None (meaning nothing has been found) or a TritonAst
+        which means the AST just yielded have to be substituted by this one. The search is made in
+        a Breath-First-Search manner as it provides better results for synthesis.
+
+        :param orig_ast: TritonAst to iterate (and to modify)
+        :returns: generator that always yield a TritonAst and either a yield type indicating whether it is during
+                  the top-down or bottom-up search or a boolean indicating all substitutions have been performed
+                  in the AST. The generate receive via send a new TritonAst or None
+        """
         worklist = OrderedSet([orig_ast])
         bottomup_worklist = OrderedSet([orig_ast])
         modified = False

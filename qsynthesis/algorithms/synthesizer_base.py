@@ -1,23 +1,28 @@
+# built-in modules
 import logging
-from typing import List, Optional, Tuple, Set, Dict, Generator, Union
-import triton
-from enum import IntEnum
 
+# qsynthesis deps
 from qsynthesis.tables.base import LookupTable
 from qsynthesis.tritonast import TritonAst
+from qsynthesis.types import Input, List, Optional, Tuple, Union, Output
 
 
 class SynthesizerBase:
     """
-    Synthesize with Top-Down ONLY AST search based on Triton AST.
-    This synthesis mechanism always converges
+    Base Synthesizer that provides base function for children classes.
+    It provides function for a given TritonAst to evaluate it against
+    lookup tables inputs and to perform the lookup in order to know
+    if a shorter expression exists.
     """
 
     def __init__(self, ltms: Union[LookupTable, List[LookupTable]], only_first_match: bool = False, learning_new_exprs: bool = False):
         """
-        Initialize TritonTDBUSynthesizer
+        Constructor that takes lookup tables as input.
 
-        :param ltms: List of lookup tables to use
+        :param ltms: Single lookup table of a list of them
+        :param only_first_match: boolean that stop interating over tables as soon as the lookup is successfull for one
+        :param learning_new_exprs: boolean that enables improving the current table if if a synthesized entry appears
+                                   to be bigger than the one submitted
         """
         self._ltms = [ltms] if isinstance(ltms, LookupTable) else ltms
         self.only_first_match = only_first_match
@@ -33,20 +38,43 @@ class SynthesizerBase:
         self.eval_count = 0
 
     def synthesize(self, ioast: TritonAst, check_sem: bool = False) -> Tuple[TritonAst, bool]:
+        """
+        Abstract function that synthesize the given TritonAst, into a smaller if it exists.
+        The implementation of this function is delegated to children classes.
+
+        :param ioast: TritonAst object to synthesize
+        :param check_sem: boolean one whether to check the semantic equivalence of expression
+                          before substituting them. That ensure soundness of the synthesis
+        :returns: tuple with new TritonAst and whether some replacement took place or not
+
+        .. warning:: Activating the `check_sem` parameter implies a strong overhead
+                     on the synthesis as SMT queries are being performed for any candidates
+        """
         raise NotImplementedError("Should be implemented in children class")
 
-    def try_synthesis_lookup(self, cur_ast: TritonAst, check_sem=False) -> Optional[TritonAst]:
+    def try_synthesis_lookup(self, cur_ast: TritonAst, check_sem: bool = False) -> Optional[TritonAst]:
+        """
+        Performs a direct synthesis lookup. And returns an optional TritonAst if it the
+        I/O evaluation has been found in one of the tables. Unlike :meth:`SynthesizerBase.synthesize`
+        which can go down the AST to try simplifying sub-AST here only the root node is
+        attempted to be synthesized.
+
+        :param cur_ast: TritonAst to synthesize
+        :param check_sem: boolean on whether to check the semantic equivalence of expression
+                          before performing substituting.
+        :returns: optional TritonAst if the the AST has been synthesized
+        """
+
         # Try all lookup-tables and pick the shortest expression
         best_len = 0
         best_expr = None
         vars_e = cur_ast.symvars
         size_e = cur_ast.node_count
 
-        #expr_str = str(cur_ast.expr)
         if cur_ast.hash in self.expr_cache:
             self.cache_hit += 1
             logging.debug("expression cache found !")
-            return self.expr_cache[cur_ast.hash] #.duplicate()
+            return self.expr_cache[cur_ast.hash]
 
         for table in self._ltms:
             # skip tables not having enough variables or the wrong bitsize
@@ -66,7 +94,6 @@ class SynthesizerBase:
                     break
             else:
                 pass
-                #logging.debug(f"candidate expr rejected because too big: current:{size_e} candidate:{e_node_cnt} (best:{best_len})")
 
             if best_len == 1:  # It cannot go better that this, so we can stop
                 break
@@ -81,11 +108,19 @@ class SynthesizerBase:
                     return None
             return best_expr
 
-    def run_direct_synthesis(self, ltm: LookupTable, cur_ast: TritonAst) -> Optional['TritonIOAst']:
+    def run_direct_synthesis(self, ltm: LookupTable, cur_ast: TritonAst) -> Optional['TritonAst']:
+        """
+        Evaluate `cur_ast` on inputs provided by `ltm` the lookup table which provide an
+        output vector then used to perform the lookup in the table. If an entry is found
+        it is returned.
+
+        :param ltm: LookupTable object in which to perform the lookup
+        :param cur_ast: TritonAst object to synthesize
+        :returns: optional TritonAst if the lookup has been successful
+        """
+
         # Evaluate node on LTMs inputs
-        #outputs = [cur_ast.eval_oracle(i) for i in ltm.inputs]
         outputs = [self.eval_ast(cur_ast, i) for i in ltm.inputs]
-        #logging.debug(f"{ltm.name.name}: outputs => {outputs}")
 
         if len(set(outputs)) == 1:  # If all outputs are equal then we consider this as a constant expression
             logging.debug(f"[base] Found constant expression in {ltm.name}: {cur_ast.pp_str} ===> {outputs[0]}")
@@ -105,9 +140,18 @@ class SynthesizerBase:
                         ltm.add_entry(h, s)
                 return lk_expr
 
-    def eval_ast(self, ioast, inputs):
+    def eval_ast(self, ioast: TritonAst, input: Input) -> Output:
+        """
+        Run evaluation of the TritonAst `ioast` on the given Input (valuation for all vars).
+        The result is an Output (integer)
+
+        :param ioast: TritonAst to evaluate
+        :param input: Input on which to evaluate the AST. All variables of ioast must
+                      be defined in input
+        :returns: Output which is the result of evaluation (made by Triton)
+        """
         self.call_to_eval += 1
-        tup_inputs = tuple(inputs.items())
+        tup_inputs = tuple(input.items())
 
         ast_hash = ioast.hash
         if ast_hash in self.eval_cache:
@@ -116,7 +160,7 @@ class SynthesizerBase:
         else:
             self.eval_cache[ast_hash] = {}
 
-        output = ioast.eval_oracle(inputs)
+        output = ioast.eval_oracle(input)
         self.eval_count += 1
         self.eval_cache[ast_hash][tup_inputs] = output
         return output
