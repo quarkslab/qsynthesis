@@ -1,3 +1,7 @@
 sphinx_rtd_theme
 sphinx
 breathe
+
+# added for mock
+psutil
+orderedset
