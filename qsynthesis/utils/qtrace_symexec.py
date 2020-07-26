@@ -72,7 +72,8 @@ class QtraceSymExec(SimpleSymExec):
     def parameter_regs(self) -> List[Register]:
         """
         Return the ordered list of Register for the call convention of the current architecture.
-        :returns: list of registers involved in the calling convention
+
+        :return: list of registers involved in the calling convention
         """
         return [getattr(self.ctx.registers, x.name.lower()) for x in self.trace_arch.registers_cc]
 
@@ -81,7 +82,8 @@ class QtraceSymExec(SimpleSymExec):
         """
         Map Qtrace-DB supported registers to Triton registers.
         It assumes registers strings exists in Triton in lowercase
-        :returns: list of Triton registers supported in the trace (namely gathered and present in DB)
+
+        :return: list of Triton registers supported in the trace (namely gathered and present in DB)
         """
         if self._sup_regs is None:  # Lazily compute it. Only done once
             rgs = ArchsManager.get_supported_regs(self.trace_arch)
@@ -190,7 +192,7 @@ class QtraceSymExec(SimpleSymExec):
         Get concrete value of the given triton Register in the trace.
 
         :param reg: triton Register
-        :returns: dynamic value in the trace
+        :return: dynamic value in the trace
         """
         return getattr(self._cur_db_inst, reg.getName().upper())
 
@@ -200,7 +202,7 @@ class QtraceSymExec(SimpleSymExec):
         read in the trace.
 
         :param reg: triton Register
-        :returns: None
+        :return: None
         """
         self.reg_id_seen.add(reg.getId())
         self.ctx.setConcreteRegisterValue(reg, self.register_value(reg))
@@ -212,7 +214,7 @@ class QtraceSymExec(SimpleSymExec):
         :param start_id: Trace ID (offset) where to start
         :param stop_id: trace ID (offset) where to stop (the instruction at this address is not executed).
         :param check_regs: Activate checking register values for desynchronization
-        :returns: None
+        :return: None
         """
 
         # Process instructions

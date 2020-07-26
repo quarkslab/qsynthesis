@@ -183,9 +183,11 @@ class TritonAst:
     def symvar_type(v: SymbolicVariable) -> SymVarType:
         """
         Static method returning the type of a given symbolic variable object
+
         :param v: symbolic variable object
         :type v: SymbolicVariable
-        :returns: SymVarType -- Type of the symbolic variables
+        :return: Type of the symbolic variables
+        :rtype: SymVarType
         """
         return SymVarType(v.getType())
 
@@ -582,9 +584,9 @@ class TritonAst:
         the send mechanism.
 
         :param update: whether to update each node after having been replaced
-        :returns: generator of TritonAst, which for each AST yielded wait to
-        receive either None meaning the it should not be replaced or a new
-        TritonAst to be put in replacement.
+        :return: generator of TritonAst, which for each AST yielded wait to
+                 receive either None meaning the it should not be replaced or a new
+                 TritonAst to be put in replacement.
         """
         v = self._visit_replacement(self)
         new_expr_to_send = None

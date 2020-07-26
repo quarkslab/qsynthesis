@@ -17,13 +17,13 @@ class SimpleSymExec:
     write to that same register or memory address
     """
 
-    def __init__(self, arch: ARCH):
+    def __init__(self, arch: Union[ARCH, str]):
         """
         Initialize symbolic execution
 
-        :param arch: Triton architecture identifier
+        :param arch: Triton architecture identifier or string of it
         """
-
+        arch = getattr(ARCH, arch.upper()) if isinstance(arch, str) else arch
         self.ctx = TritonContext(arch)
         self.ctx.setMode(MODE.ALIGNED_MEMORY, True)
         self.ctx.setMode(MODE.AST_OPTIMIZATIONS, True)
