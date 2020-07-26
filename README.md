@@ -1,38 +1,19 @@
 # qsynthesis
 
-Main qsynthesis python module
+**QSynthesis** is a Python API to perform I/O based program synthesis
+of bitvector expressions. The base synthesis algorithm is based on
+both a blackbox I/O based approach comparing solely input-to-output
+pairs to perform the synthesis, but also various AST traversal methods
+to synthesize sub-expressions if the root expression cannot be synthesized
+all at once. Also, instead of deriving possible candidates on each expressions
+to synthesize, QSynthesis relies on the pre-computation of many expressions
+where the I/O pair is kept for all of them and stored in database. Given
+an expression to synthesize, finding a candidate can thus be performed in
+near O(1) as the lookup is the lookup cost in database. With the structure
+used (Google Level-DB) the cost is thus Log(N) with N the number of entries
+in the database. This approach appears to supersede various tools of the
+state-of-the art.
 
-# Installation
+# Documentation
 
-## Module installation
-
-QSynthesis works on **Triton** ASTs thus it has to be installed first. It requires version `>= 0.8`.
-Triton can be found here: https://github.com/JonathanSalwan/Triton
-
-Then Qsynthesis can simply be installed with:
-
-```bash
-python3 setup.py install
-```
-
-## IDA plugin installation
-
-QSynthesis is integrated in IDA and can works in two manners:
-
-* As a standalone plugin working on static data. In this mode synthesis is bound to basic blocks
-* In collaboration with **Qtrace-IDA** to synthesize expressions along a trace. This mode allows synthesizing
-  expressions accross basic blocks and functions. As long as expressions are kept 
-
-The python module should be installed first. The plugin can then simply be installed with:
-
-```bash
-cp ida_plugin/qsynthesis_plugin.py $IDA_HOME/plugins
-```
-
-## Usage
-
-TODO
-
-
-# TODO
-
+The whole documentation is available here: https://synthesis.doc.qb/qsynthesis/
