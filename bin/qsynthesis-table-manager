@@ -38,12 +38,10 @@ def main():
 
 @main.command(name="generate")
 @click.argument('output_file', type=str)
-@click.option('--resume', metavar="resume file", type=str, help='resume resume lookup table generation from given file')
 @click.option('-bs', '--bitsize', metavar="bitsize", default=64, type=int, help="Bit size of expressions")
 @click.option('--var-num', default=3, type=int, help="Number of variables")
 @click.option('--input-num', default=5, type=int, help="Number of inputs")
 @click.option('--random-level', type=int, default=2, help="Randomness level of inputs 0 means higlhly biased to use corner-case values (0,1,-1)")
-@click.option('--max-depth', default=5, type=int, help="Maximum depth")
 @click.option('--op-num', default=5, type=int, help="Operator number")
 @click.option("-v", "--verbosity", default=0, count=True, help="increase output verbosity")
 @click.option('-k', default=1, type=int, help="Number of tables to generate")
@@ -53,7 +51,7 @@ def main():
 @click.option('--watchdog', type=float, help="Activate RAM watchdog (percentage of load when to stop)")
 @click.option('-t', '--type', type=click.Choice(["db", "bin"]), default="db", help="Type of database to create")
 @click.option('--linearization', is_flag=True, type=bool, default=False, help="If set activate linearization of expressions")
-def generate_command(output_file, resume, bitsize, var_num, input_num, random_level, max_depth, op_num, verbosity, k, ops, inputs, hash_mode, watchdog, type, linearization):
+def generate_command(output_file, bitsize, var_num, input_num, random_level, op_num, verbosity, k, ops, inputs, hash_mode, watchdog, type, linearization):
     """ Table generation utility """
     logging.basicConfig(level=logging.DEBUG if verbosity else logging.INFO, format='%(message)s')
 
@@ -66,50 +64,47 @@ def generate_command(output_file, resume, bitsize, var_num, input_num, random_le
     except ImportError:
         raise click.Abort("Cannot import sympy (pip3 install sympy")
 
-    if resume is not None:
-        pass  # TODO: implementing resume features
-    else:
-        out_dir = Path(output_file)
-        if out_dir.exists() and out_dir.is_file():
-            out_dir.unlink()
-        if not out_dir.exists() and k > 1:
-            out_dir.mkdir()
+    out_dir = Path(output_file)
+    if out_dir.exists() and out_dir.is_file():
+        out_dir.unlink()
+    if not out_dir.exists() and k > 1:
+        out_dir.mkdir()
 
-        ops = [BvOp[x] for x in ops.split(",")] if ops else None
-        inputs = [int(x) for x in inputs.split(",") if x]
+    ops = [BvOp[x] for x in ops.split(",")] if ops else None
+    inputs = [int(x) for x in inputs.split(",") if x]
 
-        t1 = time.time()
+    t1 = time.time()
 
-        for i in range(k):
-            logging.info(f"Generate Table #{i}")
-            p = out_dir/f"{i}.{type}" if k > 1 else out_dir
+    for i in range(k):
+        logging.info(f"Generate Table #{i}")
+        p = out_dir/f"{i}.{type}" if k > 1 else out_dir
 
-            operators = next(operator_generator(op_num)) if ops is None else ops
-            vrs = [chr(ord('a') + x) for x in range(var_num)]
-            if inputs:
-                inputs = [{n: v for n, v in zip(vrs, inputs[i:i + len(vrs)])} for i in
-                          range(0, len(inputs), len(vrs))]
+        operators = next(operator_generator(op_num)) if ops is None else ops
+        vrs = [chr(ord('a') + x) for x in range(var_num)]
+        if inputs:
+            inputs = [{n: v for n, v in zip(vrs, inputs[i:i + len(vrs)])} for i in
+                      range(0, len(inputs), len(vrs))]
+        else:
+            inputs = biased_input_generator(bitsize, var_num, input_num, bitsize, random_level)
+            inputs = [{n: v for n, v in zip(vrs, i)} for i in inputs]
+
+        grammar = TritonGrammar([(x, bitsize) for x in vrs], operators)
+
+        logging.info(f"Watchdog value: {watchdog}")
+        mp = {"db": LookupTableLevelDB, "bin": LookupTableRaw}
+        ltm = mp[type].create(p.absolute(), grammar, inputs, HashType[hash_mode])
+        try:
+            if watchdog:
+                ltm.generate(do_watch=True, watchdog_threshold=watchdog, linearize=linearization)
             else:
-                inputs = biased_input_generator(bitsize, var_num, input_num, bitsize, random_level)
-                inputs = [{n: v for n, v in zip(vrs, i)} for i in inputs]
+                ltm.generate(linearize=linearization)
+        except KeyboardInterrupt:
+            logging.warning("Stop required")
 
-            grammar = TritonGrammar([(x, bitsize) for x in vrs], operators)
-
-            logging.info(f"Watchdog value: {watchdog}")
-            mp = {"db": LookupTableLevelDB, "bin": LookupTableRaw}
-            ltm = mp[type].create(p.absolute(), grammar, inputs, HashType[hash_mode])
-            try:
-                if watchdog:
-                    ltm.generate(depth=max_depth, do_watch=True, watchdog_threshold=watchdog, linearize=linearization)
-                else:
-                    ltm.generate(depth=max_depth, linearize=linearization)
-            except KeyboardInterrupt:
-                logging.warning("Stop required")
-
-        elapsed = time.time() - t1
-        hours, rem = divmod(elapsed, 3600)
-        minutes, seconds = divmod(rem, 60)
-        logging.info(f"\n{int(hours)}h{int(minutes)}m{seconds:.2f}s")
+    elapsed = time.time() - t1
+    hours, rem = divmod(elapsed, 3600)
+    minutes, seconds = divmod(rem, 60)
+    logging.info(f"\n{int(hours)}h{int(minutes)}m{seconds:.2f}s")
 
 
 @main.command(name="info")

@@ -346,12 +346,11 @@ class LookupTable:
                 yield False, l[j], l[i]
             yield True, l[i], l[i]
 
-    def generate(self, depth: int, do_watch: bool = False, watchdog_threshold: Union[int, float] = 90, linearize: bool = False, do_use_blacklist: bool = False) -> None:
+    def generate(self, do_watch: bool = False, watchdog_threshold: Union[int, float] = 90, linearize: bool = False, do_use_blacklist: bool = False) -> None:
         """
         Generate a new lookup table from scratch with the variables and operators
         set in the constructor of the table.
 
-        :param depth: AST depths at which to stop generating (fairly useless)
         :param do_watch: Enable RAM watching thread to monitor memory
         :param watchdog_threshold: threshold to be sent to the memory watchdog
         :param linearize: whether or not to apply linearization on expressions
@@ -381,7 +380,7 @@ class LookupTable:
         hash_set = set(hash_fun(x[0]) for x in worklist)
 
         ops = sorted(self.grammar.non_terminal_operators, key=lambda x: x.arity == 1)  # sort operators to iterate on unary first
-        cur_depth = depth-1
+        cur_depth = 2
         blacklist = set()
 
         try:
@@ -389,7 +388,7 @@ class LookupTable:
                 # Start a new depth
                 n_items = len(worklist)
                 t = time() - t0
-                print(f"Depth {depth-cur_depth} (size:{n_items}) (Time:{int(t/60)}m{t%60:.5f}s)")
+                print(f"Depth {cur_depth} (size:{n_items}) (Time:{int(t/60)}m{t%60:.5f}s)")
                 c = 0
 
                 for i, (same, (vals1, name1), (vals2, name2)) in enumerate(self.custom_permutations(worklist)):
@@ -450,13 +449,13 @@ class LookupTable:
                             else:
                                 logging.debug(f"[drop] {op.symbol}({name1},{name2})" if op.is_prefix else f"[drop] ({name1}){op.symbol}({name2})")
 
-                cur_depth -= 1
+                cur_depth += 1
         except KeyboardInterrupt:
             logging.info("Stop required")
         # In the end
         self.stop = True
         t = time() - t0
-        print(f"Depth {depth - cur_depth} (size:{len(worklist)}) (Time:{int(t/60)}m{t%60:.5f}s) [RAM:{self.__size_to_str(self.max_mem)}]")
+        print(f"Depth {cur_depth} (size:{len(worklist)}) (Time:{int(t/60)}m{t%60:.5f}s) [RAM:{self.__size_to_str(self.max_mem)}]")
         self.add_entries(worklist, calc_hash=True)
         if do_watch:
             self.watchdog.join()

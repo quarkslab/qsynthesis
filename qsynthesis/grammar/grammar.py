@@ -76,6 +76,7 @@ class TritonGrammar(object):
         """
         Static method instanciating a TritonGrammar from its representation as
         a dictionnary.
+
         :param g_dict: dictionarry representation of the grammar
         :returns: TritonGrammar object
         """
