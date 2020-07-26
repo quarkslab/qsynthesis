@@ -37,12 +37,21 @@ Installing the IDA Plugin
 -------------------------
 
 The IDA plugin is made to work equally whether Qtrace-IDA is installed or not.
-
 If you want to run it through Qtrace-IDA follow installation at: https://gitlab.qb/qtrace/qtrace-ida
 
-To install it just copy the file `ida_plugin/qsynthesis_plugin.py` in your IDA Pro plugin directory.
+The only requirement it has is `qtrace-analysis <https://gitlab.qb/qtrace/qtrace-analysis>`_ for the dynamic slicing feature.
+The installation is fairly easy:
 
-.. note:: The plugin is solely working on IDA with Python3
+.. code-block:: bash
+
+    $ git clone gitlab@gitlab.qb:qtrace/qtrace-analysis.git
+    $ cd qtrace-analysis
+    $ pip3 install .
+
+
+Then to install the plugin just copy the file `ida_plugin/qsynthesis_plugin.py` in your IDA Pro plugin directory.
+
+.. warning:: The plugin is solely working on IDA with Python3
 
 
 Installing optional dependencies
