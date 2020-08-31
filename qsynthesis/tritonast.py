@@ -661,3 +661,30 @@ class TritonAst:
         else:
             arch = ArchsManager.get_arch(target_arch) if isinstance(target_arch, str) else target_arch
         return arch.disasm(asm, 0x0)
+
+    def make_graph(self) -> 'Graph':
+        """
+        Generate a graph object representing the AST
+        as a graph_tool object. 
+        """
+        from graph_tool import Graph
+        graph = Graph(directed=True)
+
+        graph.vp['sym'] = graph.new_vertex_property('string')
+        graph.vp['vmap'] = graph.new_vertex_property('int64_t')
+        n = graph.add_vertex(1)
+
+        worklist = [(None, (self, n))]
+        while worklist:
+            na, (b, nb) = worklist.pop(0)
+
+            graph.vp['sym'][nb] = b.symbol
+            graph.vp['vmap'][nb] = id(b)
+
+            if na is not None:
+                graph.add_edge(na, nb)
+
+            for c in b.get_children():
+                nc = graph.add_vertex(1)
+                worklist.append((nb, (c, nc)))
+        return graph
