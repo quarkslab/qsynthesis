@@ -42,7 +42,8 @@ class QSynthesisPlugin(ida_idaapi.plugin_t):
         present open the main view as a standalone plugin.
         """
         print("Running QSynthesis")
-        if QTRACEIDA_ENABLED:
+
+        if QTRACEIDA_ENABLED and 'qtraceida' in globals():  # qtaceida has been loaded launched it through Qtrace-IDA mechanism
             import qtraceida
             qtrace = qtraceida.get_qtrace()  # Open Qtrace if it was not already done
             # If QtraceIDA enable the action should have been registered
@@ -50,11 +51,11 @@ class QSynthesisPlugin(ida_idaapi.plugin_t):
             ida_kernwin.process_ui_action(SynthetizerViewHook.view_id)
             if not qtrace.trace_opened():
                 print("Please open a trace before using QSynthesis")
-        else:
+        else:  # Qtrace-IDA not loaded or not installed open QSynthesis on its own
             from qsynthesis.plugin.view import SynthesizerView
             self.view = SynthesizerView(None)
-            # self.view.init()
             self.view.Show()  # Show will call OnCreate that will call init
+            self.view.open_no_trace()
 
     def term(self) -> None:
         pass

@@ -18,7 +18,7 @@ from qsynthesis.tables import LookupTableLevelDB, LookupTableREST
 from qsynthesis.algorithms import TopDownSynthesizer, PlaceHolderSynthesizer
 from qsynthesis.utils.symexec import SimpleSymExec
 from qsynthesis.tritonast import ReassemblyError
-from qsynthesis.plugin.processor import processor_to_triton_arch, Arch, Processor, ProcessorType
+from qsynthesis.plugin.processor import processor_to_triton_arch, Arch, Processor, ProcessorType, processor_to_qtracedb_arch
 from qsynthesis.plugin.ast_viewer import AstViewer, BasicBlockViewer
 from qsynthesis.plugin.popup_actions import SynthetizeFromHere, SynthetizeToHere, SynthetizeOperand
 from qsynthesis.plugin.ui.synthesis_ui import Ui_synthesis_view
@@ -121,6 +121,8 @@ class ShowDepState(Enum):
     HIDE = "Hide Deps"
 
 
+
+# class SynthesizerView(ida_kernwin.PluginForm, Ui_synthesis_view):#QtWidgets.QWidget, ida_kernwin.PluginForm,  Ui_synthesis_view):
 class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_view):
     """
     Main view of the QSynthesis plugin. Contains all the features implemented
@@ -160,7 +162,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         # If working on its own
         self._dbm = None
         self._trace = None
-        self._arch = None
+        self._arch = processor_to_qtracedb_arch()  # By default initialize it with current architecture
 
         # Expresssion highlighted
         self.highlighted_addr = {}  # addr -> backed_color
@@ -168,7 +170,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
     @property
     def arch(self) -> Arch:
         """ Return current QtraceDB Arch object whether it comes from qtraceida or the trace directly """
-        if QTRACEIDA_ENABLED:
+        if QTRACEIDA_ENABLED and self.qtrace_mode:
             return self.qtrace.arch
         else:
             return self._arch
@@ -176,10 +178,15 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
     @property
     def trace(self) -> Trace:
         """ Return current Trace object whether it comes from qtraceida or a manual loading """
-        if QTRACEIDA_ENABLED:
+        if QTRACEIDA_ENABLED and self.qtrace_mode:
             return self.qtrace.trace
         else:
             return self._trace
+
+    @property
+    def qtrace_mode(self) -> bool:
+        """ Return whether QSynthesis was launched through qtrace or not """
+        return self.qtrace is not None
 
     def get_instruction(self, ea: Addr) -> Instr:
         """
@@ -213,7 +220,8 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         if self.trace:
             self.on_trace_opened(self.trace)
         else:
-            print("Trace is none it should not show up like this")
+            print("Trace is none (disabled qtrace mode)")
+            self.set_algorithm_type_enable(AnalysisType.QTRACE, False)
 
     def Show(self) -> bool:
         """ Creates the form if not created or focuses it if it was """
@@ -228,6 +236,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
     def OnClose(self, form) -> None:
         """ Window closed callback. Disable all popup actions """
         # Change visibility state
+        print("qsynthesis closed")
         self.closed = True
         self.disable_popups()
 
@@ -314,11 +323,12 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
 
         # Algorithm configuration
         self.algorithm_box.addItems([x.value for x in AlgorithmType])
-        if QTRACEDB_ENABLED:
-            self.algorithm_type_box.addItem(AnalysisType.QTRACE.name)
-        if IDA_ENABLED:
-            self.algorithm_type_box.addItem(AnalysisType.FULL_SYMBOLIC.name)
+
+        # Add both QTRACE, and FULL_SYMBOLIC algorithms and disabled them
+        self.algorithm_type_box.addItems([x.name for x in AnalysisType])
         self.algorithm_type_box.currentIndexChanged.connect(self.algorithm_type_changed)
+        self.set_algorithm_type_enable(AnalysisType.QTRACE, QTRACEDB_ENABLED)
+        self.set_algorithm_type_enable(AnalysisType.FULL_SYMBOLIC, IDA_ENABLED)
         self.qtrace_sym_type_box.addItems([x.name for x in QtraceSymType])
 
         # Hide all experimental settings
@@ -336,11 +346,19 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         """ Change target type to operand. (Meant to be called by the popup action) """
         self.target_box.setCurrentIndex(TargetType.OPERAND.value)
 
+    def set_algorithm_type_enable(self, alg: AnalysisType, enabled: bool):
+        # We assume here that items are in order (with their value attribute)
+        self.algorithm_type_box.model().item(alg.value).setEnabled(enabled)
+        if not enabled:
+            self.algorithm_type_box.setCurrentIndex(AnalysisType.FULL_SYMBOLIC.value if AnalysisType.QTRACE else AnalysisType.QTRACE.value)
+            self.algorithm_type_changed()
+
     def algorithm_type_changed(self) -> None:
         """
         When changing algorithm type. Enable or disable the mode
         associated with Qtrace.
         """
+        print("Algorith type changed")
         self.qtrace_sym_type_box.setEnabled(self.analysis_type == AnalysisType.QTRACE)
 
     @property
@@ -384,18 +402,27 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         color = "green" if self.mem_line.hasAcceptableInput() else "red"
         self.mem_line.setStyleSheet(f"border: 1px solid {color}")
 
-    def on_trace_opened(self, trace: Trace) -> None:
+    def open_no_trace(self) -> None:
+        """
+        Function called when the plugin is opened wihtout any active
+        trace.
+        """
+        self.on_trace_opened(None)
+        self.set_algorithm_type_enable(AnalysisType.QTRACE, False)
+
+    def on_trace_opened(self, trace: Optional[Trace]) -> None:
         """
         Callback called when a trace is opened either via Qtrace-IDA
         or directly when Qtrace-IDA is not available.
 
         :param trace: Trace just having been opened
         """
-        print("QSynthesis: on_trace_opened")
+        print(f"QSynthesis: on_trace_opened ({trace is not None})")
+        self.set_algorithm_type_enable(AnalysisType.QTRACE, True)
         # Activate all configuration lines
         self.set_enabled_all_layout(self.targetLayout, True)
         # Initialize registers of the targetcombobox
-        self.register_box.addItems([x.name for x in ArchsManager.get_supported_regs(trace.get_arch())])
+        self.register_box.addItems([x.name for x in ArchsManager.get_supported_regs(self.arch)])
         self.set_enabled_all_layout(self.tableLayout, True)
         self.set_enabled_all_layout(self.algorithmLayout, True)
         self.run_triton_button.setEnabled(True)
