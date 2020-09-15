@@ -53,8 +53,7 @@ class SynthetizerViewHook(ida_kernwin.action_handler_t):
         from qsynthesis.plugin.view import SynthesizerView
         if self.view is None or self.view.closed:
             self.view = SynthesizerView(self.qtrace)
-            # self.view.init()
-            self.view.Show()
+            self.view.Show()  # will call OnCreate and init and on_trace_opened by recursivity
         return True
 
     def update(self, _) -> int:
