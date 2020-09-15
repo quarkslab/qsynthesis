@@ -309,12 +309,12 @@ class TritonAst:
         it as a string.
         """
         back = {}
-        for name, ast_v in self.sub_map:  # Substitute aliases with the normalized names
+        for name, ast_v in self.sub_map.items():  # Substitute aliases with the normalized names
             sym_v = ast_v.getSymbolicVariable()
             back[name] = sym_v.getAlias()
             sym_v.setAlias(name)
         final_s = self.pp_str  # FIXME: Make a proper iteration of the expression to generate something compliant with lookup tables
-        for name, ast_v in self.sub_map:  # Restore true aliases
+        for name, ast_v in self.sub_map.items():  # Restore true aliases
             sym_v = ast_v.getSymbolicVariable()
             sym_v.setAlias(back[name])
         return final_s
