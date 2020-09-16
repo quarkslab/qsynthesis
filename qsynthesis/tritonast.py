@@ -225,10 +225,10 @@ class TritonAst:
         """Returns the symbol of the current AstNode, operator if binary expression
         variable name if variable or constant value if constant."""
         t = self.type
-        if t == AstType.BV:
+        if t in [AstType.BV, AstType.VARIABLE]:
             return str(self.expr)
-        elif t == AstType.VARIABLE:
-            return str(self.expr)
+        elif t == AstType.INTEGER:
+            return str(self.expr.getInteger())
         else:
             return op_str[t]
 
@@ -618,9 +618,23 @@ class TritonAst:
         .. warning:: This method requires the ``arybo`` library that can be installed with
            (pip3 install arybo).
         """
+        def my_asm_binary(arybo_expr, dst_regs, inps, target):
+            # FIXME: ``asm_binary`` of arybo is broken as it used the function
+            # ObjectFileRef of llvmlite which is itself broken. Up until a fix
+            # is pushed I have to reimplement asm_binary and retrieve bytes with
+            # lief. cf: https://github.com/numba/llvmlite/issues/632
+            mod = asm_module(arybo_expr, dst_regs, inps, target)
+            M = llvm.parse_assembly(str(mod))
+            M.verify()
+            target = llvm_get_target(target)
+            machine = target.create_target_machine()
+            obj_bin = machine.emit_object(M)
+            p = lief.parse(obj_bin)
+            return bytes(p.get_section('.text').content)
         try:
+            import lief
             from arybo.tools.triton_ import tritonast2arybo
-            from arybo.lib.exprs_asm import asm_binary
+            from arybo.lib.exprs_asm import asm_binary, asm_module, llvm, llvm_get_target
             if all(TritonAst.symvar_type(x) == SymVarType.REGISTER for x in self.symvars):
                 if target_arch is None:
                     m = {ARCH.X86: "x86", ARCH.X86_64: "x86_64", ARCH.ARM32: "arm", ARCH.AARCH64: "aarch64"}
@@ -629,7 +643,8 @@ class TritonAst:
                     arch_name = target_arch if isinstance(target_arch, str) else target_arch.NAME.lower()
                 arybo_expr = tritonast2arybo(self.expr, use_exprs=True, use_esf=False)
                 inps = {x.getName(): (x.getAlias(), x.getBitSize()) for x in self.symvars}
-                return asm_binary(arybo_expr, (dst_reg, self.size), inps, f"{arch_name}-unknown-unknwon")
+                #return asm_binary(arybo_expr, (dst_reg, self.size), inps, f"{arch_name}-unknown-unknwon")
+                return my_asm_binary(arybo_expr, (dst_reg, self.size), inps, f"{arch_name}-unknown-unknwon")
             else:
                 raise ReassemblyError("Can only reassemble if variable are registers (at the moment)")
         except ImportError:
