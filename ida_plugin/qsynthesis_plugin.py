@@ -3,8 +3,6 @@
 from qsynthesis.plugin.dependencies import ida_idaapi, ida_kernwin, QTRACEIDA_ENABLED, TRITON_ENABLED
 import qsynthesis
 
-plugin = None
-
 
 class QSynthesisPlugin(ida_idaapi.plugin_t):
     """
@@ -62,10 +60,8 @@ class QSynthesisPlugin(ida_idaapi.plugin_t):
 
 
 def PLUGIN_ENTRY():
-    global plugin
-    if plugin is None:
-        plugin = QSynthesisPlugin()
-    return plugin
+    qsynthesis.qsynthesis_plugin = QSynthesisPlugin()
+    return qsynthesis.qsynthesis_plugin
 
 
 def main():
