@@ -358,7 +358,6 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         When changing algorithm type. Enable or disable the mode
         associated with Qtrace.
         """
-        print("Algorith type changed")
         self.qtrace_sym_type_box.setEnabled(self.analysis_type == AnalysisType.QTRACE)
 
     @property
@@ -668,6 +667,8 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
 
         # Create the purely symbolic executor
         self.symexec = SimpleSymExec(processor_to_triton_arch())
+        from triton import MODE
+        self.symexec.ctx.setMode(MODE.ONLY_ON_SYMBOLIZED, False)
 
         self.symexec.initialize_register(self.arch.INS_PTR.name, cur_addr)
         self.symexec.initialize_register(self.arch.STK_PTR.name, 0x800000)
