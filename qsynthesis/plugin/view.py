@@ -210,7 +210,6 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         PluginForm callback called when view is created. It initialize
         the whole view with all the widgets.
         """
-        print("QSynthesis: Create View (OnCreate called)")
         self.parent_widget = self.FormToPyQtWidget(form)
         # Init of the view has to be done here ?
         self.init()
@@ -220,12 +219,10 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         if self.trace:
             self.on_trace_opened(self.trace)
         else:
-            print("Trace is none (disabled qtrace mode)")
             self.set_algorithm_type_enable(AnalysisType.QTRACE, False)
 
     def Show(self) -> bool:
         """ Creates the form if not created or focuses it if it was """
-        print("QSynthesis: Showing view (Show called)")
         self.closed = False
         self.enable_popups()
         opts = ida_kernwin.PluginForm.WOPN_PERSIST
@@ -416,7 +413,8 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
 
         :param trace: Trace just having been opened
         """
-        print(f"QSynthesis: on_trace_opened ({trace is not None})")
+        if trace:
+            print(f"QSynthesis: on_trace_opened ({trace})")
         self.set_algorithm_type_enable(AnalysisType.QTRACE, True)
         # Activate all configuration lines
         self.set_enabled_all_layout(self.targetLayout, True)
@@ -790,6 +788,14 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         """
         Run the synthesis using the algorithm selected.
         """
+
+        # Check the compatibiliy
+        if not self.lookuptable.is_expr_compatible(self.ast):
+            QtWidgets.QMessageBox.critical(self, "Incompatibility",
+                                           f"Variables of the AST expression {self.ast.symvars} are incompatibles"
+                                           f"with table variables {self.lookuptable.grammar.vars_dict} (in sizes)")
+            return
+
         if self.algorithm == AlgorithmType.TOPDOWN:
             synthesizer = TopDownSynthesizer(self.lookuptable)
         else:
