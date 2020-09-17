@@ -962,6 +962,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
     def patch_and_shrink_reassembly(self, addrs, asm) -> None:
         init_addr = addrs[0]
         f = ida_funcs.get_func(init_addr)
+        f_start_ea = f.start_ea
         g = ida_gdl.FlowChart(f)
         low, high = init_addr, addrs[-1]
         block = None
@@ -984,8 +985,19 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
                 payload += ida_bytes.get_bytes(cur_addr, sz)
             cur_addr = ida_bytes.next_head(cur_addr, block.end_ea)
 
+        if asm:  # If it has not been "Noned" it has not been put in payload
+            print("reassembled payload has not been placed in the final basic bloc (abort reassembly)")
+            return
+
         # Perform the final patching
         self.safe_patch_instruction_block(init_addr, payload)
+
+        # If the block was the first of the function and we rewrote the head
+        # and the function has been destroyed. Reconstruct it.
+        if init_addr == f_start_ea and ida_funcs.get_func(init_addr) is None:
+            res = ida_funcs.add_func(init_addr)
+            print(f"Function reconstruction: {res}")
+            return
 
         # If the block was the last of the function (adjust the end of the function)
         if f.end_ea == block.end_ea:
