@@ -5,6 +5,7 @@ from enum import IntEnum
 import array
 import hashlib
 import threading
+from collections import Counter
 from time import time, sleep
 
 # third-party libs
@@ -108,6 +109,25 @@ class LookupTable:
         :returns: raw expression string if found
         """
         raise NotImplementedError("Should be implemented by child class")
+
+    def is_expr_compatible(self, expr: TritonAst) -> bool:
+        """
+        Check the compatibility of the given expression with the table.
+        The function checks sizes of expr variables against the one of
+        its own grammar.
+
+        :param expr: TritonAst expression to check
+        :return: True if the table can decide on this expression
+        """
+        e_vars = Counter(x.getBitSize() for x in expr.symvars)
+        e_table = Counter(self.grammar.vars_dict.values())
+        for sz, count in e_vars.items():
+            if sz in e_table:
+                if count > e_table[sz]:
+                    return False
+            else:
+                return False
+        return True
 
     def lookup(self, outputs: List[Output], *args,  use_cache: bool = True) -> Optional[TritonAst]:
         """
