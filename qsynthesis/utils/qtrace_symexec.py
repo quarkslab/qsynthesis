@@ -182,10 +182,10 @@ class QtraceSymExec(SimpleSymExec):
             return
 
         if self.mode == Mode.FULL_SYMBOLIC or (self.mode == Mode.PARAM_SYMBOLIC and parent_reg in self.parameter_regs):
-            self.symbolize_register(reg, 0)
+            self.symbolize_register(parent_reg, 0)
         else:
-            logging.debug(f"Concretizing the never seen register: {reg.getName()}")
-            self.concretize_register(reg)
+            logging.debug(f"Concretizing the never seen register: {parent_reg.getName()}")
+            self.concretize_register(parent_reg)
 
     def register_value(self, reg: Register) -> int:
         """

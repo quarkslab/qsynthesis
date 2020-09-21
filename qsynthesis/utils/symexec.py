@@ -167,8 +167,12 @@ class SimpleSymExec:
         if parent_reg in [self.flags_reg, self.ins_ptr_reg]:
             return
 
-        # Symbolize the register
-        self.symbolize_register(reg, 0)
+        # Ignore registers which are immutables
+        if not reg.isMutable():
+            return
+
+        # Symbolize the (full) register
+        self.symbolize_register(parent_reg, 0)
 
     def get_register_ast(self, reg_name: Union[str, Register]) -> TritonAst:
         """
@@ -352,10 +356,27 @@ class SimpleSymExec:
         :param addr: address of the instruction
         :returns: Triton Instruction object
         """
-        inst = Instruction(addr, opcode) if addr is not None else Instruction(opcode)
+        inst = Instruction(addr, opcode[:16]) if addr is not None else Instruction(opcode[:16])
         self.ctx.disassembly(inst)
         self.cur_inst = inst  # Set it if require to query get_operand_symbolic_expression
         return inst
+
+    def execute_blob(self, data: bytes, addr: Optional[Addr] = None) -> bool:
+        """
+        Execute a whole bunch of bytes as instructions. Consume the whole
+        data and execute it symbolically.
+
+        :param data: bytes of instructions to execute
+        :param addr: optional address of the first instruction
+        :returns: True if execution of all instructions succeeded
+        """
+        blob = data[:]
+        while blob:
+            i = self.disassemble(blob, addr)
+            if not self.execute_instruction(i):
+                return False
+            blob = blob[i.getSize():]
+        return True
 
     def execute(self, opcode: bytes, addr: Optional[Addr] = None) -> bool:
         """
