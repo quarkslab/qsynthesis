@@ -39,10 +39,10 @@ class SimpleSymExec:
         self._capturing = False
 
         # Add callbacks
-        self.ctx.addCallback(self._mem_write_callback, CALLBACK.SET_CONCRETE_MEMORY_VALUE)
-        self.ctx.addCallback(self._mem_read_callback, CALLBACK.GET_CONCRETE_MEMORY_VALUE)
-        self.ctx.addCallback(self._reg_write_callback, CALLBACK.SET_CONCRETE_REGISTER_VALUE)
-        self.ctx.addCallback(self._reg_read_callback, CALLBACK.GET_CONCRETE_REGISTER_VALUE)
+        self.ctx.addCallback(CALLBACK.SET_CONCRETE_MEMORY_VALUE, self._mem_write_callback)
+        self.ctx.addCallback(CALLBACK.GET_CONCRETE_MEMORY_VALUE, self._mem_read_callback)
+        self.ctx.addCallback(CALLBACK.SET_CONCRETE_REGISTER_VALUE, self._reg_write_callback)
+        self.ctx.addCallback(CALLBACK.GET_CONCRETE_REGISTER_VALUE, self._reg_read_callback)
 
         self.cur_inst = None
         self.inst_id = 0
