@@ -1,0 +1,172 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% packages
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage{tabularx,colortbl}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% parametres
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\definecolor{mahogany}{rgb}{0.75,0.25,0}
+\definecolor{template-strong}{RGB}{64,65,148}
+\definecolor{template-light}{RGB}{237,239,240}
+
+% colors from https://www.tenable.com/sc-dashboards/executive-vulnerability-metrics
+\definecolor{template-critical}{RGB}{207,0,26}
+\definecolor{template-high}{RGB}{232,76,90}
+\definecolor{template-medium}{RGB}{250,156,40} %monero:{232,171,76}
+\definecolor{template-low}{RGB}{204, 186, 85} %monero:{153,234,155}
+\definecolor{template-improvment}{RGB}{133, 175, 190} %monero:{153,234,155}
+\definecolor{template-informational}{RGB}{215,215,215}
+
+% definition des couleurs des liens
+\hypersetup{colorlinks,citecolor=InnerLinkColor,filecolor=black,linkcolor=InnerLinkColor,urlcolor=InnerLinkColor} 
+
+%\renewcommand{\familydefault}{\sfdefault} % redefinition de la police
+\setcounter{secnumdepth}{2}            % profondeur de la numerotation dans l'index
+\setcounter{tocdepth}{2}               % profondeur de la numerotation dans le doc
+
+% redefinition de la commande des chapitres
+% http://www.ctex.org/documents/packages/layout/titlesec.pdf
+\titleformat{\chapter}[display]{\LARGE\bfseries}{}{-100pt}{\textcolor{TitleColor}{\thechapter. }\textcolor{TitleColor}}[]
+% suppression de l'espace enorme apres le chapitre
+\titlespacing{\chapter}{0pt}{50pt}{\parsep}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% style des pages
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\pagestyle{fancy}                      % style de la page
+\fancyhf{}                             % remise a zero du style
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% redefinition de ``code`` afin qu'il soit en gras
+%\renewcommand{\code}[1]{\texttt{\bfseries#1}}
+
+% couleur de fond pour les extraits de code
+\definecolor{VerbatimColor}{rgb}{0.95,0.95,1.0}
+
+% definition de la mention confidentiel en fonction de la langue du document
+\iflanguage{francais}{
+  \newcommand{\confidential}{\chead{\textcolor{red}{[DIFFUSION RESTREINTE]}}}
+}{
+  %\newcommand{\confidential}{\chead{\textcolor{mahogany}{CONFIDENTIAL -- NOT FOR PUBLIC RELEASE}}}
+  \newcommand{\confidential}{\chead{\textcolor{mahogany}{Public}}}
+  %\newcommand{\confidential}{\chead{\textcolor{mahogany}{Draft}}}
+}
+%% la façon la plus sale d'enlever Confidential : l'effacer...
+
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \fancyfoot{}
+  \iflanguage{francais}{
+    \lfoot{Réf. : \myref}                     % pied de page gauche
+  }{
+    \lfoot{Ref.: \myref}
+  }
+  \cfoot{Quarkslab SAS}                 % pied de page centre
+  \rfoot{\thepage}                       % pied de page droite
+
+  \confidential                          % sans mention confidentiel : publication sur blog.quarkslab.com
+}
+
+\fancypagestyle{normal}{
+  \fancyhf{}
+  \fancyfoot{}
+  \iflanguage{francais}{
+    \lfoot{Réf. : \myref}                     % pied de page gauche
+  }{
+    \lfoot{Ref.: \myref}
+  }
+  \cfoot{Quarkslab SAS}                 % pied de page centre
+  \rfoot{\thepage}                       % pied de page droite
+  
+  \confidential                          % sans mention confidentiel : publication sur blog.quarkslab.com
+}
+
+% redefinit la table des matieres pour avoir une page sans footer, et ne pas
+% afficher le numero du chapitre (0)
+\renewcommand{\tableofcontents}{
+  \clearpage
+  \pagenumbering{roman}
+  \setcounter{page}{1}
+  \thispagestyle{empty}
+  {\Huge\bfseries \textcolor{TitleColor}{\contentsname \\}}
+
+  \@starttoc{toc}
+  
+  % don't know why it replaces \fancypagestyle{normal}
+  \iflanguage{francais}{
+    \lfoot{Réf. : \myref}                     % pied de page gauche
+  }{
+    \lfoot{Ref.: \myref}
+  }
+  \cfoot{Quarkslab SAS}                 % pied de page centre
+  \rfoot{\thepage}                       % pied de page droite
+  
+  % \confidential                          % mention confidentiel
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% page de garde
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\renewcommand{\maketitle}{
+\thispagestyle{empty}
+\setcounter{page}{0}
+\vspace*{5.0cm}
+{\huge{\bf{\@title}\\}
+\line(1,0){424}
+\vspace{0.8em}
+
+\LARGE{\textcolor{TitleColor}{Release 0.1}}%Programme d'Analyse Statique et de Tests Instrumentés pour la Sécurité}}
+}
+
+\vfill
+
+\begin{bfseries}
+%  \begin{flushright}
+%    \begin{large}
+%      \begin{tabular}{r l}
+%        \textcolor{InnerLinkColor}{Réf.}     & \myref\\
+%        \textcolor{InnerLinkColor}{Version}  & \myversion\\
+%        \textcolor{InnerLinkColor}{Date}     & \mydate\\
+%	\textcolor{InnerLinkColor}{Preparé pour} & DGA\\
+%	\textcolor{InnerLinkColor}{Réalisé par}  & Quarkslab\\
+%      \end{tabular}
+%    \end{large}
+%
+%    \vspace*{2.0cm}
+%  \end{flushright}
+
+  \begin{multicols}{2}
+    \begin{flushright}
+      \includegraphics[scale=0.2]{../../figs/logo_quarkslab_Securing_Q.png}
+       \begin{large}
+         \textcolor{TitleColor}{Quarkslab SAS}\\
+         13 rue Saint Ambroise\\
+         75011 Paris,
+         France
+       \end{large}
+    \end{flushright}
+  \end{multicols}
+    
+\end{bfseries}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% commands
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\Go}{\mathbb{G}_1}
+\newcommand{\Gt}{\mathbb{G}_2}
+\newcommand{\GT}{\mathbb{G}_T}
+\newcommand{\ZZ}{\mathbb{Z}}

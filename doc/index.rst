@@ -15,6 +15,7 @@ used (Google Level-DB) the cost is thus Log(N) with N the number of entries
 in the database. This approach appears to supersede various tools of the
 state-of-the art.
 
+
 .. toctree::
    :caption: Getting started
    :maxdepth: 2
@@ -44,10 +45,3 @@ state-of-the art.
 
     Lookup table Management <dev_doc/table>
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
