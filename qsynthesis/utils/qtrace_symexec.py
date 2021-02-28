@@ -1,4 +1,5 @@
 # built-in libs
+from __future__ import annotations
 from enum import Enum
 import struct
 import logging
@@ -60,7 +61,10 @@ class QtraceSymExec(SimpleSymExec):
 
     @property
     def inst_id(self) -> int:
-        """Overwrite Full Symbolic instruction identifier by the trace one"""
+        """Overwrite Full Symbolic instruction identifier by the trace one
+
+        :rtype: int
+        """
         return self._cur_db_inst.id
 
     @inst_id.setter
@@ -74,6 +78,7 @@ class QtraceSymExec(SimpleSymExec):
         Return the ordered list of Register for the call convention of the current architecture.
 
         :return: list of registers involved in the calling convention
+        :rtype: List[`Register <https://triton.quarkslab.com/documentation/doxygen/py_Register_page.html>`_]
         """
         return [getattr(self.ctx.registers, x.name.lower()) for x in self.trace_arch.registers_cc]
 
@@ -84,6 +89,7 @@ class QtraceSymExec(SimpleSymExec):
         It assumes registers strings exists in Triton in lowercase
 
         :return: list of Triton registers supported in the trace (namely gathered and present in DB)
+        :rtype: List[`Register <https://triton.quarkslab.com/documentation/doxygen/py_Register_page.html>`_]
         """
         if self._sup_regs is None:  # Lazily compute it. Only done once
             rgs = ArchsManager.get_supported_regs(self.trace_arch)
@@ -192,6 +198,7 @@ class QtraceSymExec(SimpleSymExec):
         Get concrete value of the given triton Register in the trace.
 
         :param reg: triton Register
+        :type reg: `Register <https://triton.quarkslab.com/documentation/doxygen/py_Register_page.html>`_
         :return: dynamic value in the trace
         """
         return getattr(self._cur_db_inst, reg.getName().upper())
@@ -202,6 +209,7 @@ class QtraceSymExec(SimpleSymExec):
         read in the trace.
 
         :param reg: triton Register
+        :type reg: `Register <https://triton.quarkslab.com/documentation/doxygen/py_Register_page.html>`_
         :return: None
         """
         self.reg_id_seen.add(reg.getId())

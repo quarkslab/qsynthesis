@@ -1,4 +1,5 @@
 # built-in libs
+from __future__ import annotations
 from pathlib import Path
 import logging
 from enum import IntEnum
@@ -97,7 +98,10 @@ class LookupTable:
 
     @property
     def size(self) -> int:
-        """Size of the table (number of entries)"""
+        """Size of the table (number of entries)
+
+        :rtype: int
+        """
         raise NotImplementedError("Should be implemented by child class")
 
     def _get_item(self, h: Hash) -> Optional[str]:
@@ -136,8 +140,8 @@ class LookupTable:
         If an entry is found a TritonAst is created and returned.
 
         :param outputs: list of output result of evaluating an ast against the inputs of this table
-        :param args: args forwarded to grammar and ultimately to the tritonAst in charge of build a
-                     new TritonAst.
+        :type: List[:py:obj:`qsynthesis.types.Output`]
+        :param args: args forwarded to grammar and ultimately to the tritonAst in charge of building a new TritonAst
         :param use_cache: Boolean enabling caching the the hash of outputs. A second call if the same outputs
                           (which is common) will not trigger a lookup in the database
         :returns: optional TritonAst corresponding of the expression found in the table
@@ -168,6 +172,7 @@ class LookupTable:
         object. Simply returns the expression string.
 
         :param outputs: list of output result of evaluating an ast against the inputs of this table
+        :type outputs: List[:py:obj:`qsynthesis.types.Output`]
         :returns: string of the expression if found
         """
         h = self.hash(outputs)
@@ -178,38 +183,58 @@ class LookupTable:
         Raw lookup for a given key in database.
 
         :param h: hash key to look for in database
+        :type h: :py:obj:`qsynthesis.types.Hash`
         :returns: string of the expression if found
+        :rtype: Optional[str]
         """
         return self._get_item(h)
 
     @property
     def is_writable(self) -> bool:
-        """ Whether the table enable being written (with new expressions) """
+        """ Whether the table enable being written (with new expressions)
+
+        :rtype: bool
+        """
         return False
 
     @property
     def name(self) -> str:
-        """ Name of the table """
+        """ Name of the table
+
+        :rtype: str
+        """
         return str(self._name)
 
     @property
     def bitsize(self) -> BitSize:
-        """ Size of expression in bit """
+        """ Size of expression in bit
+
+        :rtype: :py:obj:`qsynthesis.types.BitSize`
+        """
         return self._bitsize
 
     @property
     def var_number(self) -> int:
-        """ Maximum number of variables contained in the table """
+        """ Maximum number of variables contained in the table
+
+        :rtype: int
+        """
         return len(self.grammar.vars)
 
     @property
     def operator_number(self) -> int:
-        """ Number of operators used in this table """
+        """ Number of operators used in this table
+
+        :rtype: int
+        """
         return len(self.grammar.ops)
 
     @property
     def input_number(self) -> int:
-        """ Number of inputs used in this table """
+        """ Number of inputs used in this table
+
+        :rtype: int
+        """
         return len(self.inputs)
 
     @staticmethod
@@ -218,7 +243,9 @@ class LookupTable:
         Hash the outputs using fnv1a_128 algorithm
 
         :param outs: list of outputs to hash
+        :type outs: List[:py:obj:`qsynthesis.types.Output`]
         :returns: Hash value (int) corresponding to the fnv1a of outputs
+        :rtype: :py:obj:`qsynthesis.types.Hash`
         """
         a = array.array('Q', outs)
         FNV1A_128_OFFSET = 0x6c62272e07bb014262b821756295c58d
@@ -246,7 +273,9 @@ class LookupTable:
         endian.
 
         :param outs: list of outputs to hash
+        :type outs: List[:py:obj:`qsynthesis.types.Output`]
         :returns: Bytes corresponding to MD5 hash
+        :type: :py:obj:`qsynthesis.types.Hash`
         """
         a = array.array('Q', outs)
         h = hashlib.md5(a.tobytes())
@@ -258,7 +287,9 @@ class LookupTable:
         function depending on the ``hash_mode`` of the table.
 
         :param outs: list of outputs to hash
+        :type outs: List[:py:obj:`qsynthesis.types.Output`]
         :returns: Hash type (bytes, int ..) of the outputs
+        :rtype: :py:obj:`qsynthesis.types.Hash`
         """
         if self.hash_mode == HashType.RAW:
             return tuple(outs)
@@ -268,7 +299,10 @@ class LookupTable:
             return self.md5(outs)
 
     def __iter__(self) -> Iterable[Tuple[Hash, str]]:
-        """ Iterator of all the entries as an iterator of pair, hash, expression as string """
+        """ Iterator of all the entries as an iterator of pair, hash, expression as string
+
+        :rtype: Iterable[Tuple[:py:obj:`qsynthesis.types.Hash, str]]`
+        """
         raise NotImplementedError("Should be implemented by child class")
 
     def get_expr(self, expr: str) -> TritonAst:
@@ -303,7 +337,9 @@ class LookupTable:
         table. The result is a list of Output values.
 
         :param expr: Triton AstNode to evaluate
+        :type expr: :py:obj:`qsynthesis.types.AstNode`
         :returns: list of output values (ready to be hashed)
+        :rtype: List[:py:obj:`qsynthesis.types.Output`]
         """
         outs = []
         for i in range(len(self.inputs)):
@@ -336,6 +372,8 @@ class LookupTable:
 
         :param s: expression string to linearize
         :param symbols: dictionnary of variables names to sympy symbol objects
+
+        .. warning:: This function requires sympy to be installed !
         """
         import sympy
         try:
@@ -485,7 +523,9 @@ class LookupTable:
         Abstract function to add an entry in the lookuptable.
 
         :param hash: already computed hash to add
+        :type Hash: :py:obj:`qsynthesis.types.Hash`
         :param value: expression value to add in the table
+        :type value: str
         """
         raise NotImplementedError("Should be implemented by child class")
 
@@ -496,6 +536,7 @@ class LookupTable:
         hash first.
 
         :param worklist: list of entries to add
+        :type worklist: List[Tuple[:py:obj:`qsynthesis.types.Hash`, str]]
         :param calc_hash: whether or not hash should be performed on entries keys
         :returns: None
         """
@@ -510,6 +551,7 @@ class LookupTable:
         :param filename: filename of the table to create
         :param grammar: TritonGrammar object representing variables and operators
         :param inputs: list of inputs on which to perform evaluation
+        :type inputs: List[:py:obj:`qsynthesis.types.Input`]
         :param hash_mode: Hashing mode for keys
         :returns: lookuptable instance object
         """

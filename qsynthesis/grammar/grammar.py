@@ -1,4 +1,5 @@
 # Standard modules
+from __future__ import annotations
 import random
 
 # Qsynthesis types
@@ -18,7 +19,9 @@ class TritonGrammar(object):
         Constructor taking a set of variables (name and size) and a set of operators.
 
         :param vars: list of tuple of (name ,size)
+        :type vars: List[Tuple[:py:obj:`qsynthesis.types.Char`, :py:obj:`qsynthesis.types.BitSize`]]
         :param ops: list of BvOp representing operators
+        :type ops: List[BvOp]
         """
         self.ops = ops
         self.vars_dict = {x[0]: x[1] for x in vars}  # Dict of str->size
@@ -43,7 +46,9 @@ class TritonGrammar(object):
         valuation for each variables of the grammar and that n times.
 
         :param n: Number of Input to generate (size of the list)
+        :type n: int
         :returns: list of inputs
+        :rtype: List[:py:obj:`qsynthesis.types.Input`]
         """
         return [{var: random.getrandbits(self.vars_dict[var]) for var in self.vars} for _ in range(n)]
 

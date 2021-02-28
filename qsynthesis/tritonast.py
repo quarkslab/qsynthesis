@@ -1,4 +1,5 @@
 # Standard modules
+from __future__ import annotations
 from enum import IntEnum
 import random
 from functools import reduce
@@ -62,11 +63,17 @@ class TritonAst:
         Instanciate a TritonAst with some precomputed fields given in parameters.
 
         :param ctx: Triton context
+        :type ctx: `TritonContext <https://triton.quarkslab.com/documentation/doxygen/py_TritonContext_page.html>`_
         :param node: Triton AstNode to wrap
+        :type node: :py:obj:`qsynthesis.types.AstNode`
         :param node_c: Number of nodes contained in the expression
+        :type node_c: int
         :param depth: Depth of the expression (depth of the AST)
+        :type depth: int
         :param vars: Variables contained in this expression
+        :type vars: Dict[str, :py:obj:`qsynthesis.types.SymbolicVariable`]
         :param children: List of children as TritonAst instances
+        :type children: List[TritonAst]
 
         .. warning:: This class is not meant to be instanciated directly. It must be instanciated
              trough the :meth:`~TritonAst.make_ast` method.
@@ -88,6 +95,8 @@ class TritonAst:
         Return the list of parents of a given AST. An AST is meant to have only
         ONE parent but Triton share common expression with multiple parents (wihtin
         the same expression)
+
+        :rtype: List[TritonAst]
         """
         return list(self._parents)
 
@@ -96,6 +105,8 @@ class TritonAst:
         """
         Mapping a placeholder character ('a', 'b', 'c' ..) to all the SymbolicVariable
         of the object.
+
+        :rtype: Dict[:py:obj:`qsynthesis.types.Char`, :py:obj:`SymbolicVariable`]
         """
         return {x[0]: x[1] for x in zip((chr(x) for x in range(97, 127)), self.symvars)}
 
@@ -104,6 +115,8 @@ class TritonAst:
         """
         Similar to mapping but map a placeholder character ('a', 'b', 'c' ..) to
         the AstNode counterpart of SymbolicVariables.
+
+        :rtype: Dict[:py:obj:`qsynthesis.types.Char`, :py:obj:`qsynthesis.types.AstNode`]
         """
         return {x[0]: self.ast.variable(x[1]) for x in zip((chr(x) for x in range(97, 127)), self.symvars)}
 
@@ -112,6 +125,8 @@ class TritonAst:
         """
         Returns the type of current AstNode object. The
         type is identical to the AST_NODE enum of Triton.
+
+        :rtype: :py:obj:`qsynthesis.types.AstType`
         """
         return AstType(self.expr.getType())
 
@@ -120,6 +135,8 @@ class TritonAst:
         """
         Returns the Triton hash of the AstNode. This hash is meant to be unique
         for all AstNode, but is also meant to be similar to commutative expressions.
+
+        :rtype: int
         """
         return self.expr.getHash()
 
@@ -128,6 +145,8 @@ class TritonAst:
         """
         Returns the hash of the AstNode object. This attribute is meant to differentiate
         to different python object have the exact same AST structure.
+
+        :rtype: int
         """
         return hash(self.expr)
 
@@ -140,7 +159,7 @@ class TritonAst:
         """Returns of the TritonAst is a variable node."""
         return self.type == AstType.VARIABLE
 
-    def is_constant(self):
+    def is_constant(self) -> bool:
         """Returns True if the type of the object is Bitvector (namely constant)"""
         return self.type == AstType.BV
 
@@ -148,6 +167,7 @@ class TritonAst:
     def variable_id(self) -> int:
         """
         Get the Triton unique id for a variable.
+
         :raises: KeyError
         """
         if self.is_variable():
@@ -157,13 +177,19 @@ class TritonAst:
 
     @property
     def var_num(self) -> int:
-        """Returns the number of different symbolic variables of the expression"""
+        """Returns the number of different symbolic variables of the expression
+
+        :rtype: int
+        """
         return len(self._symvars)
 
     @property
     def pp_str(self) -> str:
         """Hacky function that strips masks used in the AST_REPRESENTATION.PYTHON
-        of Triton."""
+        of Triton.
+
+        :rtype: str
+        """
         return str(self.expr).replace(" & 0xFFFFFFFFFFFFFFFF", "")
 
     def visit_expr(self) -> Generator['TritonAst', None, None]:
@@ -176,7 +202,10 @@ class TritonAst:
 
     @property
     def symvars(self) -> List[SymbolicVariable]:
-        """Returns the list of SymbolicVariable object of the current object"""
+        """Returns the list of SymbolicVariable object of the current object
+
+        :rtype: List[:py:obj:`qsynthesis.types.SymbolicVariable`]
+        """
         return list(self._symvars.values())
 
     @staticmethod
@@ -185,9 +214,9 @@ class TritonAst:
         Static method returning the type of a given symbolic variable object
 
         :param v: symbolic variable object
-        :type v: SymbolicVariable
+        :type v: :py:obj:`qsynthesis.types.SymbolicVariable`
         :return: Type of the symbolic variables
-        :rtype: SymVarType
+        :rtype: :py:obj:`qsynthesis.types.SymVarType`
         """
         return SymVarType(v.getType())
 
@@ -212,18 +241,27 @@ class TritonAst:
 
     @property
     def node_count(self) -> int:
-        """Pre-computed O(1) count of the number of node contained in this AST."""
+        """Pre-computed O(1) count of the number of node contained in this AST.
+
+        :rtype: int
+        """
         return self._node_count
 
     @property
-    def depth(self):
-        """Pre-computed O(1) count of the depth of the AST."""
+    def depth(self) -> int:
+        """Pre-computed O(1) count of the depth of the AST
+
+        :rtype: int
+        """
         return self._depth
 
     @property
     def symbol(self) -> str:
         """Returns the symbol of the current AstNode, operator if binary expression
-        variable name if variable or constant value if constant."""
+        variable name if variable or constant value if constant.
+
+        :rtype: str
+        """
         t = self.type
         if t in [AstType.BV, AstType.VARIABLE]:
             return str(self.expr)
@@ -452,6 +490,7 @@ class TritonAst:
 
         :param n: number of samples to generate
         :return: a list of n (inputs, output) tuples
+        :rtype: :py:obj:`qsynthesis.types.IOVector`
         """
         samples = []
 
@@ -468,7 +507,9 @@ class TritonAst:
 
         :param inp: a mapping of variable to a given input value which will be used
                     as concrete values for the symbolic variables in the wrapped AST
+        :type inp: :py:obj:`qsynthesis.types.Input`
         :return: The result computed by means of evaluating the AST
+        :rtype: :py:obj:`qsynthesis.types.Output`
         """
         for v_name, symvar in self.mapping.items():
             self.ctx.setConcreteVariableValue(symvar, inp[v_name])
@@ -510,6 +551,7 @@ class TritonAst:
         AstNode object recursively. The complexity is O(N) with N the number of node.
 
         :param expr: AstNode to iterate
+        :type expr: :py:obj:`qsynthesis.types.AstNode`
         :returns: Number of nodes in the AST.
 
         .. note:: The way of counting nodes is different from the number of nodes of
@@ -533,6 +575,7 @@ class TritonAst:
         AstNode object recursively. The complexity is O(N) with N the depth of the AST.
 
         :param expr: AstNode to iterate
+        :type expr: :py:obj:`qsynthesis.types.AstNode`
         :returns: AST depth
         """
         def rec(e):
@@ -680,7 +723,10 @@ class TritonAst:
     def make_graph(self) -> 'Graph':
         """
         Generate a graph object representing the AST
-        as a graph_tool object. 
+        as a graph_tool object.
+
+        .. warning:: This method requires the ``graph_tool`` python library that can be installed
+           by following `https://git.skewed.de/count0/graph-tool/-/wikis/installation-instructions`
         """
         from graph_tool import Graph
         graph = Graph(directed=True)

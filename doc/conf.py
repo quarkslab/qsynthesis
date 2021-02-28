@@ -18,12 +18,15 @@ sys.path.insert(0, os.path.abspath('./mock'))
 # -- Project information -----------------------------------------------------
 
 project = 'QSynthesis'
-copyright = '2020, Quarkslab'
+copyright = '2021, Quarkslab'
 author = 'Robin David'
 
 # The full version, including alpha/beta/rc tags
 release = '0.1'
 
+
+# The name of the Pygments (syntax highlighting) style to use.
+pygments_style = 'friendly'  # also monokai, friendly, colorful
 
 # -- General configuration ---------------------------------------------------
 
@@ -33,7 +36,10 @@ release = '0.1'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.todo',
-    'breathe'
+    'sphinx.ext.viewcode',
+    'breathe',
+    'sphinx.ext.intersphinx',
+    'sphinx_fontawesome'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -58,3 +64,23 @@ html_theme = "sphinx_rtd_theme"
 html_static_path = ['figs']
 
 autodoc_default_flags = ['members', 'inherited-members']
+
+
+autoclass_content = "both"  # Comment class with both class docstring and __init__ docstring
+
+autodoc_typehints = "signature"
+
+autodoc_type_aliases = {
+    'Addr': 'qsynthesis.types.Addr',
+    'BitSize': 'qsynthesis.types.BitSize',
+    'ByteSize': 'qsynthesis.types.ByteSize',
+    'Hash': 'qsynthesis.types.Hash',
+    'Char': 'qsynthesis.types.Char',
+    'Input': 'qsynthesis.types.Input',
+    'Output': 'qsynthesis.types.Output',
+    'IOPair': 'qsynthesis.types.IOPair',
+    'IOVector': 'qsynthesis.types.IOVector'
+}
+
+
+intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}

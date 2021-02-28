@@ -1,4 +1,5 @@
 # built-in libs
+from __future__ import annotations
 from typing import List, Set, Iterable, Union, Optional
 
 # third-party libs
@@ -22,6 +23,7 @@ class SimpleSymExec:
         Initialize symbolic execution
 
         :param arch: Triton architecture identifier or string of it
+        :type: `ARCH <https://triton.quarkslab.com/documentation/doxygen/py_ARCH_page.html>`_
         """
         arch = getattr(ARCH, arch.upper()) if isinstance(arch, str) else arch
         self.ctx = TritonContext(arch)
@@ -53,6 +55,8 @@ class SimpleSymExec:
         """
         Within a single instruction, used to represent an expression id.
         Programmed as an auto-increment variable upon each read.
+
+        :rtype: int
         """
         self._expr_id += 1
         return self._expr_id - 1
@@ -64,7 +68,10 @@ class SimpleSymExec:
 
     @property
     def arch(self) -> ARCH:
-        """Return the triton architecture identifier of the current context"""
+        """Return the triton architecture identifier of the current context
+
+        :rtype: `ARCH <https://triton.quarkslab.com/documentation/doxygen/py_ARCH_page.html>`_
+        """
         return self.ctx.getArchitecture()
 
     @property
@@ -72,6 +79,8 @@ class SimpleSymExec:
         """
         Portable function the get the flag register accross all Triton
         supported architectures.
+
+        :rtype: `Register <https://triton.quarkslab.com/documentation/doxygen/py_Register_page.html>`_
         """
         _mapper = {ARCH.X86: "eflags", ARCH.X86_64: "eflags", ARCH.ARM32: "cpsr", ARCH.AARCH64: "spsr"}  # Not really true for spsr
         return getattr(self.ctx.registers, _mapper[self.arch])
@@ -81,13 +90,18 @@ class SimpleSymExec:
         """
         Portable function get get the instruction pointer register depending
         on the current architecture.
+
+        :rtype: `Register <https://triton.quarkslab.com/documentation/doxygen/py_Register_page.html>`_
         """
         _mapper = {ARCH.X86: "eip", ARCH.X86_64: "rip", ARCH.ARM32: "pc", ARCH.AARCH64: "pc"}
         return getattr(self.ctx.registers, _mapper[self.arch])
 
     @property
     def current_address(self) -> Addr:
-        """Return the address of the current instruction."""
+        """Return the address of the current instruction.
+
+        :rtype: :py:obj:`qsynthesis.types.Addr`
+        """
         return self.cur_inst.getAddress()
 
     def turn_on(self) -> None:
@@ -179,7 +193,8 @@ class SimpleSymExec:
         Get the TritonAst associated with the given register. The register
         can either be a string or a triton register object.
 
-        :param reg_name: register of which to get the AST
+        :param reg_name: register name or triton register
+        :type reg_name: Union[str, `Register <https://triton.quarkslab.com/documentation/doxygen/py_Register_page.html>`_]
         :returns: the TritonAst associated to that register
         """
         reg = getattr(self.ctx.registers, reg_name.lower()) if isinstance(reg_name, str) else reg_name
@@ -196,8 +211,11 @@ class SimpleSymExec:
         Get the TritonAst associated with the given address and size.
 
         :param addr: address of which to create the AST
+        :type addr: :py:obj:`qsynthesis.types.Addr`
         :param size: Size of the read in memory (in bytes)
+        :type size: :py:obj:`qsynthesis.types.ByteSize`
         :returns: the TritonAst of the memory content
+        :rtype: TritonAst
         """
         ast = self.ctx.getMemoryAst(MemoryAccess(addr, size))
         actx = self.ctx.getAstContext()
@@ -211,7 +229,9 @@ class SimpleSymExec:
 
         :param op_num: operand number (starting at 0)
         :param inst: Triton Instruction of which to get the operand
+        :type inst: Optional[`Instruction <https://triton.quarkslab.com/documentation/doxygen/py_Instruction_page.html>`_]
         :returns: the TritonAst of the operand
+        :rtype: TritonAst
         """
         inst = self.cur_inst if inst is None else inst
         op = inst.getOperands()[op_num]
@@ -232,7 +252,9 @@ class SimpleSymExec:
         Get the current SymbolicExpression (triton object) of the register given in parameter.
 
         :param reg_name: register name, or Register object
+        :type reg_name: Union[str, `Register <https://triton.quarkslab.com/documentation/doxygen/py_Register_page.html>`_]
         :returns: current symbolic expression of the register
+        :rtype: `SymbolicExpression <https://triton.quarkslab.com/documentation/doxygen/py_SymbolicExpression_page.html>`_
         """
         reg = getattr(self.ctx.registers, reg_name.lower()) if isinstance(reg_name, str) else reg_name
         return self.ctx.getSymbolicRegister(reg)
@@ -244,8 +266,11 @@ class SimpleSymExec:
         the addr+size expression.
 
         :param addr: address in memory
+        :type addr: :py:obj:`qsynthesis.types.Addr`
         :param size: size in bytes of the memory read
+        :type ByteSize: :py:obj:`qsynthesis.types.ByteSize`
         :returns: symbolic expression representing the memory content value
+        :rtype: `SymbolicExpression <https://triton.quarkslab.com/documentation/doxygen/py_SymbolicExpression_page.html>`_
         """
         ast = self.ctx.getMemoryAst(MemoryAccess(addr, size))
         sym = self.ctx.newSymbolicExpression(ast)
@@ -261,7 +286,9 @@ class SimpleSymExec:
         a new symbolic expression.
 
         :param op_num: operand number
+        :type op_num: int
         :returns: the symbolic expression of the operand
+        :rtype: `SymbolicExpression <https://triton.quarkslab.com/documentation/doxygen/py_SymbolicExpression_page.html>`_
         """
         op = self.cur_inst.getOperands()[op_num]
         t = op.getType()
@@ -282,8 +309,11 @@ class SimpleSymExec:
         Symbolize the given register with the associated concrete value.
 
         :param reg: Register to symbolize
+        :type reg: `Register <https://triton.quarkslab.com/documentation/doxygen/py_Register_page.html>`_
         :param value: Concrete value to assign the register (required for soundness)
+        :type value: int
         :returns: the symbolic variable created for the register
+        :rtype: `SymbolicVariable <https://triton.quarkslab.com/documentation/doxygen/py_SymbolicVariable_page.html>`_
         """
         self.reg_id_seen.add(reg.getId())
         symvar = self.ctx.symbolizeRegister(reg, reg.getName())
@@ -303,7 +333,9 @@ class SimpleSymExec:
         Symbolize the given triton MemoryAccess. Into a new SymbolicVariable.
 
         :param mem: memory access to symbolize
+        :type mem: `MemAccess <https://triton.quarkslab.com/documentation/doxygen/py_MemoryAccess_page.html>`_
         :returns: symbolic variable representing the content
+        :rtype: `SymbolicVariable <https://triton.quarkslab.com/documentation/doxygen/py_SymbolicVariable_page.html>`_
         """
         # The issue here is that we need to assign a specific comment
         # on symbolic expression to attach them to a specific instruction
@@ -339,6 +371,7 @@ class SimpleSymExec:
         either be a string or a Register object.
 
         :param reg: reg name string or register object
+        :type reg: Union[str, `Register <https://triton.quarkslab.com/documentation/doxygen/py_Register_page.html>`_]
         :param value: integer value of the register
         """
         reg = getattr(self.ctx.registers, reg.lower()) if isinstance(reg, str) else reg
@@ -353,8 +386,11 @@ class SimpleSymExec:
         If not provided the current instruction pointer in the internal context is used.
 
         :param opcode: bytes of the instruction
+        :type opcode: bytes
         :param addr: address of the instruction
+        :type addr: Optional[:py:obj:`qsynthesis.types.Addr`]
         :returns: Triton Instruction object
+        :rtype: `Instruction <https://triton.quarkslab.com/documentation/doxygen/py_Instruction_page.html>`_
         """
         inst = Instruction(addr, opcode[:16]) if addr is not None else Instruction(opcode[:16])
         self.ctx.disassembly(inst)
@@ -367,8 +403,11 @@ class SimpleSymExec:
         data and execute it symbolically.
 
         :param data: bytes of instructions to execute
+        :type data: bytes
         :param addr: optional address of the first instruction
+        :type addr: Optional[:py:obj:`qsynthesis.types.Addr`]
         :returns: True if execution of all instructions succeeded
+        :rtype: bool
         """
         blob = data[:]
         while blob:
@@ -383,8 +422,11 @@ class SimpleSymExec:
         Symbolically execute the given opcode at the given optional address.
 
         :param opcode: bytes of the instruction
+        :type opcode: bytes
         :param addr: optional address of the instruction
+        :type addr: Optional[:py:obj:`qsynthesis.types.Addr`]
         :returns: True if the instruction has sucessfully been processed
+        :rtype: bool
         """
         inst = Instruction(addr, opcode) if addr is not None else Instruction(opcode)
         return self.execute_instruction(inst)
@@ -394,7 +436,9 @@ class SimpleSymExec:
         Symbolically execute the given triton Instruction already instanciated.
 
         :param instr: Triton Instruction
+        :type instr: `Instruction <https://triton.quarkslab.com/documentation/doxygen/py_Instruction_page.html>`_
         :returns: True if the processing has successfully been performed
+        :rtype: bool
         """
         # Update object values
         self.cur_inst = instr

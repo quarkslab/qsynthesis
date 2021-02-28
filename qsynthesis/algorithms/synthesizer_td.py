@@ -1,4 +1,5 @@
 # built-in module
+from __future__ import annotations
 import logging
 from typing import Tuple
 
@@ -9,7 +10,7 @@ from qsynthesis.algorithms.synthesizer_base import SynthesizerBase
 
 class TopDownSynthesizer(SynthesizerBase):
     """
-    Synthesize with Top-Down ONLY AST search based on Triton AST.
+    Synthesize with a Top-Down **only** AST search based on Triton AST.
     The complexity in worst case of the search is then O(n) with
     n the number of nodes in the AST to synthesize.
     """
