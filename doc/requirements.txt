@@ -1,6 +1,8 @@
 sphinx_rtd_theme
 sphinx
 breathe
+sphinx_fontawesome
+sphinx-autodoc-typehints
 
 # added for mock
 psutil
