@@ -33,3 +33,7 @@ which interface is given below. At the moment three children clases implement th
 
 .. autoclass:: qsynthesis.tables.base.LookupTable
    :members:
+
+
+.. autoclass:: qsynthesis.tables.base.HashType
+   :members:

@@ -1,4 +1,5 @@
 # built-in modules
+from __future__ import annotations
 import logging
 
 # qsynthesis deps
@@ -146,9 +147,12 @@ class SynthesizerBase:
         The result is an Output (integer)
 
         :param ioast: TritonAst to evaluate
+        :type ioast: TritonAst
         :param input: Input on which to evaluate the AST. All variables of ioast must
                       be defined in input
+        :type input: :py:obj:`qsynthesis.types.Input`
         :returns: Output which is the result of evaluation (made by Triton)
+        :rtype: :py:obj:`qsynthesis.types.Output`
         """
         self.call_to_eval += 1
         tup_inputs = tuple(input.items())
