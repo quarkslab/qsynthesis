@@ -103,7 +103,7 @@ Reassembly
 
 The last feature provided by the plugin is a trivial *(and unsound)* reassembly of the
 synthesized AST into fresh unobfuscated instructions. The reassembly process use the
-amazing `ayrbo <https://github.com/quarkslab/arybo>` project that turns Triton ASTs
+amazing `ayrbo <https://github.com/quarkslab/arybo>`_ project that turns Triton ASTs
 back to LLVM and then compiled bytes. When clicking the 'Reassemble' button. A dialog
 window asks for various parameters.
 
@@ -113,6 +113,7 @@ window asks for various parameters.
    :alt: Reassembly options
 
 The three scenarios are:
+
 * No ticking of any options: The synthesized expression is reassembled in an IDA graph view
 * Ticking 'patch functions bytes': All dependent instructions (cf. above), are erased with
 NOPs and the reassembled instructions are put on the 'To' location where it was extracted
