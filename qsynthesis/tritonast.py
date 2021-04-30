@@ -190,7 +190,8 @@ class TritonAst:
 
         :rtype: str
         """
-        return str(self.expr).replace(" & 0xFFFFFFFFFFFFFFFF", "")
+        return str(self.expr).replace(" & 0xFFFFFFFFFFFFFFFF", "").replace(" & 0xffffffffffffffff", "")
+
 
     def visit_expr(self) -> Generator['TritonAst', None, None]:
         """ Pre-Order visit of all the sub-AstNode"""
@@ -690,8 +691,8 @@ class TritonAst:
                 return my_asm_binary(arybo_expr, (dst_reg, self.size), inps, f"{arch_name}-unknown-unknwon")
             else:
                 raise ReassemblyError("Can only reassemble if variable are registers (at the moment)")
-        except ImportError:
-            raise ReassemblyError("Cannot import arybo, while it is required (pip3 install arybo)")
+        except ImportError as e:
+            raise ReassemblyError(f"Cannot import arybo, while it is required (pip3 install arybo): {e}")
         except NameError:
             raise ReassemblyError(f"Invalid target architecture '{target_arch}' provided")
         except Exception as e:

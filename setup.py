@@ -13,11 +13,11 @@ try:
         sys.exit(1)
 except ImportError:
     print("Triton module should be installed first")
-    sys.exit(1)
+    #sys.exit(1)
 
 #base_deps = ["orderedset", "psutil", "click", "plyvel", "requests", "arybo"]
 generate_deps = ['pydffi', 'sympy']
-server_deps = ['fastapi']
+server_deps = ['fastapi', 'uvicorn']
 
 
 setup(
@@ -26,7 +26,7 @@ setup(
     description="Python API to synthesize Triton AST's",
     packages=find_packages(),
     setup_requires=[],
-    install_requires=["orderedset", "psutil", "click", "plyvel", "arybo", "requests"],
+    install_requires=["orderedset", "psutil", "click", "plyvel", "arybo", "requests", "llvmlite"],
     tests_require=[],
     license="qb",
     author="Quarkslab",

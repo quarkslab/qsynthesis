@@ -305,7 +305,7 @@ class LookupTable:
         """
         raise NotImplementedError("Should be implemented by child class")
 
-    def get_expr(self, expr: str) -> TritonAst:
+    def get_expr(self, expr: str) -> AstNode:
         """
         Utility function that returns a TritonAst from a given expression string.
         A TritonContext local to the table is created to enable generating such ASTs.

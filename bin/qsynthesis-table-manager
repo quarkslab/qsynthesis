@@ -174,9 +174,11 @@ def serve_command(table_file, port):
         from fastapi import FastAPI, Query
         import uvicorn
     except ImportError:
-        raise click.Abort("Cannot import fastapi or uvicorn (pip3 install fastapi uvicorn")
+        logging.critical("Cannot import fastapi or uvicorn (pip3 install fastapi uvicorn)")
+        raise click.Abort("")
 
     app = FastAPI()
+
 
     @app.get("/")
     def read_root():
