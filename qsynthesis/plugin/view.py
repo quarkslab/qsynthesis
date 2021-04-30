@@ -983,12 +983,16 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         cur_addr = init_addr
         payload = b""
         while cur_addr < block.end_ea:  # Iterate the whole basicblock
-            if cur_addr >= self.stop_addr and asm:  #
+            if not addrs and asm: # if we poped all the dependencies we can put the synthesized expr
                 payload += asm
                 asm = None
+            
             if cur_addr not in addrs:  # Instruction not in dependency so keep it
                 sz = ida_bytes.get_item_size(cur_addr)
                 payload += ida_bytes.get_bytes(cur_addr, sz)
+            else:
+                addrs.remove(cur_addr)  # remove the address from deps
+
             cur_addr = ida_bytes.next_head(cur_addr, block.end_ea)
 
         if asm:  # If it has not been "Noned" it has not been put in payload
