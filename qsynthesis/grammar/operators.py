@@ -70,11 +70,12 @@ OPERATORS = {               # ID               strop    Trit op         Py op   
     BvOp.SUB:        Operator(BvOp.SUB,        '-',     operator.sub,   CU.funcs.sub,        CU.funcs.sub_arr,    2,   False, False, True,   False,  False, False),
     BvOp.SHL:        Operator(BvOp.SHL,        "<<",    operator.lshift, CU.funcs.lshift,    CU.funcs.lshift_arr, 2,   False, False, False,  False,  True,  False),
     BvOp.LSHR:       Operator(BvOp.LSHR,       ">>",    operator.rshift, CU.funcs.rshift,    CU.funcs.rshift_arr, 2,   False, False, False,  False,   False, False),
-    # BvOp.ROL:        Operator(BvOp.ROL,        "bvrol", "bvrol",        CU.funcs.rol,        2,   False, False, False,  True,   False, False),
-    # BvOp.ROR:        Operator(BvOp.ROR,        "bvror", "bvror",        CU.funcs.ror,        2,   False, False, False,  True,   False, False),
-    # BvOp.UDIV:       Operator(BvOp.UDIV,       "/",     operator.truediv,CU.funcs.udiv,      2,   False, False, False,  True,   False, False),
-    # BvOp.UREM:       Operator(BvOp.UREM,       "%",     operator.mod,   CU.funcs.urem,       2,   False, False, False,  False,  False, False),
-    # BvOp.ASHR:       Operator(BvOp.ASHR,       "bvashr","bvashr",       CU.funcs.ashr,       2,   False, False, False,  True,  False, False),
+
+    BvOp.ROL:        Operator(BvOp.ROL,        "bvrol", "bvrol",         CU.funcs.rol,       CU.funcs.rol_arr,    2,   False, False, False,  True,   False, False),
+    BvOp.ROR:        Operator(BvOp.ROR,        "bvror", "bvror",         CU.funcs.ror,       CU.funcs.ror_arr,    2,   False, False, False,  True,   False, False),
+    # BvOp.UDIV:       Operator(BvOp.UDIV,       "/",     operator.truediv,CU.funcs.udiv,      CU.funcs.udiv_arr,   2,   False, False, False,  False,  False, False), # TODO: Fix /0
+    # BvOp.UREM:       Operator(BvOp.UREM,       "%",     operator.mod,    CU.funcs.urem,      CU.funcs.urem_arr,   2,   False, False, False,  False,  False, False), # TODO: Fix /0
+    BvOp.ASHR:       Operator(BvOp.ASHR,       "bvashr", "bvashr",       CU.funcs.ashr,      CU.funcs.ashr_arr,   2,   False, False, False,  True,   False, False),
     # BvOp.SDIV:       Operator(BvOp.SDIV,       "bvsdiv","bvsdiv",       operator.truediv,    2,   False, False, False,  False,  False, False),
     # BvOp.SREM:       Operator(BvOp.SREM,       "bvsrem","bvsrem",       None,                2,   False, False, True,   True,   False, False),
     # BvOp.SMOD:       Operator(BvOp.SMOD,       "bvsmod","bvsmod",       CU.funcs.mod,        2,   False, False, True,   False,  False, False),
