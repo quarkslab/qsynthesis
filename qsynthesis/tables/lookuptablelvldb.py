@@ -49,7 +49,7 @@ class LookupTableLevelDB(LookupTable):
         # TODO: If it exists deleting it ?
         db = plyvel.DB(str(filename), create_if_missing=True)
 
-        metas = dict(hash_mode=hash_mode.name, operators=[x.value for x in grammar.ops])
+        metas = dict(hash_mode=hash_mode.name, operators=[x.name for x in grammar.ops])
         db.put(META_KEY, json.dumps(metas).encode())
         db.put(VARS_KEY, json.dumps(grammar.vars_dict).encode())
         db.put(INPUTS_KEY, json.dumps(inputs).encode())
@@ -67,7 +67,7 @@ class LookupTableLevelDB(LookupTable):
         """
         db = plyvel.DB(str(file))
         metas = json.loads(db.get(META_KEY))
-        ops = [BvOp(x) for x in metas['operators']]
+        ops = [BvOp[x] for x in metas['operators']]
         vrs = list(json.loads(db.get(VARS_KEY)).items())
         inps = json.loads(db.get(INPUTS_KEY))
         grammar = TritonGrammar(vars=vrs, ops=ops)
@@ -107,7 +107,9 @@ class LookupTableLevelDB(LookupTable):
                 for outs, s in entries[step:step+chunk_size]:
                     wb.put(do_hash(outs), s.encode())
         if update_count:
-            self.db.put(SIZE_KEY, (str(int(self.db.get(SIZE_KEY)) + count)).encode())
+            cur_count = self.db.get(SIZE_KEY)
+            new_count = count if cur_count is None else int(cur_count)+count
+            self.db.put(SIZE_KEY, str(new_count).encode())
 
     def __iter__(self) -> Iterator[Tuple[Hash, str]]:
         """ Iterator of all the entries as an iterator of pair, hash, expression as string """

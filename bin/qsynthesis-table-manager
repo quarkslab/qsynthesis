@@ -155,51 +155,6 @@ def check_command(table_file):
     logging.info(f"[OK:{good}/{count}]{'': <15}")
 
 
-@main.command(name="runserver")
-@click.argument('table_file', type=click.Path(exists=True))
-@click.option('-p', '--port', type=int, default=8080, help="Service port to listen on")
-def serve_command(table_file, port):
-    """Run the REST API to serve a given table database"""
-    logging.basicConfig(level=logging.INFO, format='%(message)s')
-    table_file = Path(table_file)
-
-    try:
-        table = LookupTableLevelDB.load(table_file)
-    except IOError:
-        click.Abort("Lookup table database is invalid")
-
-    logging.info("preload table size")
-
-    try:
-        from fastapi import FastAPI, Query
-        import uvicorn
-    except ImportError:
-        logging.critical("Cannot import fastapi or uvicorn (pip3 install fastapi uvicorn)")
-        raise click.Abort("")
-
-    app = FastAPI()
-
-
-    @app.get("/")
-    def read_root():
-        return {'size': table.size,
-                'hash_mode': table.hash_mode.name,
-                'inputs': table.inputs,
-                'grammar': table.grammar.to_dict()}
-
-    @app.get("/entry/{hash}")
-    def read_item(hash: str = Query(None, min_length=32, max_length=32, regex="^[0-9a-z]+$")):
-        decoded = unhexlify(hash)
-        entry = table.lookup_hash(decoded)
-        print(entry)
-        if entry:
-            return {"hash": hash, "expression": entry}
-        else:
-            return {}
-
-    uvicorn.run(app, host="0.0.0.0", port=port)
-
-
 @main.command(name="compare")
 @click.argument('table1', type=click.Path(exists=True))
 @click.argument('table2', type=click.Path(exists=True))

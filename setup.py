@@ -18,7 +18,7 @@ except ImportError:
 #base_deps = ["orderedset", "psutil", "click", "plyvel", "requests", "arybo"]
 generate_deps = ['pydffi', 'sympy']
 server_deps = ['fastapi', 'uvicorn']
-
+assembly_deps = ["arybo", "llvmlite"]
 
 setup(
     name="qsynthesis",
@@ -26,7 +26,7 @@ setup(
     description="Python API to synthesize Triton AST's",
     packages=find_packages(),
     setup_requires=[],
-    install_requires=["orderedset", "psutil", "click", "plyvel", "arybo", "requests", "llvmlite"],
+    install_requires=["orderedset", "psutil", "click", "plyvel", "requests"],
     tests_require=[],
     license="qb",
     author="Quarkslab",
@@ -36,10 +36,10 @@ setup(
         'Operating System :: OS Independent',
     ],
     extras_require={
-        'all': generate_deps+server_deps,
+        'all': assembly_deps+generate_deps+server_deps,
         'generator': generate_deps,
         'server': server_deps
     },
     test_suite="",
-    scripts=['bin/qsynthesis-table-manager']
+    scripts=['bin/qsynthesis-table-manager', 'bin/qsynthesis-table-server']
 )
