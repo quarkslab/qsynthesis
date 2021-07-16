@@ -31,7 +31,7 @@ class LookupTableREST(LookupTable):
         self._size = 0
 
     @staticmethod
-    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Input], hash_mode: HashType = HashType.RAW) -> 'LookupTableREST':
+    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Input], hash_mode: HashType = HashType.RAW, constants: List[int] = []) -> 'LookupTableREST':
         """
         Such tables cannot be created as they are read-only databases.
         """
