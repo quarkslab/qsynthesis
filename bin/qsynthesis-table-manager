@@ -50,10 +50,13 @@ def main():
 @click.option('--hash-mode', default=HashType.RAW, type=click.Choice([x.name for x in HashType]), help="Hash function for keys in table")
 @click.option('--watchdog', type=float, help="Activate RAM watchdog (percentage of load when to stop)")
 @click.option('-t', '--type', type=click.Choice(["db", "bin"]), default="db", help="Type of database to create")
+@click.option('-c', '--cst', type=str, help="Constant to add in the generation process", multiple=True)
 @click.option('--linearization', is_flag=True, type=bool, default=False, help="If set activate linearization of expressions")
-def generate_command(output_file, bitsize, var_num, input_num, random_level, op_num, verbosity, k, ops, inputs, hash_mode, watchdog, type, linearization):
+def generate_command(output_file, bitsize, var_num, input_num, random_level, op_num, verbosity, k, ops, inputs, hash_mode, watchdog, type, cst, linearization):
     """ Table generation utility """
     logging.basicConfig(level=logging.DEBUG if verbosity else logging.INFO, format='%(message)s')
+
+    constants = [int(x, 16 if x.startswith("0x") else 10) for x in cst]
 
     try:
         import pydffi
@@ -92,12 +95,12 @@ def generate_command(output_file, bitsize, var_num, input_num, random_level, op_
 
         logging.info(f"Watchdog value: {watchdog}")
         mp = {"db": LookupTableLevelDB, "bin": LookupTableRaw}
-        ltm = mp[type].create(p.absolute(), grammar, inputs, HashType[hash_mode])
+        ltm = mp[type].create(p.absolute(), grammar, inputs, HashType[hash_mode], constants)
         try:
             if watchdog:
-                ltm.generate(do_watch=True, watchdog_threshold=watchdog, linearize=linearization)
+                ltm.generate(constants=constants, do_watch=True, watchdog_threshold=watchdog, linearize=linearization)
             else:
-                ltm.generate(linearize=linearization)
+                ltm.generate(constants=constants, linearize=linearization)
         except KeyboardInterrupt:
             logging.warning("Stop required")
 
@@ -247,6 +250,21 @@ def merge_command(in_table, out_table):
             print(f"count:{c}/{sz} (imported:{i})\r", end="")
 
     print(f"Imported: {i}")
+
+
+@main.command(name="dump")
+@click.option('-l', '--limit', type=int, default=0, help='maximum number of entries to dump')
+@click.argument('in_table', type=click.Path(exists=True))
+def dump_command(limit, in_table):
+    """Merge entries of the first database in the second"""
+    lkp_in = LookupTableLevelDB.load(in_table)
+
+    counter = 0
+    for hash, s in lkp_in:
+        if counter > limit > 0:
+            break
+        print(f"{hash} -> {s}")
+        counter += 1
 
 
 if __name__ == "__main__":

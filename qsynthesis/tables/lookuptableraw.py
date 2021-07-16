@@ -113,7 +113,7 @@ class LookupTableRaw(LookupTable):
             return lkp
 
     @staticmethod
-    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Input], hash_mode: HashType = HashType.RAW) -> 'LookupTableRaw':
+    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Input], hash_mode: HashType = HashType.RAW, constants: List[int] = []) -> 'LookupTableRaw':
         """
         Create a new empty lookup table with the given initial parameters, grammars, inputs
         and hash_mode.
@@ -122,11 +122,13 @@ class LookupTableRaw(LookupTable):
         :param grammar: TritonGrammar object representing variables and operators
         :param inputs: list of inputs on which to perform evaluation
         :param hash_mode: Hashing mode for keys
+        :param constants: list of constants used
         :returns: LookupTableRaw instance object
         """
         with open(filename, "wb") as f:
             d = grammar.to_dict()
             d["hash_mode"] = hash_mode.name
+            d["constants"] = constants
             f.write(f"{json.dumps(d)}\n".encode())
             f.write(f"{json.dumps(inputs)}\n".encode())
         return LookupTableRaw(grammar, inputs, hash_mode, filename)

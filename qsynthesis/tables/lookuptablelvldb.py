@@ -35,7 +35,7 @@ class LookupTableLevelDB(LookupTable):
         self.db = None
 
     @staticmethod
-    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Input], hash_mode: HashType = HashType.RAW) -> 'LookupTableLevelDB':
+    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Input], hash_mode: HashType = HashType.RAW, constants: List[int] = []) -> 'LookupTableLevelDB':
         """
         Create a new empty lookup table with the given initial parameters, grammars, inputs
         and hash_mode.
@@ -44,12 +44,13 @@ class LookupTableLevelDB(LookupTable):
         :param grammar: TritonGrammar object representing variables and operators
         :param inputs: list of inputs on which to perform evaluation
         :param hash_mode: Hashing mode for keys
+        :param constants: list of constants used
         :returns: LookupTableLevelDB instance object
         """
         # TODO: If it exists deleting it ?
         db = plyvel.DB(str(filename), create_if_missing=True)
 
-        metas = dict(hash_mode=hash_mode.name, operators=[x.name for x in grammar.ops])
+        metas = dict(hash_mode=hash_mode.name, operators=[x.name for x in grammar.ops], constants=constants)
         db.put(META_KEY, json.dumps(metas).encode())
         db.put(VARS_KEY, json.dumps(grammar.vars_dict).encode())
         db.put(INPUTS_KEY, json.dumps(inputs).encode())

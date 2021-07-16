@@ -8,6 +8,7 @@ import hashlib
 import threading
 from collections import Counter
 from time import time, sleep
+import ctypes
 
 # third-party libs
 import psutil
@@ -388,6 +389,22 @@ class LookupTable:
             return s
 
     @staticmethod
+    def to_signed(value: int) -> int:
+        return ctypes.c_longlong(value).value
+
+    @staticmethod
+    def to_unsigned(value: int) -> int:
+        return ctypes.c_ulonglong(value).value
+
+    @staticmethod
+    def is_constant(v1: str) -> bool:
+        try:
+            int(v1)
+            return True
+        except ValueError:
+            return False
+
+    @staticmethod
     def custom_permutations(l: List[Any]) -> Generator[Tuple[bool, Any, Any], None, None]:
         """
         Custom generator generating all the possible tuples from a list. But instead
@@ -404,11 +421,12 @@ class LookupTable:
                 yield False, l[j], l[i]
             yield True, l[i], l[i]
 
-    def generate(self, do_watch: bool = False, watchdog_threshold: Union[int, float] = 90, linearize: bool = False, do_use_blacklist: bool = False) -> None:
+    def generate(self, constants: List[int] = [], do_watch: bool = False, watchdog_threshold: Union[int, float] = 90, linearize: bool = False, do_use_blacklist: bool = False) -> None:
         """
         Generate a new lookup table from scratch with the variables and operators
         set in the constructor of the table.
 
+        :param constants: List of constants to use in the generation
         :param do_watch: Enable RAM watching thread to monitor memory
         :param watchdog_threshold: threshold to be sent to the memory watchdog
         :param linearize: whether or not to apply linearization on expressions
@@ -431,10 +449,21 @@ class LookupTable:
         ArTy = FFI.arrayType(FFI.ULongLongTy, N)
 
         hash_fun = lambda x: hashlib.md5(bytes(x)).digest() if self.hash_mode == HashType.MD5 else self.hash
+
+        # Initialize worklist with variables
         worklist = [(ArTy(), k) for k in self.grammar.vars]
         for i, inp in enumerate(self.inputs):
             for v, k in worklist:
                 v[i] = inp[k]
+
+        # Initialize worklist with constants
+        csts = [(ArTy(), str(c)) for c in constants]
+        for (ar, c) in csts:
+            cast_u8 = pydffi.cast(ar, FFI.arrayType(FFI.UInt8Ty, N*FFI.ULongLongTy.size))
+            memoryview(cast_u8)[:] = array.array('Q', [int(c)]*N).tobytes()
+        worklist.extend(csts)
+
+        # initialize set of hash
         hash_set = set(hash_fun(x[0]) for x in worklist)
 
         ops = sorted(self.grammar.non_terminal_operators, key=lambda x: x.arity == 1)  # sort operators to iterate on unary first
@@ -457,6 +486,10 @@ class LookupTable:
                         logging.warning("Threshold reached, generation interrupted")
                         raise KeyboardInterrupt()
 
+                    # Check it here once then iterate operators
+                    name1_cst, name2_cst = self.is_constant(name1), self.is_constant(name2)
+                    is_both_constant = name1_cst & name2_cst
+
                     for op in ops:  # Iterate over all operators
                         if op.arity == 1:
                             new_vals = ArTy()
@@ -464,7 +497,10 @@ class LookupTable:
 
                             h = hash_fun(new_vals)
                             if h not in hash_set:
-                                fmt = f"{op.symbol}({name1})" if len(name1) > 1 else f"{op.symbol}{name1}"
+                                if name1_cst:
+                                    fmt = str(self.to_signed(new_vals[0]))  # any value is the new constant value
+                                else:
+                                    fmt = f"{op.symbol}({name1})" if len(name1) > 1 else f"{op.symbol}{name1}"
                                 fmt = self.try_linearize(fmt, symbols) if linearize else fmt
                                 logging.debug(f"[add] {fmt: <20} {h}")
                                 hash_set.add(h)
@@ -488,6 +524,9 @@ class LookupTable:
                             new_vals = ArTy()
                             op.eval_a(new_vals, vals1, vals2, N)
 
+                            if is_both_constant:  # if both were constant use the constant as repr instead
+                                fmt = str(self.to_signed(new_vals[0]))
+
                             h = hash_fun(new_vals)
                             if h not in hash_set:
                                 if linearize:
@@ -499,7 +538,7 @@ class LookupTable:
                                 hash_set.add(h)
                                 worklist.append((new_vals, fmt))
 
-                                if op.commutative and do_use_blacklist:
+                                if op.commutative and do_use_blacklist and not is_both_constant:
                                     fmt = f"{op.symbol}({name2},{name1})" if op.is_prefix else f"{sn2}{op.symbol}{sn1}"
                                     fmt = self.try_linearize(fmt, symbols) if linearize else fmt
                                     blacklist.add(fmt)  # blacklist commutative equivalent e.g for a+b blacklist: b+a
@@ -543,7 +582,7 @@ class LookupTable:
         raise NotImplementedError("Should be implemented by child class")
 
     @staticmethod
-    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Input], hash_mode: HashType = HashType.RAW) -> 'LookupTable':
+    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Input], hash_mode: HashType = HashType.RAW, constants: List[int] = []) -> 'LookupTable':
         """
         Create a new empty lookup table with the given initial parameters, grammars, inputs
         and hash_mode.
@@ -553,6 +592,7 @@ class LookupTable:
         :param inputs: list of inputs on which to perform evaluation
         :type inputs: List[:py:obj:`qsynthesis.types.Input`]
         :param hash_mode: Hashing mode for keys
+        :param constants: list of constants used
         :returns: lookuptable instance object
         """
         raise NotImplementedError("Should be implemented by child class")
