@@ -6,7 +6,7 @@ from pathlib import Path
 import logging
 import click
 import time
-from binascii import unhexlify
+import sys
 
 import qsynthesis
 from qsynthesis.grammar import TritonGrammar, BvOp
@@ -47,7 +47,7 @@ def main():
 @click.option('-k', default=1, type=int, help="Number of tables to generate")
 @click.option('--ops', type=str, default='', help='specifying operators to uses')
 @click.option('--inputs', type=str, default='', help='specifying input vector to use')
-@click.option('--hash-mode', default=HashType.RAW, type=click.Choice([x.name for x in HashType]), help="Hash function for keys in table")
+@click.option('--hash-mode', default=HashType.RAW.name, type=click.Choice([x.name for x in HashType]), help="Hash function for keys in table")
 @click.option('--watchdog', type=float, help="Activate RAM watchdog (percentage of load when to stop)")
 @click.option('-t', '--type', type=click.Choice(["db", "bin"]), default="db", help="Type of database to create")
 @click.option('-c', '--cst', type=str, help="Constant to add in the generation process", multiple=True)
@@ -66,6 +66,10 @@ def generate_command(output_file, bitsize, var_num, input_num, random_level, op_
         import sympy
     except ImportError:
         raise click.Abort("Cannot import sympy (pip3 install sympy")
+
+    if bitsize not in [8, 16, 32, 64]:
+        print(f"Invalid bitsize {bitsize} valid ones [8, 16, 32, 64]")
+        sys.exit(1)
 
     out_dir = Path(output_file)
     if out_dir.exists() and out_dir.is_file():
@@ -98,9 +102,9 @@ def generate_command(output_file, bitsize, var_num, input_num, random_level, op_
         ltm = mp[type].create(p.absolute(), grammar, inputs, HashType[hash_mode], constants)
         try:
             if watchdog:
-                ltm.generate(constants=constants, do_watch=True, watchdog_threshold=watchdog, linearize=linearization)
+                ltm.generate(bitsize, constants=constants, do_watch=True, watchdog_threshold=watchdog, linearize=linearization)
             else:
-                ltm.generate(constants=constants, linearize=linearization)
+                ltm.generate(bitsize, constants=constants, linearize=linearization)
         except KeyboardInterrupt:
             logging.warning("Stop required")
 
