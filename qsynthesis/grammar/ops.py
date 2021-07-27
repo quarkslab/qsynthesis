@@ -1,6 +1,7 @@
 from enum import IntEnum
 from triton import AST_NODE
 from collections import namedtuple
+import operator
 
 
 class BoolOp(IntEnum):
@@ -62,4 +63,49 @@ class BvOp(IntEnum):
     SGT = AST_NODE.BVSGT
 
 
-Operator = namedtuple("Operator", "id symbol eval_trit eval eval_a arity commutative id_eq id_zero is_prefix can_overflow bool_ret")
+Operator = namedtuple("Operator", "id symbol eval_trit arity commutative id_eq id_zero is_prefix can_overflow bool_ret")
+
+
+OPERATORS = {               # ID               strop    Trit op            arit comm   id_eq  id_zero is_pfx  can_ov bool_ret
+    # BoolOp.EQUAL:    Operator(BoolOp.EQUAL,    "==",    operator.eq,     2,   True,  True,  False,  False,  False, True),
+    # BoolOp.DISTINCT: Operator(BoolOp.DISTINCT, "!=",    operator.ne,     2,   True,  False, True,   False,  False, True),
+    # BoolOp.IFF:      Operator(BoolOp.IFF,      "iff",   "iff",           2,   False, False, False,  False,  False, True),
+    # BoolOp.LOR:      Operator(BoolOp.LOR,      "lor",   "lor",           2,   True,  True,  False,  True,   False, True),
+    # BoolOp.AND:      Operator(BoolOp.AND,      "land",  "land",          2,   True,  True,  False,  True,   False, True),
+    # BoolOp.NOT:      Operator(BoolOp.NOT,      "lnot",  "lnot",          1,   False, False, False,  True,   False, True),
+    BvOp.NOT:        Operator(BvOp.NOT,        "~",     operator.invert,   1,   False, False, False,  True,   False, False),
+    BvOp.AND:        Operator(BvOp.AND,        "&",     operator.and_,     2,   True,  True,  False,  False,  False, False),
+    BvOp.OR:         Operator(BvOp.OR,         '|',     operator.or_,      2,   True,  True,  False,  False,  False, False),
+    BvOp.XOR:        Operator(BvOp.XOR,        '^',     operator.xor,      2,   True,  False, True,   False,  False, False),
+    BvOp.NEG:        Operator(BvOp.NEG,        '-',     operator.neg,      1,   False, False, False,  True,   False, False),
+    BvOp.ADD:        Operator(BvOp.ADD,        '+',     operator.add,      2,   True,  False, False,  False,  True,  False),
+    BvOp.MUL:        Operator(BvOp.MUL,        '*',     operator.mul,      2,   True,  False, False,  False,  True,  False),
+    BvOp.SUB:        Operator(BvOp.SUB,        '-',     operator.sub,      2,   False, False, True,   False,  False, False),
+    BvOp.SHL:        Operator(BvOp.SHL,        "<<",    operator.lshift,   2,   False, False, False,  False,  True,  False),
+    BvOp.LSHR:       Operator(BvOp.LSHR,       ">>",    operator.rshift,   2,   False, False, False,  False,   False, False),
+
+    BvOp.ROL:        Operator(BvOp.ROL,        "bvrol", "bvrol",           2,   False, False, False,  True,   False, False),
+    BvOp.ROR:        Operator(BvOp.ROR,        "bvror", "bvror",           2,   False, False, False,  True,   False, False),
+    # BvOp.UDIV:       Operator(BvOp.UDIV,       "/",     operator.truediv,2,   False, False, False,  False,  False, False), # TODO: Fix /0
+    # BvOp.UREM:       Operator(BvOp.UREM,       "%",     operator.mod,    2,   False, False, False,  False,  False, False), # TODO: Fix /0
+    BvOp.ASHR:       Operator(BvOp.ASHR,       "bvashr", "bvashr",         2,   False, False, False,  True,   False, False),
+    # BvOp.SDIV:       Operator(BvOp.SDIV,       "bvsdiv","bvsdiv",        2,   False, False, False,  False,  False, False),
+    # BvOp.SREM:       Operator(BvOp.SREM,       "bvsrem","bvsrem",        2,   False, False, True,   True,   False, False),
+    # BvOp.SMOD:       Operator(BvOp.SMOD,       "bvsmod","bvsmod",        2,   False, False, True,   False,  False, False),
+    # BvOp.XNOR:       Operator(BvOp.XNOR,       "bvxnor","bvxnor",        2,   True,  False, False,  True,   False, False),
+    # BvOp.NOR:        Operator(BvOp.NOR,        "bvnor", "bvnor",         2,   True,  False, False,  True,   False, False),
+    # BvOp.NAND:       Operator(BvOp.NAND,       "bvnand","bvnand",        2,   True,  False, False,  True,   False, False),
+    # BvOp.ZEXT:       Operator(BvOp.ZEXT,       "zx",    "zx",            2,   False, True,  False,  True,   False, False),
+    # BvOp.SEXT:       Operator(BvOp.SEXT,       "sx",    "sx",            2,   False, False, False,  True,   False, False), # FIXME: operator
+    # BvOp.CONCAT:     Operator(BvOp.CONCAT,     "concat","concat",        2,   False, False, False,  True,   False, False), # FIXME: operator
+    # BvOp.EXTRACT:    Operator(BvOp.EXTRACT,    "extract","extract",      2,   False, False, False,  True,   False, False), # FIXME: operator
+    # BvOp.ITE:        Operator(BvOp.ITE,        "If",     "If",           3,   False, False, False,  True,   False, False),
+    # BvOp.UGE:        Operator(BvOp.UGE,        ">=",     operator.ge,    2,   False, True,  False,  False,  False, True),
+    # BvOp.UGT:        Operator(BvOp.UGT,        ">",      operator.gt,    2,   False, False, True,   False,  False, True),
+    # BvOp.ULE:        Operator(BvOp.ULE,        "<=",     operator.le,    2,   False, True,  False,  False,  False, True),
+    # BvOp.ULT:        Operator(BvOp.ULT,        "<",      operator.lt,    2,   False, False, True,   False,  False, True),
+    # BvOp.SLE:        Operator(BvOp.SLE,        "bvsle",  "bvsle",        2,   False, True,  False,  True,   False, True),
+    # BvOp.SLT:        Operator(BvOp.SLT,        "bvslt",  "bvslt",        2,   False, False, True,   True,   False, True),
+    # BvOp.SGE:        Operator(BvOp.SGE,        "bvsge",  "bvsge",        2,   False, True,  False,  True,   False, True),
+    # BvOp.SGT:        Operator(BvOp.SGT,        "bvsgt",  "bvsgt",        2,   False, False, True,   True,   False, True)
+}

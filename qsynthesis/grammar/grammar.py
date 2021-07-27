@@ -5,7 +5,7 @@ import random
 # Qsynthesis types
 from qsynthesis.types import BitSize, Char, Input, Dict, List, Tuple
 from qsynthesis.tritonast import TritonAst
-from qsynthesis.grammar.ops import BvOp, Operator
+from qsynthesis.grammar.ops import BvOp, Operator, OPERATORS
 
 
 class TritonGrammar(object):
@@ -37,7 +37,6 @@ class TritonGrammar(object):
 
         :return: list of operators namedtuples
         """
-        from qsynthesis.grammar.operators import OPERATORS
         return [OPERATORS[x] for x in self.ops]
 
     def gen_test_inputs(self, n: int) -> List[Input]:

@@ -421,11 +421,12 @@ class LookupTable:
                 yield False, l[j], l[i]
             yield True, l[i], l[i]
 
-    def generate(self, constants: List[int] = [], do_watch: bool = False, watchdog_threshold: Union[int, float] = 90, linearize: bool = False, do_use_blacklist: bool = False) -> None:
+    def generate(self, bitsize: int, constants: List[int] = [], do_watch: bool = False, watchdog_threshold: Union[int, float] = 90, linearize: bool = False, do_use_blacklist: bool = False) -> None:
         """
         Generate a new lookup table from scratch with the variables and operators
         set in the constructor of the table.
 
+        :param bitsize: Bitsize of expressions to generate
         :param constants: List of constants to use in the generation
         :param do_watch: Enable RAM watching thread to monitor memory
         :param watchdog_threshold: threshold to be sent to the memory watchdog
@@ -443,10 +444,10 @@ class LookupTable:
             symbols = {x: sympy.symbols(x) for x in self.grammar.vars}
         t0 = time()
 
-        import pydffi
-        FFI = pydffi.FFI()
+        from qsynthesis.grammar import jitting  # Import it locally to make sure pydffi is not mandatory
+        CU = jitting.make_compilation_unit(bitsize)
         N = self.input_number
-        ArTy = FFI.arrayType(FFI.ULongLongTy, N)
+        ArTy = jitting.get_native_array_type(bitsize, N)
 
         hash_fun = lambda x: hashlib.md5(bytes(x)).digest() if self.hash_mode == HashType.MD5 else self.hash
 
@@ -459,8 +460,7 @@ class LookupTable:
         # Initialize worklist with constants
         csts = [(ArTy(), str(c)) for c in constants]
         for (ar, c) in csts:
-            cast_u8 = pydffi.cast(ar, FFI.arrayType(FFI.UInt8Ty, N*FFI.ULongLongTy.size))
-            memoryview(cast_u8)[:] = array.array('Q', [int(c)]*N).tobytes()
+            jitting.init_array_cst(ar, int(c), N, bitsize)
         worklist.extend(csts)
 
         # initialize set of hash
@@ -490,10 +490,10 @@ class LookupTable:
                     name1_cst, name2_cst = self.is_constant(name1), self.is_constant(name2)
                     is_both_constant = name1_cst & name2_cst
 
-                    for op in ops:  # Iterate over all operators
+                    for op, op_eval in zip(ops, [jitting.get_op_eval_array(CU, x) for x in ops]):  # Iterate over all operators
                         if op.arity == 1:
                             new_vals = ArTy()
-                            op.eval_a(new_vals, vals1, N)
+                            op_eval(new_vals, vals1, N)
 
                             h = hash_fun(new_vals)
                             if h not in hash_set:
@@ -522,7 +522,8 @@ class LookupTable:
                                     continue
 
                             new_vals = ArTy()
-                            op.eval_a(new_vals, vals1, vals2, N)
+
+                            op_eval(new_vals, vals1, vals2, N)
 
                             if is_both_constant:  # if both were constant use the constant as repr instead
                                 fmt = str(self.to_signed(new_vals[0]))
