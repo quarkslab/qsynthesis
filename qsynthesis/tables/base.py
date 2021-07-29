@@ -57,8 +57,9 @@ class _EvalCtx(object):
     def eval_str(self, s: str) -> AstNode:
         """Eval the string expression to create an AstNode object"""
         e = eval(s, self.tops, self.vars)
+        bv_size = list(self.vars.values())[0].getBitvectorSize()  # Assume all vars are of same size
         if isinstance(e, int):  # In case the expression was in fact an int
-            return self.ast.bv(e, 64)
+            return self.ast.bv(e, bv_size)
         else:
             return e
 

@@ -82,7 +82,8 @@ class TritonAst:
         self.ast = self.ctx.getAstContext()
         self.expr = node  # It needs to be unrolled !!!
         self.size = self.expr.getBitvectorSize()
-        self._symvars = vars  # SymVarName -> SymbolicVariable object
+        self._symvars = vars  # SymVarName -> SymbolicVariable object  e.g: {'SymVar_1': rdi, 'SymVar_2': rsi}
+        self._mapping = {chr(x[0]): x[1] for x in zip(range(97, 127), self._symvars.values())}  # {'a': SymVar, 'b': SymVar}
         self._parents = set()
 
         self._node_count = node_c
@@ -108,7 +109,14 @@ class TritonAst:
 
         :rtype: Dict[:py:obj:`qsynthesis.types.Char`, :py:obj:`SymbolicVariable`]
         """
-        return {x[0]: x[1] for x in zip((chr(x) for x in range(97, 127)), self.symvars)}
+        return self._mapping
+
+    @mapping.setter
+    def mapping(self, value: Dict[Char, SymbolicVariable]) -> None:
+        """
+        Set the given mapping of placeholder to their SymbolicVariable in the object.
+        """
+        self._mapping = value
 
     @property
     def sub_map(self) -> Dict[Char, AstNode]:
@@ -118,7 +126,7 @@ class TritonAst:
 
         :rtype: Dict[:py:obj:`qsynthesis.types.Char`, :py:obj:`qsynthesis.types.AstNode`]
         """
-        return {x[0]: self.ast.variable(x[1]) for x in zip((chr(x) for x in range(97, 127)), self.symvars)}
+        return {k: self.ast.variable(v) for k, v in self.mapping.items()}
 
     @property
     def type(self) -> AstType:
@@ -515,6 +523,31 @@ class TritonAst:
         for v_name, symvar in self.mapping.items():
             self.ctx.setConcreteVariableValue(symvar, inp[v_name])
         return self.expr.evaluate()
+
+    def compare_behavior(self, ast: TritonAst, inps: List[Input]) -> int:
+        """
+        Compare the current expression with the one given in parameter wrt theirs
+        behavior on the given set of inputs. The comparison returns -1 if not applicable
+        (as involving different variables, 0 if different and 1 if equal.
+
+        :param ast: other ast to compare against
+        :param inps: Set of inputs to use for evaluation
+        :return: -1 if not applicable, 0 if different and 1 if equal
+        :rtype: int
+        """
+        if set(x.getAlias() for x in self.mapping.values()).symmetric_difference(set(x.getAlias() for x in ast.mapping.values())):
+            return -1  # Some variables are different
+        backup = self.mapping
+        print([self.eval_oracle(i) for i in inps])
+        rev = {v.getAlias(): k for k, v in ast.mapping.items()}  # Map name -> pld   e.g: {'rsi': 'a', 'rdi': 'b'}
+        self.mapping = {rev[vs.getAlias()]: vs for pld, vs in self.mapping.items()}  # keep own vars (vs) but remap on other ast identifier
+        print(backup, self.mapping)
+        tmp1 = [self.eval_oracle(i) for i in inps]
+        tmp2 = [ast.eval_oracle(i) for i in inps]
+        print(tmp1, "\n", tmp2)
+        res = tmp1 == tmp2
+        self.mapping = backup  # Restore backup submap
+        return res
 
     def to_z3(self) -> 'z3.z3.ExprRef':
         """Returns the Z3 expression associated with the Triton AST expression"""
