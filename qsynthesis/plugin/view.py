@@ -5,7 +5,6 @@ from typing import Tuple, Optional, List, Iterable
 
 # third-party modules
 from PyQt5 import QtWidgets, QtCore, QtGui  # provided by IDA
-from qtraceanalysis.slicing import Slicer
 from qtracedb import DatabaseManager
 from qtracedb.trace import Trace, InstrCtx
 from qtracedb.archs.arch import Instr
@@ -22,6 +21,7 @@ from qsynthesis.plugin.processor import processor_to_triton_arch, Arch, Processo
 from qsynthesis.plugin.ast_viewer import AstViewer, BasicBlockViewer
 from qsynthesis.plugin.popup_actions import SynthetizeFromHere, SynthetizeToHere, SynthetizeOperand
 from qsynthesis.plugin.ui.synthesis_ui import Ui_synthesis_view
+from qsynthesis.plugin import slicer
 from qsynthesis.types import Addr
 
 
@@ -753,9 +753,8 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         """
         Retrieve Triton 'SymbolicExpression' of the expression to synthesize as
         'SymbolicExpression' contain a comment field which contain the link between
-        expressions and Instructions. The expression is given to the slicer that
-        will build the dependency graph from which is simply extracted the set of
-        addresses (which are returned).
+        expressions and Instructions. The expression is given to the slicer iterate
+        the expression to retrieve the set of instruction involved in computation.
 
         :return: list of addresses involved in the computation of the expression
         """
@@ -770,14 +769,8 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         else:
             assert False
 
-        # Instanciate the slicer
-        sl = Slicer(self.trace)
-
-        # Call the backslice with existing context and symbolic expression
-        dg = sl._backslice(self.symexec.ctx, sym)
-
         # Iterate all addresses
-        return sorted(Slicer.to_address_set(dg))
+        return sorted(slicer.backslice(sym))
 
     def triton_show_ast_clicked(self) -> None:
         """ Show the AST of the triton expression """
