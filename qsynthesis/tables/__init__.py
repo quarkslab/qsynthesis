@@ -1,4 +1,3 @@
-from .lookuptableraw import LookupTableRaw
-from .lookuptablerest import LookupTableREST
-from .lookuptablelvldb import LookupTableLevelDB
+from .lookuptablerest import InputOutputOracleREST
+from .lookuptablelvldb import InputOutputOracleLevelDB
 from .base import HashType

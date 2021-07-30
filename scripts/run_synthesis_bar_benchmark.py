@@ -14,7 +14,7 @@ from collections import Counter
 from qtracedb import DatabaseManager
 
 from qsynthesis.utils.qtrace_symexec import QtraceSymExec, Mode
-from qsynthesis import LookupTableLevelDB, TopDownSynthesizer, PlaceHolderSynthesizer, TritonAst, TritonGrammar
+from qsynthesis import InputOutputOracleLevelDB, TopDownSynthesizer, PlaceHolderSynthesizer, TritonAst, TritonGrammar
 from qsynthesis.tables.base import _EvalCtx
 
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
@@ -23,11 +23,6 @@ logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 class AnalysisType(Enum):
     TopDown = 0
     Placeholder = 1
-
-
-class LookupTableType(Enum):
-    DB = 0
-    LDB = 1
 
 
 class ResType(Enum):
@@ -177,7 +172,7 @@ class RunAnalysis:
             self.program.load_ground_truth(ground_t, var_size=8)
 
         logging.info(f"[*] Loading lookup table {lkps}")
-        self.ltms = [LookupTableLevelDB.load(lkps)]
+        self.ltms = [InputOutputOracleLevelDB.load(lkps)]
 
         if self.type == AnalysisType.TopDown:
             self.synthesizer = TopDownSynthesizer(self.ltms, bool(first_match))

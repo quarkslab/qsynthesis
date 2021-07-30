@@ -7,11 +7,11 @@ import requests
 
 # qsynthesis deps
 from qsynthesis.grammar import TritonGrammar
-from qsynthesis.tables.base import LookupTable, HashType, Hash
+from qsynthesis.tables.base import InputOutputOracle, HashType, Hash
 from qsynthesis.types import Input, Optional, List, Dict, Union, Tuple, Iterator
 
 
-class LookupTableREST(LookupTable):
+class InputOutputOracleREST(InputOutputOracle):
     """
     REST-based lookup table. The table given in parameter is meant to be an IP
     address serving the API (that can be served with qsynthesis-table-manager runserver)
@@ -26,19 +26,19 @@ class LookupTableREST(LookupTable):
         :param hash_mode: type of hash to be used as keys in tables
         :param f_name: file name of the table (when being loaded)
         """
-        super(LookupTableREST, self).__init__(grammar, inputs, hash_mode, f_name)
+        super(InputOutputOracleREST, self).__init__(grammar, inputs, hash_mode, f_name)
         self.session = requests.Session()
         self._size = 0
 
     @staticmethod
-    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Input], hash_mode: HashType = HashType.RAW, constants: List[int] = []) -> 'LookupTableREST':
+    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Input], hash_mode: HashType = HashType.RAW, constants: List[int] = []) -> 'InputOutputOracleREST':
         """
         Such tables cannot be created as they are read-only databases.
         """
         raise RuntimeError("REST Lookup tables cannot be created only loaded")
 
     @staticmethod
-    def load(file: Union[Path, str]) -> 'LookupTableREST':
+    def load(file: Union[Path, str]) -> 'InputOutputOracleREST':
         """
         Load a given table. The function perform a request to retrieve alll
         the basic informations about the table (size, grammar, inputs etc..)
@@ -48,7 +48,7 @@ class LookupTableREST(LookupTable):
         if res.status_code == 200:
             data = res.json()
             g = TritonGrammar.from_dict(data['grammar'])
-            lkp = LookupTableREST(g, data['inputs'], HashType[data['hash_mode']], file)
+            lkp = InputOutputOracleREST(g, data['inputs'], HashType[data['hash_mode']], file)
             lkp._size = data["size"]
             lkp.session.headers['Host'] = file
             lkp._name = file

@@ -68,14 +68,14 @@ class _EvalCtx(object):
             self.ctx.setConcreteVariableValue(self.symvars[v_name], value)
 
 
-class LookupTable:
+class InputOutputOracle:
     """
     Base Lookup table class. Specify the interface that child class have to
     implement to be interoperable with other the synthesizer.
     """
     def __init__(self, gr: TritonGrammar, inputs: List[Input], hash_mode: HashType = HashType.RAW, f_name: str = ""):
         """
-        Constructor making a lookuptable from a grammar a set of inputs and an hash type.
+        Constructor making a I/O oracle from a grammar a set of inputs and an hash type.
 
         :param gr: triton grammar
         :param inputs: List of inputs
@@ -170,7 +170,7 @@ class LookupTable:
 
     def lookup_raw(self, outputs: List[Output]) -> Optional[str]:
         """
-        Identical to :meth:`~LookupTable.lookup` but does not create the TritonAst
+        Identical to :meth:`InputOutputOracle.lookup` but does not create the TritonAst
         object. Simply returns the expression string.
 
         :param outputs: list of output result of evaluating an ast against the inputs of this table
@@ -584,7 +584,7 @@ class LookupTable:
         raise NotImplementedError("Should be implemented by child class")
 
     @staticmethod
-    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Input], hash_mode: HashType = HashType.RAW, constants: List[int] = []) -> 'LookupTable':
+    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Input], hash_mode: HashType = HashType.RAW, constants: List[int] = []) -> 'InputOutputOracle':
         """
         Create a new empty lookup table with the given initial parameters, grammars, inputs
         and hash_mode.
@@ -600,12 +600,12 @@ class LookupTable:
         raise NotImplementedError("Should be implemented by child class")
 
     @staticmethod
-    def load(file: Union[Path, str]) -> 'LookupTable':
+    def load(file: Union[Path, str]) -> 'InputOutputOracle':
         """
         Load the given lookup table and returns an instance object.
 
         :param file: Database file to load
-        :returns: LookupTable object
+        :returns: InputOutputOracle object
         """
         raise NotImplementedError("Should be implemented by child class")
 

@@ -7,7 +7,7 @@ from enum import IntEnum
 from orderedset import OrderedSet
 
 # qsynthesis modules
-from qsynthesis.tables.base import LookupTable
+from qsynthesis.tables.base import InputOutputOracle
 from qsynthesis.tritonast import TritonAst
 from qsynthesis.algorithms.synthesizer_base import SynthesizerBase
 
@@ -33,7 +33,7 @@ class TopDownBottomUpSynthesizer(SynthesizerBase):
                  serving a common base for children class using this search strategy.
     """
 
-    def __init__(self, ltms: Union[LookupTable, List[LookupTable]], only_first_match: bool = False, learning_new_exprs: bool = False):
+    def __init__(self, ltms: Union[InputOutputOracle, List[InputOutputOracle]], only_first_match: bool = False, learning_new_exprs: bool = False):
         """
         Constructor that takes lookup tables as input.
 
