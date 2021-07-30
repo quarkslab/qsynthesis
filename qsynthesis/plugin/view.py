@@ -14,7 +14,7 @@ from qtracedb.archs import ArchsManager
 # qsynthesis modules
 from qsynthesis.plugin.dependencies import ida_kernwin, IDA_ENABLED, QTRACEIDA_ENABLED, QTRACEDB_ENABLED
 from qsynthesis.plugin.dependencies import ida_bytes, ida_nalt, ida_ua, ida_funcs, ida_gdl, ida_loader
-from qsynthesis.tables import LookupTableLevelDB, LookupTableREST
+from qsynthesis.tables import InputOutputOracleLevelDB, InputOutputOracleREST
 from qsynthesis.algorithms import TopDownSynthesizer, PlaceHolderSynthesizer
 from qsynthesis.utils.symexec import SimpleSymExec
 from qsynthesis.tritonast import ReassemblyError
@@ -532,13 +532,13 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             return False
         if self.table_type == TableType.HTTP:
             try:
-                self.lookuptable = LookupTableREST.load(self.table_line.text())
+                self.lookuptable = InputOutputOracleREST.load(self.table_line.text())
             except ConnectionAbortedError as e:
                 QtWidgets.QMessageBox.critical(self, "Table Loading", f"Error contacting {self.table_line}\n{e}")
                 return False
         elif self.table_type == TableType.LEVELDB:
             try:
-                self.lookuptable = LookupTableLevelDB.load(self.table_line.text())
+                self.lookuptable = InputOutputOracleLevelDB.load(self.table_line.text())
             except Exception as e:
                 QtWidgets.QMessageBox.critical(self, "Table Loading", f"Error when loading database: {e}")
                 return False

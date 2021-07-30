@@ -8,7 +8,7 @@ import plyvel
 
 # qsynthesis deps
 from qsynthesis.grammar import TritonGrammar, BvOp
-from qsynthesis.tables.base import LookupTable, HashType
+from qsynthesis.tables.base import InputOutputOracle, HashType
 from qsynthesis.types import Optional, List, Dict, Union, Tuple, Iterator, Hash, Input
 
 
@@ -18,24 +18,24 @@ INPUTS_KEY = b"inputs"
 SIZE_KEY = b"size"
 
 
-class LookupTableLevelDB(LookupTable):
+class InputOutputOracleLevelDB(InputOutputOracle):
     """
     Key-Value store lookup table based on Google Level-DB
     """
     def __init__(self, grammar: TritonGrammar, inputs: List[Input], hash_mode: HashType = HashType.RAW, f_name: str = ""):
         """
-        Constructor making a LookupTableLevelDB from a grammar a set of inputs and an hash type.
+        Constructor making a InputOutputOracleLevelDB from a grammar a set of inputs and an hash type.
 
         :param grammar: triton grammar
         :param inputs: List of inputs
         :param hash_mode: type of hash to be used as keys in tables
         :param f_name: file name of the table (when being loaded)
         """
-        super(LookupTableLevelDB, self).__init__(grammar, inputs, hash_mode, f_name)
+        super(InputOutputOracleLevelDB, self).__init__(grammar, inputs, hash_mode, f_name)
         self.db = None
 
     @staticmethod
-    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Input], hash_mode: HashType = HashType.RAW, constants: List[int] = []) -> 'LookupTableLevelDB':
+    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Input], hash_mode: HashType = HashType.RAW, constants: List[int] = []) -> 'InputOutputOracleLevelDB':
         """
         Create a new empty lookup table with the given initial parameters, grammars, inputs
         and hash_mode.
@@ -45,7 +45,7 @@ class LookupTableLevelDB(LookupTable):
         :param inputs: list of inputs on which to perform evaluation
         :param hash_mode: Hashing mode for keys
         :param constants: list of constants used
-        :returns: LookupTableLevelDB instance object
+        :returns: InputOutputOracleLevelDB instance object
         """
         # TODO: If it exists deleting it ?
         db = plyvel.DB(str(filename), create_if_missing=True)
@@ -54,17 +54,17 @@ class LookupTableLevelDB(LookupTable):
         db.put(META_KEY, json.dumps(metas).encode())
         db.put(VARS_KEY, json.dumps(grammar.vars_dict).encode())
         db.put(INPUTS_KEY, json.dumps(inputs).encode())
-        lkp = LookupTableLevelDB(grammar=grammar, inputs=inputs, hash_mode=hash_mode, f_name=filename)
+        lkp = InputOutputOracleLevelDB(grammar=grammar, inputs=inputs, hash_mode=hash_mode, f_name=filename)
         lkp.db = db
         return lkp
 
     @staticmethod
-    def load(file: Union[Path, str]) -> 'LookupTableLevelDB':
+    def load(file: Union[Path, str]) -> 'InputOutputOracleLevelDB':
         """
         Load the given lookup table and returns an instance object.
 
         :param file: Database file to load
-        :returns: LookupTableLevelDB object
+        :returns: InputOutputOracleLevelDB object
         """
         db = plyvel.DB(str(file))
         metas = json.loads(db.get(META_KEY))
@@ -72,7 +72,7 @@ class LookupTableLevelDB(LookupTable):
         vrs = list(json.loads(db.get(VARS_KEY)).items())
         inps = json.loads(db.get(INPUTS_KEY))
         grammar = TritonGrammar(vars=vrs, ops=ops)
-        lkp = LookupTableLevelDB(grammar=grammar, inputs=inps, hash_mode=HashType[metas['hash_mode']], f_name=file)
+        lkp = InputOutputOracleLevelDB(grammar=grammar, inputs=inps, hash_mode=HashType[metas['hash_mode']], f_name=file)
         lkp.db = db
         return lkp
 

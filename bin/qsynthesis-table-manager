@@ -9,8 +9,7 @@ import time
 import sys
 
 import qsynthesis
-from qsynthesis.grammar import TritonGrammar, BvOp
-from qsynthesis.tables import HashType, LookupTableRaw, LookupTableLevelDB
+from qsynthesis import TritonGrammar, BvOp, HashType, LookupTableLevelDB
 
 
 def biased_input_generator(bitsize: int, var_num: int, input_number: int, bs: int, random_level: int = 2):
@@ -44,15 +43,13 @@ def main():
 @click.option('--random-level', type=int, default=2, help="Randomness level of inputs 0 means higlhly biased to use corner-case values (0,1,-1)")
 @click.option('--op-num', default=5, type=int, help="Operator number")
 @click.option("-v", "--verbosity", default=0, count=True, help="increase output verbosity")
-@click.option('-k', default=1, type=int, help="Number of tables to generate")
 @click.option('--ops', type=str, default='', help='specifying operators to uses')
 @click.option('--inputs', type=str, default='', help='specifying input vector to use')
 @click.option('--hash-mode', default=HashType.RAW.name, type=click.Choice([x.name for x in HashType]), help="Hash function for keys in table")
 @click.option('--watchdog', type=float, help="Activate RAM watchdog (percentage of load when to stop)")
-@click.option('-t', '--type', type=click.Choice(["db", "bin"]), default="db", help="Type of database to create")
 @click.option('-c', '--cst', type=str, help="Constant to add in the generation process", multiple=True)
 @click.option('--linearization', is_flag=True, type=bool, default=False, help="If set activate linearization of expressions")
-def generate_command(output_file, bitsize, var_num, input_num, random_level, op_num, verbosity, k, ops, inputs, hash_mode, watchdog, type, cst, linearization):
+def generate_command(output_file, bitsize, var_num, input_num, random_level, op_num, verbosity, ops, inputs, hash_mode, watchdog, cst, linearization):
     """ Table generation utility """
     logging.basicConfig(level=logging.DEBUG if verbosity else logging.INFO, format='%(message)s')
 
@@ -74,39 +71,34 @@ def generate_command(output_file, bitsize, var_num, input_num, random_level, op_
     out_dir = Path(output_file)
     if out_dir.exists() and out_dir.is_file():
         out_dir.unlink()
-    if not out_dir.exists() and k > 1:
-        out_dir.mkdir()
 
     ops = [BvOp[x] for x in ops.split(",")] if ops else None
     inputs = [int(x) for x in inputs.split(",") if x]
 
     t1 = time.time()
 
-    for i in range(k):
-        logging.info(f"Generate Table #{i}")
-        p = out_dir/f"{i}.{type}" if k > 1 else out_dir
+    logging.info(f"Generate Table")
 
-        operators = next(operator_generator(op_num)) if ops is None else ops
-        vrs = [chr(ord('a') + x) for x in range(var_num)]
-        if inputs:
-            inputs = [{n: v for n, v in zip(vrs, inputs[i:i + len(vrs)])} for i in
-                      range(0, len(inputs), len(vrs))]
+    operators = next(operator_generator(op_num)) if ops is None else ops
+    vrs = [chr(ord('a') + x) for x in range(var_num)]
+    if inputs:
+        inputs = [{n: v for n, v in zip(vrs, inputs[i:i + len(vrs)])} for i in
+                  range(0, len(inputs), len(vrs))]
+    else:
+        inputs = biased_input_generator(bitsize, var_num, input_num, bitsize, random_level)
+        inputs = [{n: v for n, v in zip(vrs, i)} for i in inputs]
+
+    grammar = TritonGrammar([(x, bitsize) for x in vrs], operators)
+
+    logging.info(f"Watchdog value: {watchdog}")
+    ltm = LookupTableLevelDB.create(out_dir.absolute(), grammar, inputs, HashType[hash_mode], constants)
+    try:
+        if watchdog:
+            ltm.generate(bitsize, constants=constants, do_watch=True, watchdog_threshold=watchdog, linearize=linearization)
         else:
-            inputs = biased_input_generator(bitsize, var_num, input_num, bitsize, random_level)
-            inputs = [{n: v for n, v in zip(vrs, i)} for i in inputs]
-
-        grammar = TritonGrammar([(x, bitsize) for x in vrs], operators)
-
-        logging.info(f"Watchdog value: {watchdog}")
-        mp = {"db": LookupTableLevelDB, "bin": LookupTableRaw}
-        ltm = mp[type].create(p.absolute(), grammar, inputs, HashType[hash_mode], constants)
-        try:
-            if watchdog:
-                ltm.generate(bitsize, constants=constants, do_watch=True, watchdog_threshold=watchdog, linearize=linearization)
-            else:
-                ltm.generate(bitsize, constants=constants, linearize=linearization)
-        except KeyboardInterrupt:
-            logging.warning("Stop required")
+            ltm.generate(bitsize, constants=constants, linearize=linearization)
+    except KeyboardInterrupt:
+        logging.warning("Stop required")
 
     elapsed = time.time() - t1
     hours, rem = divmod(elapsed, 3600)
@@ -121,10 +113,7 @@ def infos_command(table_file):
     logging.basicConfig(level=logging.INFO, format='%(message)s')
     table_file = Path(table_file)
 
-    if table_file.suffix == ".bin":
-        table = LookupTableRaw.load(table_file)
-    else:
-        table = LookupTableLevelDB.load(table_file)
+    table = LookupTableLevelDB.load(table_file)
 
     logging.info(f"Bitsize: {table.bitsize}")
     logging.info(f"Hash mode: {table.hash_mode.name}")
@@ -189,51 +178,6 @@ def compare_command(table1, table2):
     # FUTURE: Implementing semantic comparison of common keys
 
 
-@main.command(name="import")
-@click.argument('raw_table', type=click.Path(exists=True))
-@click.argument('out_table', type=click.Path(exists=False))
-def import_command(raw_table, out_table):
-    """Import a raw table in a Level-DB database"""
-    f_id = 1
-    current_file = raw_table
-    out_lkp = None
-    i = 0
-    buffer = []
-
-    while True:
-        lkp = LookupTableRaw.load(current_file)
-        if out_lkp is None:
-            out_lkp = LookupTableLevelDB.create(out_table, lkp.grammar, lkp.inputs, lkp.hash_mode)
-        try:
-            for it in lkp:
-                buffer.append(it)
-                i += 1
-                if i % 100000 == 0:
-                    print(f"process: {i}\r", end="")
-                if i % 5000000 == 0:
-                    out_lkp.add_entries(buffer, chunk_size=5000000, update_count=False)
-                    buffer = []
-        except Exception as e:
-            print(f"Exception raised: {e} stop.")
-            break
-        except KeyboardInterrupt as _:
-            print("Keyboard interrupt")
-            break
-
-        p = Path(f"{raw_table}.{f_id}")
-        if p.exists():
-            print(f"\n Start processing: {p}")
-            current_file = str(p)
-            f_id += 1
-        else:
-            break
-    # flush remaining entries
-    print(f"Flush remaining entries: {len(buffer)}")
-    out_lkp.add_entries(buffer,  chunk_size=30000, update_count=False)
-    out_lkp.db.put(b"size", str(i).encode())
-    print(f"Imported: {i}")
-
-
 @main.command(name="merge")
 @click.argument('in_table', type=click.Path(exists=True))
 @click.argument('out_table', type=click.Path(exists=False))
@@ -241,6 +185,10 @@ def merge_command(in_table, out_table):
     """Merge entries of the first database in the second"""
     lkp_in = LookupTableLevelDB.load(in_table)
     lkp_out = LookupTableLevelDB.load(out_table)
+
+    if lkp_in.inputs != lkp_out.inputs:
+        print("Tables should use the same set of inputs")
+        sys.exit(1)
 
     i = 0
     c = 0
@@ -260,7 +208,7 @@ def merge_command(in_table, out_table):
 @click.option('-l', '--limit', type=int, default=0, help='maximum number of entries to dump')
 @click.argument('in_table', type=click.Path(exists=True))
 def dump_command(limit, in_table):
-    """Merge entries of the first database in the second"""
+    """Dump the content of the table on stdout"""
     lkp_in = LookupTableLevelDB.load(in_table)
 
     counter = 0

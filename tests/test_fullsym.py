@@ -1,11 +1,6 @@
-import logging
-from pathlib import Path
-
 from triton import ARCH
 
-from qsynthesis.utils.symexec import SimpleSymExec
-from qsynthesis.algorithms import TopDownSynthesizer
-from qsynthesis.tables import LookupTableLevelDB
+from qsynthesis import SimpleSymExec, TopDownSynthesizer, InputOutputOracleLevelDB
 
 
 RIP_ADDR = 0x40B160
@@ -34,7 +29,7 @@ def test():
     rax = symexec.get_register_ast("rax")
 
     # Load lookup tables
-    ltm = LookupTableLevelDB.load("../lts/lts15_opt_leveldb")
+    ltm = InputOutputOracleLevelDB.load("../lts/lts15_opt_leveldb")
 
     # Perform Synthesis of the expression
     synthesizer = TopDownSynthesizer(ltm)

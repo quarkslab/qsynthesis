@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 
 # qsynthesis deps
-from qsynthesis.tables.base import LookupTable
+from qsynthesis.tables.base import InputOutputOracle
 from qsynthesis.tritonast import TritonAst
 from qsynthesis.types import Input, List, Optional, Tuple, Union, Output
 
@@ -16,7 +16,7 @@ class SynthesizerBase:
     if a shorter expression exists.
     """
 
-    def __init__(self, ltms: Union[LookupTable, List[LookupTable]], only_first_match: bool = False, learning_new_exprs: bool = False):
+    def __init__(self, ltms: Union[InputOutputOracle, List[InputOutputOracle]], only_first_match: bool = False, learning_new_exprs: bool = False):
         """
         Constructor that takes lookup tables as input.
 
@@ -25,7 +25,7 @@ class SynthesizerBase:
         :param learning_new_exprs: boolean that enables improving the current table if if a synthesized entry appears
                                    to be bigger than the one submitted
         """
-        self._ltms = [ltms] if isinstance(ltms, LookupTable) else ltms
+        self._ltms = [ltms] if isinstance(ltms, InputOutputOracle) else ltms
         self.only_first_match = only_first_match
         self.learning_enabled = learning_new_exprs
 
@@ -109,13 +109,13 @@ class SynthesizerBase:
                     return None
             return best_expr
 
-    def run_direct_synthesis(self, ltm: LookupTable, cur_ast: TritonAst) -> Optional['TritonAst']:
+    def run_direct_synthesis(self, ltm: InputOutputOracle, cur_ast: TritonAst) -> Optional['TritonAst']:
         """
         Evaluate `cur_ast` on inputs provided by `ltm` the lookup table which provide an
         output vector then used to perform the lookup in the table. If an entry is found
         it is returned.
 
-        :param ltm: LookupTable object in which to perform the lookup
+        :param ltm: InputOutputOracle object in which to perform the lookup
         :param cur_ast: TritonAst object to synthesize
         :returns: optional TritonAst if the lookup has been successful
         """

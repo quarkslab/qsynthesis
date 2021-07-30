@@ -4,8 +4,7 @@ from pathlib import Path
 from qtracedb import DatabaseManager
 
 from qsynthesis.utils.qtrace_symexec import QtraceSymExec, Mode
-from qsynthesis.algorithms import TopDownSynthesizer
-from qsynthesis.tables import LookupTableLevelDB
+from qsynthesis import InputOutputOracleLevelDB, TopDownSynthesizer
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -100,7 +99,7 @@ def test():
     rax = symexec.get_register_ast("rax")
 
     # Load lookup tables
-    ltm = LookupTableLevelDB.load(TABLE_DIR)
+    ltm = InputOutputOracleLevelDB.load(TABLE_DIR)
 
     # Perform Synthesis of the expression
     synthesizer = TopDownSynthesizer(ltm)
