@@ -14,11 +14,8 @@ from collections import Counter
 from qtracedb import DatabaseManager
 
 from qsynthesis.utils.qtrace_symexec import QtraceSymExec, Mode
-from qsynthesis.tables import LookupTableLevelDB
+from qsynthesis import LookupTableLevelDB, TopDownSynthesizer, PlaceHolderSynthesizer, TritonAst, TritonGrammar
 from qsynthesis.tables.base import _EvalCtx
-from qsynthesis.algorithms import TopDownSynthesizer, PlaceHolderSynthesizer
-from qsynthesis.grammar import TritonGrammar
-from qsynthesis.tritonast import TritonAst
 
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 
