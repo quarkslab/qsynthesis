@@ -5,19 +5,16 @@ from typing import Tuple, Optional, List, Iterable
 
 # third-party modules
 from PyQt5 import QtWidgets, QtCore, QtGui  # provided by IDA
-from qtracedb import DatabaseManager
-from qtracedb.trace import Trace, InstrCtx
-from qtracedb.archs.arch import Instr
-from qtracedb.archs import ArchsManager
 
 # qsynthesis modules
+from qsynthesis.plugin.dependencies import DatabaseManager, Trace, InstrCtx, Instr, Arch, ArchsManager
 from qsynthesis.plugin.dependencies import ida_kernwin, IDA_ENABLED, QTRACEIDA_ENABLED, QTRACEDB_ENABLED
-from qsynthesis.plugin.dependencies import ida_bytes, ida_nalt, ida_ua, ida_funcs, ida_gdl, ida_loader
+from qsynthesis.plugin.dependencies import ida_bytes, ida_nalt, ida_ua, ida_funcs, ida_gdl, ida_loader, ida_lines
 from qsynthesis.tables import InputOutputOracleLevelDB, InputOutputOracleREST
 from qsynthesis.algorithms import TopDownSynthesizer, PlaceHolderSynthesizer
 from qsynthesis.utils.symexec import SimpleSymExec
 from qsynthesis.tritonast import ReassemblyError
-from qsynthesis.plugin.processor import processor_to_triton_arch, Arch, Processor, ProcessorType, processor_to_qtracedb_arch
+from qsynthesis.plugin.processor import processor_to_triton_arch, Processor, ProcessorType, processor_to_arch
 from qsynthesis.plugin.ast_viewer import AstViewer, BasicBlockViewer
 from qsynthesis.plugin.popup_actions import SynthetizeFromHere, SynthetizeToHere, SynthetizeOperand
 from qsynthesis.plugin.ui.synthesis_ui import Ui_synthesis_view
@@ -162,7 +159,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         # If working on its own
         self._dbm = None
         self._trace = None
-        self._arch = processor_to_qtracedb_arch()  # By default initialize it with current architecture
+        self._arch = processor_to_arch()  # By default initialize it with current architecture
 
         # Expresssion highlighted
         self.highlighted_addr = {}  # addr -> backed_color
@@ -852,7 +849,7 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
             try:
                 if patch_fun:
                     addrs = self.get_dependency_addresses()
-                    asm_bytes = self.synth_ast.reassemble(dst_reg, self.arch)
+                    asm_bytes = self.synth_ast.reassemble(dst_reg, self.arch.NAME)
                     if snap:  # Create a snapshot of the database
                         ss = ida_loader.snapshot_t()
                         ss.desc = f"Reassembly of {dst_reg} at {self.stop_addr:#x}"
@@ -863,7 +860,8 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
                         self.patch_reassembly(addrs, asm_bytes)
                 else:
                     # Reassemble to instruction and show it in a View
-                    insts = self.synth_ast.reassemble_to_insts(dst_reg, self.arch)
+                    raw_insts = self.synth_ast.reassemble(dst_reg, self.arch.NAME)
+                    insts = self.arch.disasm(raw_insts, 0x0)
                     bb_viewer = BasicBlockViewer("Reassembly", insts)
                     bb_viewer.Show()
             except ReassemblyError as e:
@@ -1076,11 +1074,13 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
         elif self.target_type == TargetType.MEMORY:
             return False, None
         elif self.target_type == TargetType.OPERAND:
+
             opc = ida_bytes.get_bytes(self.stop_addr, ida_bytes.get_item_size(self.stop_addr))
             inst = self.arch.disasm_one(opc, self.stop_addr)
             op = inst.operands[self.op_num]
             if op.is_register():
-                return True, op.register.name
+                op_name = ida_lines.tag_remove(ida_ua.print_operand(self.stop_addr, self.op_num))
+                return True, op_name  # op.register.name
             else:
                 return False, None
 

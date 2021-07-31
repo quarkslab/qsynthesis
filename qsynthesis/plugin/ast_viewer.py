@@ -1,11 +1,8 @@
 # built-in modules
 from typing import List
 
-# third-party
-from qtracedb.archs.arch import Instr
-
 # qsynthesis modules
-from qsynthesis.plugin.dependencies import ida_graph
+from qsynthesis.plugin.dependencies import ida_graph, Instr
 from qsynthesis.tritonast import TritonAst
 
 

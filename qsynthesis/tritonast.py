@@ -8,10 +8,6 @@ import logging
 # Third-party modules
 from triton import TritonContext, AST_NODE, SYMBOLIC, ARCH
 
-# Qtrace imports
-from qtracedb.archs.manager import ArchsManager
-from qtracedb.archs.arch import Arch, Instr
-
 # QSynthesis imports
 from qsynthesis.types import AstNode, List, Tuple, Generator, Dict, Union, Optional, AstType, SymVarMap, \
                              SymbolicVariable, Char, IOVector, Input, Output
@@ -679,7 +675,7 @@ class TritonAst:
                     self._inplace_replace(new_expr_to_send)
                     return
 
-    def reassemble(self, dst_reg: str, target_arch: Optional[Union['Arch', str]] = None) -> bytes:
+    def reassemble(self, dst_reg: str, target_arch: Optional[str] = None) -> bytes:
         """
         Reassemble the TritonAst in assembly. ``dst_reg`` is the destination register of the
         result of the computation of the AST. Parameter ``target_arch`` is either a QtraceDB
@@ -717,10 +713,9 @@ class TritonAst:
                     m = {ARCH.X86: "x86", ARCH.X86_64: "x86_64", ARCH.ARM32: "arm", ARCH.AARCH64: "aarch64"}
                     arch_name = m[self.ctx.getArchitecture()]
                 else:
-                    arch_name = target_arch if isinstance(target_arch, str) else target_arch.NAME.lower()
+                    arch_name = target_arch.lower()
                 arybo_expr = tritonast2arybo(self.expr, use_exprs=True, use_esf=False)
                 inps = {x.getName(): (x.getAlias(), x.getBitSize()) for x in self.symvars}
-                #return asm_binary(arybo_expr, (dst_reg, self.size), inps, f"{arch_name}-unknown-unknwon")
                 return my_asm_binary(arybo_expr, (dst_reg, self.size), inps, f"{arch_name}-unknown-unknwon")
             else:
                 raise ReassemblyError("Can only reassemble if variable are registers (at the moment)")
@@ -730,29 +725,6 @@ class TritonAst:
             raise ReassemblyError(f"Invalid target architecture '{target_arch}' provided")
         except Exception as e:
             raise ReassemblyError(f"Something went wrong during reassembly: {e}")
-
-    def reassemble_to_insts(self, dst_reg: str, target_arch: Optional[Union[Arch, str]] = None) -> List[Instr]:
-        """
-        Similar to :meth:`TritonAst.reassemble` but returns Instruction object for each instruction
-        reassembled.
-
-        :param dst_reg: destination register as lowercase string
-        :param target_arch: target architecture in which to reassemble the AST
-        :returns: bytes of the AST reassembled in the given architecture
-        :raises: ReassemblyError
-
-        .. warning:: This method requires the ``arybo`` library that can be installed with
-           (pip3 install arybo).
-        """
-
-        # Note: let all exception being raised above if any
-        asm = self.reassemble(dst_reg, target_arch)
-        if target_arch is None:
-            m = {ARCH.X86: "x86", ARCH.X86_64: "x86_64", ARCH.ARM32: "arm", ARCH.AARCH64: "aarch64"}
-            arch = ArchsManager.get_arch(m[self.ctx.getArchitecture()])
-        else:
-            arch = ArchsManager.get_arch(target_arch) if isinstance(target_arch, str) else target_arch
-        return arch.disasm(asm, 0x0)
 
     def make_graph(self) -> 'Graph':
         """

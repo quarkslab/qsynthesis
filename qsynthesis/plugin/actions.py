@@ -1,5 +1,4 @@
-from qsynthesis.plugin.dependencies import ida_kernwin, TRITON_ENABLED
-from qtracedb.trace import Trace
+from qsynthesis.plugin.dependencies import ida_kernwin, TRITON_ENABLED, Trace
 
 
 class SynthetizerViewHook(ida_kernwin.action_handler_t):

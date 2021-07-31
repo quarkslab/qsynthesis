@@ -34,7 +34,7 @@ class SynthetizeFromHere(ida_kernwin.action_handler_t):
         the Qsynthesis view.
 
         :param ea: address to set
-        :return: None
+        :return: Nones
         """
         self.widget.from_line.setText(f"{ea:#x}")
 
@@ -138,8 +138,8 @@ class SynthetizeOperand(SynthetizeFromHere):
     def activate(self, ctx) -> bool:
         """
         Upon clicking (or shortcut key typed) retrieve the current operand
-        with qtracedb Instruction object and set various widget variable
-        to be able to retrieve the information later on.
+        object and set various widget variable to be able to retrieve the
+        information later on.
 
         :return: True if the operand is value and has successfully been retrieved
         """
