@@ -37,6 +37,7 @@ setup(
     ],
     extras_require={
         'all': assembly_deps+generate_deps+server_deps,
+        'reassembly': assembly_deps,
         'generator': generate_deps,
         'server': server_deps
     },

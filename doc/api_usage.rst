@@ -50,10 +50,9 @@ to the synthesizer.
 
 .. code-block:: python
 
-    from qsynthesis.algorithms import TopDownSynthesizer
-    from qsynthesis.tables import LookupTableLevelDB
+    from qsynthesis import TopDownSynthesizer, InputOutputOracleLevelDB
 
-    table = LookupTableLevelDB.load("my_leveldb_table/")  # Load the lookup table database
+    table = InputOutputOracleLevelDB.load("my_leveldb_table/")  # Load the lookup table oracle database
 
     synthesizer = TopDownSynthesizer(table)       # Instanciate the synthesize of the table
     synt_rax, simp_bool = synthesizer.synthesize(rax)  # Trigger synthesize of the rax expression
@@ -91,7 +90,7 @@ expression.
                     b'H\x01\xc1', b'H\x8bE\xe0', b'H\x0f\xaf\xc0', b'H1\xc8', b'H#E\xf0', b'H\x01\xc0', b'H)\xc2',
                     b'H\x89\xd0', b']', b'\xc3']
 
-The first thing to do is to executed these instruction with triton. For that Qsynthesis also
+The first thing to do is to executed these instruction with triton. For that Qsynthesis
 provides an utility class :py:class:`SimpleSymExec` (cf: :ref:`label_simplesymexec`) facilitating
 various tasks. It takes the architecture in parameter. We arbritrarily initialize ``rip`` and
 ``rsp`` to arbitrary addresses and feed all instructions to that wrapper.
@@ -108,15 +107,14 @@ various tasks. It takes the architecture in parameter. We arbritrarily initializ
     rax = symexec.get_register_ast("rax")          # Retrieve rax AST after executing instructions
 
 
-As of now the ``rax`` expression can be synthesized in the exact same manner
-than in the previous use-cse with qtrace.
+As of now the ``rax`` expression can be synthesized by instanciating the synthesizer with
+an oracle table.
 
 .. code-block:: python
 
-    from qsynthesis.algorithms import TopDownSynthesizer
-    from qsynthesis.tables import LookupTableLevelDB
+    from qsynthesis import TopDownSynthesizer, InputOutputOracleLevelDB
 
-    table = LookupTableLevelDB.load("my_leveldb_table/")  # Load the lookup table database
+    table = InputOutputOracleLevelDB.load("my_leveldb_table/")  # Load the lookup table database
 
     synthesizer = TopDownSynthesizer(table)       # Instanciate the synthesize of the table
     synt_rax, simp_bool = synthesizer.synthesize(rax)  # Trigger synthesize of the rax expression

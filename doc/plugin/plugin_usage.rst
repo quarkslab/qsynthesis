@@ -42,6 +42,10 @@ third is operand but is a high-level refinement for a register or memory.
 The other parameter specifies options for the synthesis, kind of algorithm etc.
 These parameters are directly sent to the APIs.
 
+.. warning:: In full symbolic mode, 'From' and 'To' have to be located in the
+             same basic block. *(Otherwise the algorithm cannot determine which
+             parent/children to follow)*. For more broad sequence of instruction
+             please use the API directly.
 
 .. note:: In full symbolic the analysis process is the exact same. The only difference
           is that QSynthesis assumes that all items located between 'From' and 'To' are
@@ -116,9 +120,9 @@ The three scenarios are:
 
 * No ticking of any options: The synthesized expression is reassembled in an IDA graph view
 * Ticking 'patch functions bytes': All dependent instructions (cf. above), are erased with
-NOPs and the reassembled instructions are put on the 'To' location where it was extracted
+  NOPs and the reassembled instructions are put on the 'To' location where it was extracted
 * Ticking 'patch' + 'shrink function': The function is rewriting with only instructions not
-in the dependency and the reassembled instructions.
+  in the dependency and the reassembled instructions.
 
 The two latest, do tamper the IDB *(for good :) )* and somehow save the synthesized expression
 result directly back in the IDB. The figure below shows the result obtained with the
@@ -129,7 +133,7 @@ three variants of the reassembly.
    :alt: Reassembly
 
 
-.. note:: The reassembly does not take in account use-defs etc. The reassembly is purely
+.. warning:: The reassembly does not take in account use-defs etc. The reassembly is purely
           syntactical. Thus it might work, but to program is unlikely to run well. A proper
           non-interference analysis should be performed to make sure the semantic is preserved.
 
@@ -148,3 +152,7 @@ For debugging it is possible to access the QSynthesis view via Qtrace-IDA with t
 
 Note that ``get_view`` will return None if the view is not shown.
 Then you have access to all internal structures and objects of the plugin to play around with it.
+
+
+.. note:: Once instanciated, it is possible to access the plugin object
+          with ``from qsynthesis import qsynthesis_plugin``.

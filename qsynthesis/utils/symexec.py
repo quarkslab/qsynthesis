@@ -104,11 +104,11 @@ class SimpleSymExec:
         """
         return self.cur_inst.getAddress()
 
-    def turn_on(self) -> None:
+    def _turn_on(self) -> None:
         """Turn on capturing"""
         self._capturing = True
 
-    def turn_off(self) -> None:
+    def _turn_off(self) -> None:
         """Turn off capturing"""
         self._capturing = False
 
@@ -274,7 +274,7 @@ class SimpleSymExec:
         """
         ast = self.ctx.getMemoryAst(MemoryAccess(addr, size))
         sym = self.ctx.newSymbolicExpression(ast)
-        sym.setComment(self.fmt_comment())
+        sym.setComment(self._fmt_comment())
         return sym
 
     def get_operand_symbolic_expression(self, op_num: int) -> SymbolicExpression:
@@ -295,7 +295,7 @@ class SimpleSymExec:
         if t == OPERAND.IMM:
             ast = self.ctx.getAstContext().bv(op.getValue(), op.getBitSize())
             sym = self.ctx.newSymbolicExpression(ast)
-            sym.setComment(self.fmt_comment())
+            sym.setComment(self._fmt_comment())
         elif t == OPERAND.REG:
             sym = self.get_register_symbolic_expression(op)
         elif t == OPERAND.MEM:
@@ -321,7 +321,7 @@ class SimpleSymExec:
 
         # Set comment on the register reference
         sreg = self.ctx.getSymbolicRegister(reg)
-        sreg.setComment(self.fmt_comment())
+        sreg.setComment(self._fmt_comment())
 
         # We also set the symbolic var to the actual value of the register
         self.ctx.setConcreteVariableValue(symvar, value)
@@ -346,7 +346,7 @@ class SimpleSymExec:
         # symbolize the MemAccess and obtain a SymbolicVariable object
         alias = f"mem_{mem.getAddress():#x}_{mem.getSize()}_{self.inst_id}"
         symvar = self.ctx.symbolizeMemory(mem, alias)
-        symvar.setComment(self.fmt_comment())
+        symvar.setComment(self._fmt_comment())
 
         # Iterate each address of the MemAccess to obtain the SymbolicExpression
         # of the address. Put for each of them the right comment
@@ -355,14 +355,14 @@ class SimpleSymExec:
         cur_mem_exp = None
         while addr < end:
             cur_mem_exp = self.ctx.getSymbolicMemory(addr)
-            cur_mem_exp.setComment(self.fmt_comment())
+            cur_mem_exp.setComment(self._fmt_comment())
             addr += 1
 
         # Each SymbolicExpression have a uniq Id. The way they are created
         # (I heuristically know that the one before the last cur_mem_exp)
         # is the expression concating all of them thus also add a comment on it
         var_exp = self.ctx.getSymbolicExpression(cur_mem_exp.getId()-1)
-        var_exp.setComment(self.fmt_comment())
+        var_exp.setComment(self._fmt_comment())
         return symvar
 
     def initialize_register(self, reg: Union[str, Register], value: int) -> None:
@@ -446,17 +446,17 @@ class SimpleSymExec:
         self.expr_id = 0
 
         # Process instruction
-        self.turn_on()
+        self._turn_on()
         r = self.ctx.processing(instr)
 
         # Set a unique comment on each symbolic expressions
         for e in instr.getSymbolicExpressions():
-            e.setComment(self.fmt_comment())
+            e.setComment(self._fmt_comment())
 
-        self.turn_off()
+        self._turn_off()
         return r
 
-    def fmt_comment(self) -> str:
+    def _fmt_comment(self) -> str:
         """Return a string identifying a SymbolicExpression in a unique manner"""
         return f"{self.inst_id}#{self.expr_id}#{self.current_address}"
 

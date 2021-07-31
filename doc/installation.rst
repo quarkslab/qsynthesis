@@ -23,6 +23,18 @@ After installation of Triton, just run the following command:
 
 You're ready to go !
 
+Optional dependencies
+^^^^^^^^^^^^^^^^^^^^^
+
+Not to install too many third-party libraries the default installation
+only install the strict minimum. Various features requires installing
+additional packages.
+
+* **Table generation**: requires `dragonffi <https://github.com/aguinet/dragonffi>`_ and `sympy <https://www.sympy.org/en/index.html>`_ ``pip install .[generator]``
+* **Reassemby**: requires `arybo <https://github.com/quarkslab/arybo>`_ and `llvmlite <https://github.com/numba/llvmlite>`_ ``pip install .[reassembly]``
+* **Server**: requires `FastAPI <https://fastapi.tiangolo.com>`_ ``pip install .[server]``
+
+You can install all dependencies all at once with ``pip install .[all]``.
 
 Installing Qtrace-DB
 --------------------
@@ -39,38 +51,6 @@ Installing the IDA Plugin
 The IDA plugin is made to work equally whether Qtrace-IDA is installed or not.
 If you want to run it through Qtrace-IDA follow installation at: https://gitlab.qb/qtrace/qtrace-ida
 
-The only requirement it has is `qtrace-analysis <https://gitlab.qb/qtrace/qtrace-analysis>`_ for the dynamic slicing feature.
-The installation is fairly easy:
-
-.. code-block:: bash
-
-    $ git clone gitlab@gitlab.qb:qtrace/qtrace-analysis.git
-    $ cd qtrace-analysis
-    $ pip3 install .
-
-
 Then to install the plugin just copy the file `ida_plugin/qsynthesis_plugin.py` in your IDA Pro plugin directory.
 
-.. warning:: The plugin is solely working on IDA with Python3
-
-
-Installing optional dependencies
---------------------------------
-
-**Tables**: Table generation require two additional packages:
-
-* `dragonffi <https://github.com/aguinet/dragonffi>`_ for JITing the evaluation of expressions
-* `sympy <https://www.sympy.org/en/index.html>`_ for linearization of expressions
-
-They can be installed with:
-
-.. code-block:: bash
-
-    $ pip3 install .[generator]
-
-**Table server as REST**: Qsynthesis enables serving lookup table as a REST API. It relies
-on `FastAPI <https://fastapi.tiangolo.com/>`_  for that. It can also be installed with:
-
-.. code-block:: bash
-
-    $ pip3 install .[server]
+.. warning:: The plugin is solely working on IDA with Python3, and latest versions of IDA.

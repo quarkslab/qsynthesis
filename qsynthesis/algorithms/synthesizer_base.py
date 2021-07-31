@@ -12,15 +12,15 @@ class SynthesizerBase:
     """
     Base Synthesizer that provides base function for children classes.
     It provides function for a given TritonAst to evaluate it against
-    lookup tables inputs and to perform the lookup in order to know
+    oracle inputs and to perform the lookup in order to know
     if a shorter expression exists.
     """
 
     def __init__(self, ltms: Union[InputOutputOracle, List[InputOutputOracle]], only_first_match: bool = False, learning_new_exprs: bool = False):
         """
-        Constructor that takes lookup tables as input.
+        Constructor that takes one or multiple oracles as input.
 
-        :param ltms: Single lookup table of a list of them
+        :param ltms: Single oracle or a list
         :param only_first_match: boolean that stop interating over tables as soon as the lookup is successfull for one
         :param learning_new_exprs: boolean that enables improving the current table if if a synthesized entry appears
                                    to be bigger than the one submitted
@@ -111,13 +111,13 @@ class SynthesizerBase:
 
     def run_direct_synthesis(self, ltm: InputOutputOracle, cur_ast: TritonAst) -> Optional['TritonAst']:
         """
-        Evaluate `cur_ast` on inputs provided by `ltm` the lookup table which provide an
-        output vector then used to perform the lookup in the table. If an entry is found
+        Evaluate `cur_ast` on inputs provided by `ltm` the oracle which provide an
+        output vector then used to perform the lookup in the database. If an entry is found
         it is returned.
 
-        :param ltm: InputOutputOracle object in which to perform the lookup
+        :param ltm: InputOutputOracle object in which to perform the query
         :param cur_ast: TritonAst object to synthesize
-        :returns: optional TritonAst if the lookup has been successful
+        :returns: optional TritonAst if the an entry was found
         """
 
         # Evaluate node on LTMs inputs

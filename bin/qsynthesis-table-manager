@@ -9,7 +9,7 @@ import time
 import sys
 
 import qsynthesis
-from qsynthesis import TritonGrammar, BvOp, HashType, LookupTableLevelDB
+from qsynthesis import TritonGrammar, BvOp, HashType, InputOutputOracleLevelDB
 
 
 def biased_input_generator(bitsize: int, var_num: int, input_number: int, bs: int, random_level: int = 2):

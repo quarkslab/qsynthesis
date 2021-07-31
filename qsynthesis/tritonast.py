@@ -254,7 +254,7 @@ class TritonAst:
 
     @property
     def depth(self) -> int:
-        """Pre-computed O(1) count of the depth of the AST
+        """Pre-computed depth of the AST *(complexity O(1))*
 
         :rtype: int
         """
@@ -558,7 +558,7 @@ class TritonAst:
         :param expr: Z3 expression
         :return: TritonAst
 
-        .. warning:: This function is completely untested !
+        .. warning:: This function is mostly untested !
         """
         astctx = ctx.getAstContext()
         ast = astctx.z3ToTriton(expr)
@@ -585,8 +585,8 @@ class TritonAst:
         :returns: Number of nodes in the AST.
 
         .. note:: The way of counting nodes is different from the number of nodes of
-                  Triton for which bitvector values are composed of 3 nodes. In this
-                  counting they are counted as one.
+                  Triton for which bitvector values are composed of 3 nodes. We count
+                  them as one.
         """
         def rec(e):
             typ = e.getType()
