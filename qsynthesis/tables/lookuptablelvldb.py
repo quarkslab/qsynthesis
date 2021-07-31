@@ -9,7 +9,7 @@ import plyvel
 # qsynthesis deps
 from qsynthesis.grammar import TritonGrammar, BvOp
 from qsynthesis.tables.base import InputOutputOracle, HashType
-from qsynthesis.types import Optional, List, Dict, Union, Tuple, Iterator, Hash, Input
+from qsynthesis.types import Optional, List, Union, Tuple, Iterator, Hash, Input
 
 
 META_KEY = b"metadatas"
@@ -20,7 +20,7 @@ SIZE_KEY = b"size"
 
 class InputOutputOracleLevelDB(InputOutputOracle):
     """
-    Key-Value store lookup table based on Google Level-DB
+    Key-Value store oracle database based on Google Level-DB
     """
     def __init__(self, grammar: TritonGrammar, inputs: List[Input], hash_mode: HashType = HashType.RAW, f_name: str = ""):
         """

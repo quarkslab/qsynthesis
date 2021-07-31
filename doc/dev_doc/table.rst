@@ -1,12 +1,12 @@
-Table Management
-================
+Oracle Management
+=================
 
 qsynthesis-table-manager utility
 --------------------------------
 
-The tedious task about using QSynthesis is having good tables
+The tedious task about using QSynthesis is having good tables (aka oracles)
 for efficient synthesis. QSynthesis provides `qsynthesis-table-manager`
-provide high-level function to manage tables. Its help file is:
+which provide high-level function to manage tables. Its help file is:
 
 .. highlight:: none
 
@@ -19,13 +19,14 @@ provide high-level function to manage tables. Its help file is:
       -h, --help  Show this message and exit.
 
     Commands:
-      check      Checking the equivalence of hashes against evaluation of...
-      compare    Compare two tables
-      generate   Table generation utility
-      import     Import a raw table in a Level-DB database
-      info       Getting information of a given database
-      merge      Merge entries of the first database in the second
-      runserver  Run the REST API to serve a given table database
+      check     Checking the equivalence of hashes against evaluation of...
+      compare   Compare two tables
+      dump      Dump the content of the table on stdout
+      generate  Table generation utility
+      info      Getting information of a given database
+      merge     Merge entries of the first database in the second
+
+
 
 The first interesting command is ``info`` that provides information about the
 database, like grammar used, inputs, used, number of entries etc.
@@ -61,7 +62,6 @@ The help message is the following:
 
       --op-num INTEGER                Operator number
       -v, --verbosity                 increase output verbosity
-      -k INTEGER                      Number of tables to generate
       --ops TEXT                      specifying operators to uses
       --inputs TEXT                   specifying input vector to use
       --hash-mode [RAW|FNV1A_128|MD5]
@@ -69,9 +69,10 @@ The help message is the following:
       --watchdog FLOAT                Activate RAM watchdog (percentage of load
                                       when to stop)
 
-      -t, --type [db|bin]             Type of database to create
+      -c, --cst TEXT                  Constant to add in the generation process
       --linearization                 If set activate linearization of expressions
       -h, --help                      Show this message and exit.
+
 
 The parameters are the following:
 
@@ -82,14 +83,13 @@ The parameters are the following:
   vectors might induce false positives, while too long vectors might uselessly be too computation intensive (15 is good)
 * ``random-level``: Number of random value that will be used as inputs. Low value favor values like (0, 1, -1)
 * ``op-num``: Unless provided this argument select randomly X operators (among 8 at the moment)
-* ``k``: number of tables to generate (default is 1)
 * ``ops``: takes comma separated operators to use for generation (if not provided they are selected randomly)
 * ``inputs``: Should be given as a1,b1,c1,a2,b2,c2 where a,b,c are the variable. (a1,b1,c1) is the first input etc.
   If not provided inputs are selected randomly using the ``random-level``.
 * ``hash-mode``: Hashing function to apply on output vectors. **(use MD5)**
 * ``watchdog``: Generation is highly RAM consuming *(exponential algorithm)*. That enable a watchdog and
   the value is the percentage of RAM above which the generation should be stopped.
-* ``type``: Type of database to generate, bin is LookupTableRaw, and db is LookupTableLevelDB
+* ``cst``: Additional constants to introduce in the generation process.
 * ``linearization``: enable linearization of expression using sympy
 
 
@@ -106,14 +106,15 @@ files can be imported in a Level-db database with ``qsynthesis-table-manager imp
 
 .. _label_rest_api:
 
-Table REST server
------------------
+Oracle REST server
+------------------
 
+For large oracles it is convenient to serve them on an API instead of having them locally.
+The synthesis is slower but more flexible. Qsynthesis provides ``qsynthesis-table-server``
+allowing to serve Level-DB database via a REST API.
 
-
-The last command of this utility enable serving a given table via a REST API.
-The command is straightforward and takes the table in parameter *(and optionaly a port)* e.g:
+The command is straightforward and takes the table in parameter *(and optionally a port)* e.g:
 
 ::
 
-    qsynthesis-table-manager runserver my_table_leveldb -p 8080
+    qsynthesis-table-server my_table_leveldb -p 8080

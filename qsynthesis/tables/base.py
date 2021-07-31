@@ -168,18 +168,6 @@ class InputOutputOracle:
             else:
                 return None
 
-    def lookup_raw(self, outputs: List[Output]) -> Optional[str]:
-        """
-        Identical to :meth:`InputOutputOracle.lookup` but does not create the TritonAst
-        object. Simply returns the expression string.
-
-        :param outputs: list of output result of evaluating an ast against the inputs of this table
-        :type outputs: List[:py:obj:`qsynthesis.types.Output`]
-        :returns: string of the expression if found
-        """
-        h = self.hash(outputs)
-        return self._get_item(h)
-
     def lookup_hash(self, h: Hash) -> Optional[str]:
         """
         Raw lookup for a given key in database.
@@ -240,7 +228,7 @@ class InputOutputOracle:
         return len(self.inputs)
 
     @staticmethod
-    def fnv1a_128(outs: List[Output]) -> Hash:
+    def _fnv1a_128(outs: List[Output]) -> Hash:
         """
         Hash the outputs using fnv1a_128 algorithm
 
@@ -268,7 +256,7 @@ class InputOutputOracle:
         return hash
 
     @staticmethod
-    def md5(outs: List[Output]) -> Hash:
+    def _md5(outs: List[Output]) -> Hash:
         """
         Hash the outputs using MD5 algorithm. Outputs are transformed into an array.
         That means the final bytes hashed are the concatenation of uint64 in little
@@ -296,9 +284,9 @@ class InputOutputOracle:
         if self.hash_mode == HashType.RAW:
             return tuple(outs)
         elif self.hash_mode == HashType.FNV1A_128:
-            return self.fnv1a_128(outs)
+            return self._fnv1a_128(outs)
         elif self.hash_mode == HashType.MD5:
-            return self.md5(outs)
+            return self._md5(outs)
 
     def __iter__(self) -> Iterable[Tuple[Hash, str]]:
         """ Iterator of all the entries as an iterator of pair, hash, expression as string
@@ -307,7 +295,7 @@ class InputOutputOracle:
         """
         raise NotImplementedError("Should be implemented by child class")
 
-    def get_expr(self, expr: str) -> AstNode:
+    def _get_expr(self, expr: str) -> AstNode:
         """
         Utility function that returns a TritonAst from a given expression string.
         A TritonContext local to the table is created to enable generating such ASTs.
@@ -319,7 +307,7 @@ class InputOutputOracle:
             self._ectx = _EvalCtx(self.grammar)
         return self._ectx.eval_str(expr)
 
-    def set_input_lcontext(self, i: Union[int, Input]) -> None:
+    def _set_input_lcontext(self, i: Union[int, Input]) -> None:
         """
         Set the given concrete values of variables in the local TritonContext.
         The parameter is either the ith input of the table, or directly an Input
@@ -333,7 +321,7 @@ class InputOutputOracle:
             self._ectx = _EvalCtx(self.grammar)
         self._ectx.set_symvar_values(self.inputs[i] if isinstance(i, int) else i)
 
-    def eval_expr_inputs(self, expr: AstNode) -> List[Output]:
+    def _eval_expr_inputs(self, expr: AstNode) -> List[Output]:
         """
         Evaluate a given Triton AstNode object on all inputs of the
         table. The result is a list of Output values.
@@ -345,11 +333,11 @@ class InputOutputOracle:
         """
         outs = []
         for i in range(len(self.inputs)):
-            self.set_input_lcontext(i)
+            self._set_input_lcontext(i)
             outs.append(expr.evaluate())
         return outs
 
-    def watchdog_worker(self, threshold: Union[float, int]) -> None:
+    def _watchdog_worker(self, threshold: Union[float, int]) -> None:
         """
         Function where the memory watchdog thread is running. This function
         allows interrupting table generation when it happens to fill the
@@ -366,7 +354,7 @@ class InputOutputOracle:
                 self.stop = True  # Should stop self and also main thread
 
     @staticmethod
-    def try_linearize(s: str, symbols: Dict[str, object]) -> str:
+    def _try_linearize(s: str, symbols: Dict[str, object]) -> str:
         """
         Try applying sympy to linearize ``s`` with the variable symbols
         ``symbols``. If any exception is raised in between to expression
@@ -390,15 +378,15 @@ class InputOutputOracle:
             return s
 
     @staticmethod
-    def to_signed(value: int) -> int:
+    def _to_signed(value: int) -> int:
         return ctypes.c_longlong(value).value
 
     @staticmethod
-    def to_unsigned(value: int) -> int:
+    def _to_unsigned(value: int) -> int:
         return ctypes.c_ulonglong(value).value
 
     @staticmethod
-    def is_constant(v1: str) -> bool:
+    def _is_constant(v1: str) -> bool:
         try:
             int(v1)
             return True
@@ -406,7 +394,7 @@ class InputOutputOracle:
             return False
 
     @staticmethod
-    def custom_permutations(l: List[Any]) -> Generator[Tuple[bool, Any, Any], None, None]:
+    def _custom_permutations(l: List[Any]) -> Generator[Tuple[bool, Any, Any], None, None]:
         """
         Custom generator generating all the possible tuples from a list. But instead
         of iterating item i with all others 0..n, iterates i with all the previous 0..i.
@@ -436,7 +424,7 @@ class InputOutputOracle:
         :returns: None
         """
         if do_watch:
-            self.watchdog = threading.Thread(target=self.watchdog_worker, args=[watchdog_threshold], daemon=True)
+            self.watchdog = threading.Thread(target=self._watchdog_worker, args=[watchdog_threshold], daemon=True)
             logging.info("Start watchdog")
             self.watchdog.start()
         if linearize:
@@ -479,7 +467,7 @@ class InputOutputOracle:
                 print(f"Depth {cur_depth} (size:{n_items}) (Time:{int(t/60)}m{t%60:.5f}s)")
                 c = 0
 
-                for i, (same, (vals1, name1), (vals2, name2)) in enumerate(self.custom_permutations(worklist)):
+                for i, (same, (vals1, name1), (vals2, name2)) in enumerate(self._custom_permutations(worklist)):
                     if same:
                         c += 1
                         print(f"process: {(c*100)/n_items:.2f}%\r", end="")
@@ -488,7 +476,7 @@ class InputOutputOracle:
                         raise KeyboardInterrupt()
 
                     # Check it here once then iterate operators
-                    name1_cst, name2_cst = self.is_constant(name1), self.is_constant(name2)
+                    name1_cst, name2_cst = self._is_constant(name1), self._is_constant(name2)
                     is_both_constant = name1_cst & name2_cst
 
                     for op, op_eval in zip(ops, [jitting.get_op_eval_array(CU, x) for x in ops]):  # Iterate over all operators
@@ -499,10 +487,10 @@ class InputOutputOracle:
                             h = hash_fun(new_vals)
                             if h not in hash_set:
                                 if name1_cst:
-                                    fmt = str(self.to_signed(new_vals[0]))  # any value is the new constant value
+                                    fmt = str(self._to_signed(new_vals[0]))  # any value is the new constant value
                                 else:
                                     fmt = f"{op.symbol}({name1})" if len(name1) > 1 else f"{op.symbol}{name1}"
-                                fmt = self.try_linearize(fmt, symbols) if linearize else fmt
+                                fmt = self._try_linearize(fmt, symbols) if linearize else fmt
                                 logging.debug(f"[add] {fmt: <20} {h}")
                                 hash_set.add(h)
                                 worklist.append((new_vals, fmt))  # add it in worklist if not already in LUT
@@ -527,12 +515,12 @@ class InputOutputOracle:
                             op_eval(new_vals, vals1, vals2, N)
 
                             if is_both_constant:  # if both were constant use the constant as repr instead
-                                fmt = str(self.to_signed(new_vals[0]))
+                                fmt = str(self._to_signed(new_vals[0]))
 
                             h = hash_fun(new_vals)
                             if h not in hash_set:
                                 if linearize:
-                                    fmt = self.try_linearize(fmt, symbols) if linearize else fmt
+                                    fmt = self._try_linearize(fmt, symbols) if linearize else fmt
                                     if fmt in blacklist:  # if linearize check blacklist here
                                         continue
 
@@ -542,7 +530,7 @@ class InputOutputOracle:
 
                                 if op.commutative and do_use_blacklist and not is_both_constant:
                                     fmt = f"{op.symbol}({name2},{name1})" if op.is_prefix else f"{sn2}{op.symbol}{sn1}"
-                                    fmt = self.try_linearize(fmt, symbols) if linearize else fmt
+                                    fmt = self._try_linearize(fmt, symbols) if linearize else fmt
                                     blacklist.add(fmt)  # blacklist commutative equivalent e.g for a+b blacklist: b+a
                                     logging.debug(f"[blacklist] {fmt}")
                             else:

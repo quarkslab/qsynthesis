@@ -1,5 +1,6 @@
 from unittest.mock import MagicMock
 
+
 class TritonContext:
     pass
 
