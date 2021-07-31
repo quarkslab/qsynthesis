@@ -7,13 +7,10 @@ from enum import IntEnum
 
 # third-party modules
 from triton import ARCH
-from qtracedb.archs.arch import Arch
-from qtracedb.archs.x86 import ArchX86, ArchX64
-from qtracedb.archs.arm import ArchARM
-from qtracedb.archs.arm64 import ArchARM64
 
 # qsynthesis modules
 from qsynthesis.plugin.dependencies import ida_idp, ida_idaapi
+from qsynthesis.plugin.dependencies import ArchX86, ArchX64, ArchARM, ArchARM64
 
 
 class ProcessorType(IntEnum):
@@ -61,7 +58,7 @@ def processor_to_triton_arch() -> ARCH:
         assert False
 
 
-def processor_to_qtracedb_arch() -> Arch:
+def processor_to_arch():
     """
     Get the current IDB processor as a Qtrace-DB Arch object
 

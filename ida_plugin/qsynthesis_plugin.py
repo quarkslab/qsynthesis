@@ -27,7 +27,7 @@ class QSynthesisPlugin(ida_idaapi.plugin_t):
         addon_info.name = self.wanted_name
         addon_info.producer = "Quarkslab"
         addon_info.version = qsynthesis.__version__
-        addon_info.url = "https://gitlab.qb/synthesis/qsynthesis"
+        addon_info.url = "https://github.com/quarkslab/qsynthesis"
         addon_info.freeform = "Copyright (c) 2020 - All Rights Reserved"
         ida_kernwin.register_addon(addon_info)
         self.view = None

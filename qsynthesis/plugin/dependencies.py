@@ -44,9 +44,20 @@ except ImportError:
 
 try:
     import qtracedb
+    from qtracedb import DatabaseManager
+    from qtracedb.trace import Trace, InstrCtx
+    from qtracedb.archs.arch import Instr, Arch
+    from qtracedb.manager import ArchsManager
+    from qtracedb.archs.x86 import ArchX86, ArchX64
+    from qtracedb.archs.arm import ArchARM
+    from qtracedb.archs.arm64 import ArchARM64
     QTRACEDB_ENABLED = True
-except ImportError:
+except ImportError as e:
     QTRACEDB_ENABLED = False
+    from .arch import Arch, ArchX64, ArchARM, ArchARM64, ArchX86, Instr, ArchsManager
+    # Set dummy vars
+    DatabaseManager, Trace, InstrCtx = None, None, None
+
 
 try:
     import triton
