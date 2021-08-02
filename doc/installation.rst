@@ -3,11 +3,11 @@ Installation
 
 Installing **QSynthesis** is rather straightforward, you just need to:
 
-1. Install Triton on your system (cf. `Documentation <https://triton.quarkslab.com/documentation/doxygen/index.html#install_sec>`_)
-2. Use the provided `setup.py` to install QSynthesis
-3. (Optional) Install Qtrace-DB to enable synthesizing from execution trace
-4. (Optional) copy the `ida_plugin/qsynthesis_plugin.py` in the IDA Pro plugin folder
-5. (Optional) install additionnal dependencies to generate tables or to serve tables as server
+* Install Triton on your system (cf. `Documentation <https://triton.quarkslab.com/documentation/doxygen/index.html#install_sec>`_)
+* Use the provided `setup.py` to install QSynthesis
+* (Optional) Install Qtrace-DB to enable synthesizing from execution trace
+* (Optional) copy the `ida_plugin/qsynthesis_plugin.py` in the IDA Pro plugin folder
+* (Optional) install additionnal dependencies to generate tables or to serve tables as server
 
 
 Installing QSynthesis
