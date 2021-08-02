@@ -1,11 +1,10 @@
 # built-in module
 from __future__ import annotations
-import logging
 from typing import Tuple
 
 # qsynthesis deps
 from qsynthesis.tritonast import TritonAst
-from qsynthesis.algorithms.synthesizer_base import SynthesizerBase
+from qsynthesis.algorithms.synthesizer_base import SynthesizerBase, logger
 
 
 class TopDownSynthesizer(SynthesizerBase):
@@ -47,13 +46,13 @@ class TopDownSynthesizer(SynthesizerBase):
                 if not cur_ast.has_children():  # If don't have children either constant or variable
                     continue
 
-                logging.debug(f"try synthesis lookup: {cur_ast.pp_str} [{cur_ast.var_num}]")
+                logger.debug(f"try synthesis lookup: {cur_ast.pp_str} [{cur_ast.var_num}]")
 
                 synt_res = self.try_synthesis_lookup(cur_ast, check_sem)
 
                 if synt_res is not None:
                     has_been_synthesized = True
-                    logging.debug(f"Replace: {cur_ast.pp_str} ===> {synt_res.pp_str}")
+                    logger.debug(f"Replace: {cur_ast.pp_str} ===> {synt_res.pp_str}")
                     if is_first:  # root node has been synthesized
                         return synt_res, has_been_synthesized
                     else:

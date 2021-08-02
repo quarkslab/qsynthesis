@@ -7,6 +7,8 @@ from qsynthesis.tables.base import InputOutputOracle
 from qsynthesis.tritonast import TritonAst
 from qsynthesis.types import Input, List, Optional, Tuple, Union, Output
 
+logger = logging.getLogger("qsynthesis")
+
 
 class SynthesizerBase:
     """
@@ -74,7 +76,7 @@ class SynthesizerBase:
 
         if cur_ast.hash in self.expr_cache:
             self.cache_hit += 1
-            logging.debug("expression cache found !")
+            logger.debug("expression cache found !")
             return self.expr_cache[cur_ast.hash]
 
         for table in self._ltms:
@@ -89,7 +91,7 @@ class SynthesizerBase:
             # Check if we got something better
             e_node_cnt = synth_ast.node_count
             if (best_expr is None and e_node_cnt < size_e) or (e_node_cnt < best_len):
-                logging.debug(f"[base] candidate expr accepted: current:{size_e} candidate:{e_node_cnt} (best:{best_len})  => {synth_ast.pp_str}")
+                logger.debug(f"[base] candidate expr accepted: current:{size_e} candidate:{e_node_cnt} (best:{best_len})  => {synth_ast.pp_str}")
                 best_len, best_expr = e_node_cnt, synth_ast
                 if self.only_first_match:
                     break
@@ -103,9 +105,9 @@ class SynthesizerBase:
             self.expr_cache[cur_ast.hash] = best_expr
             if check_sem:
                 if cur_ast.is_semantically_equal(best_expr):
-                    logging.info("Expressions are semantically equal")
+                    logger.info("Expressions are semantically equal")
                 else:
-                    logging.error("Expressions are semantically different (return None)!!")
+                    logger.error("Expressions are semantically different (return None)!!")
                     return None
             return best_expr
 
@@ -124,7 +126,7 @@ class SynthesizerBase:
         outputs = [self.eval_ast(cur_ast, i) for i in ltm.inputs]
 
         if len(set(outputs)) == 1:  # If all outputs are equal then we consider this as a constant expression
-            logging.debug(f"[base] Found constant expression in {ltm.name}: {cur_ast.pp_str} ===> {outputs[0]}")
+            logger.debug(f"[base] Found constant expression in {ltm.name}: {cur_ast.pp_str} ===> {outputs[0]}")
             return cur_ast.mk_constant(outputs[0], cur_ast.size)
         else:
             # Lookup expression with same outputs in the LT
@@ -133,11 +135,11 @@ class SynthesizerBase:
                 return None
             else:
                 if lk_expr.node_count > cur_ast.node_count:
-                    logging.warning(f"[base] synthesized bigger expression ({lk_expr.pp_str}) than given ({cur_ast.pp_str})")
+                    logger.debug(f"[base] synthesized bigger expression ({lk_expr.pp_str}) than given ({cur_ast.pp_str})")
                     if ltm.is_writable and self.learning_enabled:
                         h = ltm.hash(outputs)
                         s = cur_ast.to_normalized_str()
-                        logging.info(f"[base] expression {s} added to {ltm.name}")
+                        logger.info(f"[base] expression {s} added to {ltm.name}")
                         ltm.add_entry(h, s)
                 return lk_expr
 
