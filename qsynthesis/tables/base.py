@@ -410,7 +410,14 @@ class InputOutputOracle:
                 yield False, l[j], l[i]
             yield True, l[i], l[i]
 
-    def generate(self, bitsize: int, constants: List[int] = [], do_watch: bool = False, watchdog_threshold: Union[int, float] = 90, linearize: bool = False, do_use_blacklist: bool = False) -> None:
+    def generate(self,
+                 bitsize: int,
+                 constants: List[int] = [],
+                 do_watch: bool = False,
+                 watchdog_threshold: Union[int, float] = 90,
+                 linearize: bool = False,
+                 do_use_blacklist: bool = False,
+                 limit: int = 0) -> None:
         """
         Generate a new lookup table from scratch with the variables and operators
         set in the constructor of the table.
@@ -421,6 +428,7 @@ class InputOutputOracle:
         :param watchdog_threshold: threshold to be sent to the memory watchdog
         :param linearize: whether or not to apply linearization on expressions
         :param do_use_blacklist: enable blacklist mechanism on commutative operators. Slower but less memory consuming
+        :param limit: Maximum number of entries to generate
         :returns: None
         """
         if do_watch:
@@ -458,11 +466,12 @@ class InputOutputOracle:
         ops = sorted(self.grammar.non_terminal_operators, key=lambda x: x.arity == 1)  # sort operators to iterate on unary first
         cur_depth = 2
         blacklist = set()
+        item_count = len(worklist)  # total number of expressions
 
         try:
             while cur_depth > 0:
                 # Start a new depth
-                n_items = len(worklist)
+                n_items = len(worklist)  # number of items to process at a given depth
                 t = time() - t0
                 print(f"Depth {cur_depth} (size:{n_items}) (Time:{int(t/60)}m{t%60:.5f}s)")
                 c = 0
@@ -471,6 +480,10 @@ class InputOutputOracle:
                     if same:
                         c += 1
                         print(f"process: {(c*100)/n_items:.2f}%\r", end="")
+
+                    if 0 < limit <= item_count:
+                        self.stop = True
+
                     if self.stop:
                         logging.warning("Threshold reached, generation interrupted")
                         raise KeyboardInterrupt()
@@ -493,6 +506,7 @@ class InputOutputOracle:
                                 fmt = self._try_linearize(fmt, symbols) if linearize else fmt
                                 logging.debug(f"[add] {fmt: <20} {h}")
                                 hash_set.add(h)
+                                item_count += 1
                                 worklist.append((new_vals, fmt))  # add it in worklist if not already in LUT
                             else:
                                 logging.debug(f"[drop] {op.symbol}{name1}  ")
@@ -526,6 +540,7 @@ class InputOutputOracle:
 
                                 logging.debug(f"[add] {fmt: <20} {h}")
                                 hash_set.add(h)
+                                item_count += 1
                                 worklist.append((new_vals, fmt))
 
                                 if op.commutative and do_use_blacklist and not is_both_constant:
