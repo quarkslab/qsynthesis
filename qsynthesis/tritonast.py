@@ -13,6 +13,9 @@ from qsynthesis.types import AstNode, List, Tuple, Generator, Dict, Union, Optio
                              SymbolicVariable, Char, IOVector, Input, Output
 
 
+logger = logging.getLogger('qsynthesis')
+
+
 class ReassemblyError(Exception):
     """
     Wrapping exception for all exceptions that might be raised during the
@@ -303,10 +306,10 @@ class TritonAst:
         try:
             e = eval(s, self.sub_map)
         except NameError as e:
-            logging.warning(f"Expression {s} evaluation failed {self.sub_map}")
+            logger.warning(f"Expression {s} evaluation failed {self.sub_map}")
             raise e
         except TypeError as exc:
-            logging.error(f"Type error when evaluating: {s}")
+            logger.error(f"Type error when evaluating: {s}")
             # Try mangling expressions
             nast = self._try_mangle_ast(s, exc)
             if nast:
@@ -326,7 +329,7 @@ class TritonAst:
         :param s: expression to evaluate
         :return: Triton AST node of the expression
         """
-        logging.warning(f"Try mangling {s}: {str(e)}")
+        logger.warning(f"Try mangling {s}: {str(e)}")
         import re
         mod = False
         s2 = s
@@ -337,10 +340,10 @@ class TritonAst:
                 if c.count("(") != c.count(")") and c.endswith(")"):
                     sub_c = sub_c[:-1]
                     trail = ")"
-                # logging.info(f"Found instance {c} with {v}")
+                # logger.info(f"Found instance {c} with {v}")
                 mod = True
                 s2 = re.sub(re.escape(c+"**"+v), '*'.join([f"({sub_c})"]*int(v))+trail, s2)
-            logging.warning(f"Mangle expr {s} to {s2}")
+            logger.warning(f"Mangle expr {s} to {s2}")
         if mod and s2 != s:
             return self.normalized_str_to_ast(s2)
         else:
@@ -431,7 +434,7 @@ class TritonAst:
         :param update_parents: whether to update parents or not
         """
         if len(self.parents):
-            logging.debug("replace self while multiple parents !")
+            logger.debug("replace self while multiple parents !")
         is_first = True
         for p in self.parents:
             p.set_child(self, repl, update_node=is_first, update_parents=update_parents)
@@ -641,7 +644,7 @@ class TritonAst:
             yield ast, rep_took_place
 
     def _inplace_replace(self, other: 'TritonAst') -> None:
-        logging.debug("Inplace replace")
+        logger.debug("Inplace replace")
         self.ctx, self.ast = other.ctx, other.ast
         self.expr = other.expr
         self.size = other.size

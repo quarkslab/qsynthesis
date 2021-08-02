@@ -1,7 +1,6 @@
 # built-in libs
 from __future__ import annotations
 from pathlib import Path
-import logging
 from enum import IntEnum
 import array
 import hashlib
@@ -9,6 +8,7 @@ import threading
 from collections import Counter
 from time import time, sleep
 import ctypes
+import logging
 
 # third-party libs
 import psutil
@@ -18,6 +18,8 @@ from qsynthesis.grammar import TritonGrammar
 from qsynthesis.tritonast import TritonAst
 from qsynthesis.types import AstNode, Hash, Optional, List, Dict, Union, Tuple, Iterable, Input, Output, BitSize, Any, \
                              Generator
+
+logger = logging.getLogger("qsynthesis")
 
 
 class HashType(IntEnum):
@@ -350,7 +352,7 @@ class InputOutputOracle:
             mem = psutil.virtual_memory()
             self.max_mem = max(mem.used, self.max_mem)
             if mem.percent >= threshold:
-                logging.warning(f"Threshold reached: {mem.percent}%")
+                logger.warning(f"Threshold reached: {mem.percent}%")
                 self.stop = True  # Should stop self and also main thread
 
     @staticmethod
@@ -369,8 +371,8 @@ class InputOutputOracle:
         try:
             lin = eval(s, symbols)
             if isinstance(lin, sympy.boolalg.BooleanFalse):
-                logging.error(f"[linearization] expression {s} False")
-            logging.debug(f"[linearization] expression linearized {s} => {lin}")
+                logger.error(f"[linearization] expression {s} False")
+            logger.debug(f"[linearization] expression linearized {s} => {lin}")
             return str(lin).replace(" ", "")
         except TypeError:
             return s
@@ -433,10 +435,10 @@ class InputOutputOracle:
         """
         if do_watch:
             self.watchdog = threading.Thread(target=self._watchdog_worker, args=[watchdog_threshold], daemon=True)
-            logging.info("Start watchdog")
+            logger.debug("Start watchdog")
             self.watchdog.start()
         if linearize:
-            logging.info("Linearization enabled")
+            logger.info("Linearization enabled")
             import sympy
             symbols = {x: sympy.symbols(x) for x in self.grammar.vars}
         t0 = time()
@@ -485,7 +487,7 @@ class InputOutputOracle:
                         self.stop = True
 
                     if self.stop:
-                        logging.warning("Threshold reached, generation interrupted")
+                        logger.warning("Threshold reached, generation interrupted")
                         raise KeyboardInterrupt()
 
                     # Check it here once then iterate operators
@@ -504,12 +506,12 @@ class InputOutputOracle:
                                 else:
                                     fmt = f"{op.symbol}({name1})" if len(name1) > 1 else f"{op.symbol}{name1}"
                                 fmt = self._try_linearize(fmt, symbols) if linearize else fmt
-                                logging.debug(f"[add] {fmt: <20} {h}")
+                                logger.debug(f"[add] {fmt: <20} {h}")
                                 hash_set.add(h)
                                 item_count += 1
                                 worklist.append((new_vals, fmt))  # add it in worklist if not already in LUT
                             else:
-                                logging.debug(f"[drop] {op.symbol}{name1}  ")
+                                logger.debug(f"[drop] {op.symbol}{name1}  ")
 
                         else:  # arity is 2
                             # for identity (a op a) ignore it if the result is known to be 0 or a
@@ -538,7 +540,7 @@ class InputOutputOracle:
                                     if fmt in blacklist:  # if linearize check blacklist here
                                         continue
 
-                                logging.debug(f"[add] {fmt: <20} {h}")
+                                logger.debug(f"[add] {fmt: <20} {h}")
                                 hash_set.add(h)
                                 item_count += 1
                                 worklist.append((new_vals, fmt))
@@ -547,13 +549,13 @@ class InputOutputOracle:
                                     fmt = f"{op.symbol}({name2},{name1})" if op.is_prefix else f"{sn2}{op.symbol}{sn1}"
                                     fmt = self._try_linearize(fmt, symbols) if linearize else fmt
                                     blacklist.add(fmt)  # blacklist commutative equivalent e.g for a+b blacklist: b+a
-                                    logging.debug(f"[blacklist] {fmt}")
+                                    logger.debug(f"[blacklist] {fmt}")
                             else:
-                                logging.debug(f"[drop] {op.symbol}({name1},{name2})" if op.is_prefix else f"[drop] ({name1}){op.symbol}({name2})")
+                                logger.debug(f"[drop] {op.symbol}({name1},{name2})" if op.is_prefix else f"[drop] ({name1}){op.symbol}({name2})")
 
                 cur_depth += 1
         except KeyboardInterrupt:
-            logging.info("Stop required")
+            logger.info("Stop required")
         # In the end
         self.stop = True
         t = time() - t0

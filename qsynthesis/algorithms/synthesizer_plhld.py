@@ -1,10 +1,9 @@
 # built-in modules
-import logging
 from typing import Tuple, Dict
 
 # qsynthesis modules
 from qsynthesis.tritonast import TritonAst
-from qsynthesis.algorithms.synthesizer_tdbu import TopDownBottomUpSynthesizer, YieldT
+from qsynthesis.algorithms.synthesizer_tdbu import TopDownBottomUpSynthesizer, YieldT, logger
 
 
 class PlaceHolderSynthesizer(TopDownBottomUpSynthesizer):
@@ -45,7 +44,7 @@ class PlaceHolderSynthesizer(TopDownBottomUpSynthesizer):
         cur_placeholder = 0
 
         while 1:
-            logging.debug(f"[plhdr] sending: {new_expr_to_send.pp_str if new_expr_to_send is not None else None}")
+            logger.debug(f"[plhdr] sending: {new_expr_to_send.pp_str if new_expr_to_send is not None else None}")
             cur_ast, info = expr_repl_visitor.send(new_expr_to_send)  # Iterate generator
 
             if isinstance(info, bool):
@@ -54,7 +53,7 @@ class PlaceHolderSynthesizer(TopDownBottomUpSynthesizer):
 
             # Check if not already substituted, if so yield directly the placeholder
             if cur_ast.hash in replacements_hashs:
-                logging.debug(f"[plhdr] Hash match: {cur_ast.pp_str} ==> {replacements_hashs[cur_ast.hash].pp_str}")
+                logger.debug(f"[plhdr] Hash match: {cur_ast.pp_str} ==> {replacements_hashs[cur_ast.hash].pp_str}")
                 new_expr_to_send = replacements_hashs[cur_ast.hash]
                 continue
 
@@ -63,7 +62,7 @@ class PlaceHolderSynthesizer(TopDownBottomUpSynthesizer):
                 continue
 
             # Try synthesizing expression
-            logging.debug(f"[phldr] try synthesis lookup: {cur_ast.pp_str if cur_ast.node_count < 50 else 'too large'} [{cur_ast.node_count}] [{info.name}]")
+            logger.debug(f"[phldr] try synthesis lookup: {cur_ast.pp_str if cur_ast.node_count < 50 else 'too large'} [{cur_ast.node_count}] [{info.name}]")
             synt_res = self.try_synthesis_lookup(cur_ast, check_sem)
 
             if synt_res is not None:
@@ -86,14 +85,14 @@ class PlaceHolderSynthesizer(TopDownBottomUpSynthesizer):
             replacements[placeholder] = synt_res
             replacements_hashs[cur_ast.hash] = placeholder
             new_expr_to_send = placeholder
-            logging.debug(f"[plhdr] Create Placeholder plhd_{cur_placeholder-1} for: {synt_res.pp_str} ptr_id: {synt_res.ptr_id}")
+            logger.debug(f"[plhdr] Create Placeholder plhd_{cur_placeholder-1} for: {synt_res.pp_str} ptr_id: {synt_res.ptr_id}")
 
-        logging.debug(f"[plhdr] AST before replacement: {final_ast.pp_str}")
+        logger.debug(f"[plhdr] AST before replacement: {final_ast.pp_str}")
         for k, v in replacements.items():
-            logging.debug(f"Final replace {k.pp_str}  ==> {v.pp_str}")
+            logger.debug(f"Final replace {k.pp_str}  ==> {v.pp_str}")
         self.replace_all(final_ast, replacements, recursive=True)
         final_ast.update_all()
-        logging.info(f"Final AST: {final_ast.pp_str}")
+        logger.info(f"Final AST: {final_ast.pp_str}")
         return final_ast, expr_modified
 
     @staticmethod
@@ -126,7 +125,7 @@ class PlaceHolderSynthesizer(TopDownBottomUpSynthesizer):
             new_expr_to_send = None
             hash_mapping = {k.hash: k for k in replacement}
 
-            logging.debug(f"Len replacement: {len(replacement)}  len hash_mapping:{len(hash_mapping)}")
+            logger.debug(f"Len replacement: {len(replacement)}  len hash_mapping:{len(hash_mapping)}")
 
             g = ast.visit_replacement(update=False)
 
@@ -137,13 +136,13 @@ class PlaceHolderSynthesizer(TopDownBottomUpSynthesizer):
 
                 if cur_ast_id in hash_mapping:  # Prefilter with hash to check if current ast might be substituted
                     key = hash_mapping[cur_ast_id]
-                    logging.debug(f"cur_ast: {cur_ast.pp_str}  key:{key.pp_str}  equal:{cur_ast.expr.equalTo(key.expr)}")
+                    logger.debug(f"cur_ast: {cur_ast.pp_str}  key:{key.pp_str}  equal:{cur_ast.expr.equalTo(key.expr)}")
 
                     if not cur_ast.expr.equalTo(key.expr):  # Check that they are equal
-                        logging.warning("two different expressions !")
+                        logger.warning("two different expressions !")
 
                     new_expr_to_send = replacement[key]
-                    logging.debug(f"Will replace {cur_ast.pp_str}  ==> {new_expr_to_send.pp_str}")
+                    logger.debug(f"Will replace {cur_ast.pp_str}  ==> {new_expr_to_send.pp_str}")
 
                     if recursive:
                         self.replace_all(new_expr_to_send, replacement, recursive=recursive)

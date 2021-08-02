@@ -1,5 +1,4 @@
 # built-in modules
-import logging
 from typing import List, Tuple, Generator, Union
 from enum import IntEnum
 
@@ -9,7 +8,7 @@ from orderedset import OrderedSet
 # qsynthesis modules
 from qsynthesis.tables.base import InputOutputOracle
 from qsynthesis.tritonast import TritonAst
-from qsynthesis.algorithms.synthesizer_base import SynthesizerBase
+from qsynthesis.algorithms.synthesizer_base import SynthesizerBase, logger
 
 
 class YieldT(IntEnum):
@@ -69,17 +68,17 @@ class TopDownBottomUpSynthesizer(SynthesizerBase):
         expr_modified = False
 
         while 1:
-            # logging.debug(f"Sending: {new_expr_to_send}")
+            # logger.debug(f"Sending: {new_expr_to_send}")
             cur_expr, info = expr_repl_visitor.send(new_expr_to_send)  # Iterate generator
-            # logging.debug(f"Receiving: {cur_expr}")
+            # logger.debug(f"Receiving: {cur_expr}")
             if isinstance(info, bool):
                 final_expr = cur_expr
-                # logging.debug("final expression:", final_expr.replace("\n"," "))
+                # logger.debug("final expression:", final_expr.replace("\n"," "))
                 final_expr.update_all()
                 return final_expr, expr_modified
 
             else:  # Try synthesizing expression
-                logging.debug(f"try synthesis lookup: {cur_expr.pp_str if cur_expr.node_count < 50 else 'too large'}")
+                logger.debug(f"try synthesis lookup: {cur_expr.pp_str if cur_expr.node_count < 50 else 'too large'}")
                 synt_res = self.try_synthesis_lookup(cur_expr, check_sem)
                 if synt_res is not None:
                     expr_modified = True
@@ -150,7 +149,7 @@ class TopDownBottomUpSynthesizer(SynthesizerBase):
 
         while worklist:
             ast = worklist.pop(0)
-            logging.debug(f"\n[visit_replacement] pop [{ast.ptr_id}]({len(ast.get_children())}) {ast.pp_str}  worklist:[{len(worklist)}] bu_worklist:[{len(bottomup_worklist)}]")
+            logger.debug(f"\n[visit_replacement] pop [{ast.ptr_id}]({len(ast.get_children())}) {ast.pp_str}  worklist:[{len(worklist)}] bu_worklist:[{len(bottomup_worklist)}]")
 
             if not ast.is_leaf():
                 rep = yield ast, mode  # Current yield (TopB, or BotUp)
@@ -162,21 +161,21 @@ class TopDownBottomUpSynthesizer(SynthesizerBase):
                 self.total_repl_td += 1 if mode == YieldT.TopBottom else 0
                 self.total_repl_bu += 1 if mode == YieldT.BottomUp else 0
                 if ast.is_root():
-                    logging.debug(f"YIeld new root ahead of time: {rep.pp_str}")
+                    logger.debug(f"YIeld new root ahead of time: {rep.pp_str}")
                     yield rep, modified  # Final yield (ahead of time)
                 else:
-                    logging.debug(f"replace_self: {str(ast.expr)} => {rep.pp_str}")
+                    logger.debug(f"replace_self: {str(ast.expr)} => {rep.pp_str}")
                     ast.replace_self(rep, update_parents=True)
             else:
                 if mode == YieldT.TopBottom:
-                    logging.debug(f"[visit_replacement] worklist updates before wl:[{len(worklist)}] buwl:[{len(bottomup_worklist)}]")
+                    logger.debug(f"[visit_replacement] worklist updates before wl:[{len(worklist)}] buwl:[{len(bottomup_worklist)}]")
                     worklist.update(ast.get_children())  # add child in the TopDown only if it has not been replaced
                     bottomup_worklist.add(ast)  # add itself in the BottomUp list !
-                    logging.debug(f"[visit_replacement] worklist updates wl:[{len(worklist)}] buwl:[{len(bottomup_worklist)}]")
+                    logger.debug(f"[visit_replacement] worklist updates wl:[{len(worklist)}] buwl:[{len(bottomup_worklist)}]")
 
             if not worklist:
-                logging.debug("--------------------------------- Switch Bottom Up -----------------------------------")
-                logging.debug(f"AST at that time: {orig_ast.pp_str}")
+                logger.debug("--------------------------------- Switch Bottom Up -----------------------------------")
+                logger.debug(f"AST at that time: {orig_ast.pp_str}")
                 mode = YieldT.BottomUp
                 worklist = bottomup_worklist[::-1]  # switch the worklist
                 bottomup_worklist = []
