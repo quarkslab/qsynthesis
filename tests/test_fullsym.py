@@ -1,3 +1,5 @@
+import sys
+
 from triton import ARCH
 
 from qsynthesis import SimpleSymExec, TopDownSynthesizer, InputOutputOracleLevelDB
@@ -19,7 +21,7 @@ INSTRUCTIONS = [b'U', b'H\x89\xe5', b'H\x89}\xf8', b'H\x89u\xf0', b'H\x89U\xe8',
                 b'H\x89\xd0', b']', b'\xc3']
 
 
-def test():
+def test(oracle_file):
     # Perform symbolic execution of the instructions
     symexec = SimpleSymExec(ARCH.X86_64)
     symexec.initialize_register('rip', RIP_ADDR)
@@ -29,7 +31,7 @@ def test():
     rax = symexec.get_register_ast("rax")
 
     # Load lookup tables
-    ltm = InputOutputOracleLevelDB.load("../lts/lts15_opt_leveldb")
+    ltm = InputOutputOracleLevelDB.load(oracle_file)
 
     # Perform Synthesis of the expression
     synthesizer = TopDownSynthesizer(ltm)
@@ -43,7 +45,10 @@ def test():
 
 
 if __name__ == "__main__":
-    sx, srax = test()
+    if len(sys.argv) != 2:
+        print(f"./{sys.argv[0]} oracle_table")
+        sys.exit(1)
+    sx, srax = test(sys.argv[1])
 '''
 simplified: True
 synthesized expression: ((((~(((rsi * rcx)))) ^ ((rcx * rcx))) - rsi))
