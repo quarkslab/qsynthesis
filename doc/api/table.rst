@@ -18,7 +18,7 @@ which interface is given below. At the moment two children classes implement thi
 * :py:class:`InputOutputOracleLevelDB`: Main table object where entries are stored in a key-value database
   made by called `Level-DB <https://github.com/google/leveldb>`_ made by Google, that guarantee logarithmic
   read in database.
-* :py:class:`LookupTableREST`: Class interfacing a ``InputOutputOracleLevelDB`` being served on a REST API
+* :py:class:`InputOutputOracleREST`: Class interfacing a ``InputOutputOracleLevelDB`` being served on a REST API
   (cf. :ref:`label_rest_api`). This table avoids having a whole table locally.
 
 
