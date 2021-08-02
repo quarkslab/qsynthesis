@@ -6,19 +6,6 @@ Introduction
 
 .. _label_intro_plugin:
 
-The IDA plugin works in two manner, with Qtrace-IDA and without Qtrace-IDA. If
-Qtrace-IDA is installed the plugin will use the trace loaded within Qtrace-IDA.
-Qtrace-IDA will automatically detect QSynthesis as a Qtrace-IDA addon and will
-put it in its menu.
-
-.. figure:: ../figs/qtrace-menu-edit.png
-   :scale: 100 %
-   :align: center
-   :alt: Qtrace-IDA main menu with QSynthesis
-
-Without IDA, QSynthesis provides the basic functionalities to load a trace and
-to work on it. In both modes the same functionalities are provided.
-
 The default shortcut to launch QSynthesis is: **Alt+S**
 
 
@@ -141,18 +128,6 @@ three variants of the reassembly.
 
 Debugging
 =========
-
-For debugging it is possible to access the QSynthesis view via Qtrace-IDA with the following code:
-
-.. code-block:: python
-
-    import qtraceida
-    qtrace = qtraceida.get_qtrace()
-    view = qtrace.get_view("QSynthesis")
-
-Note that ``get_view`` will return None if the view is not shown.
-Then you have access to all internal structures and objects of the plugin to play around with it.
-
 
 .. note:: Once instanciated, it is possible to access the plugin object
           with ``from qsynthesis import qsynthesis_plugin``.
