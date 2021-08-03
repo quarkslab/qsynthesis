@@ -1,0 +1,299 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>QSynthesis documentation &mdash; QSynthesis 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home"> QSynthesis
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html"> Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_usage.html"> API usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugin Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="plugin/plugin_usage.html">IDA Plugin Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugin/plugin_usage.html#exploiting-results">Exploiting results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugin/plugin_usage.html#debugging">Debugging</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Python API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/tritonast.html">TritonAst</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/synthesis.html">Top-Down Synthesizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/synthesis.html#placeholder-based-synthesizer">Placeholder-based Synthesizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/table.html">Grammar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/table.html#oracles">Oracles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/sym_exec.html">Symbolic Execution utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/types.html">Types</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dev_doc/table.html">Lookup table Management</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">QSynthesis</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>QSynthesis documentation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="qsynthesis-documentation">
+<h1>QSynthesis documentation<a class="headerlink" href="#qsynthesis-documentation" title="Permalink to this headline">¶</a></h1>
+<p><strong>QSynthesis</strong> is a Python API to perform Greybox synthesis of bitvector
+expressions. The base synthesis algorithm is based on
+both a blackbox I/O based approach comparing solely input-to-output
+pairs to perform the synthesis, but also a whitebox AST search
+to synthesize sub-expressions <em>(if the root expression cannot be synthesized
+all at once)</em>. Also, instead of deriving possible candidates on each expressions
+to synthesize, QSynthesis relies on pre-computated expressions stored in a
+database. The database keeps the mapping of an expression and its associated output
+vector representing its behavior on a set of inputs. Given a bitvector expression
+to synthesize, finding a candidate can thus be performed in
+near O(1) as the lookup is the lookup cost in database. With the structure
+used (Google Level-DB) the cost is thus Log(N) with N the number of entries
+in the database.</p>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html"> Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installing-qsynthesis">Installing QSynthesis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installing-the-ida-plugin">Installing the IDA Plugin</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api_usage.html"> API usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api_usage.html#use-case-synthesis-in-pure-symbolic-with-triton">Use-case: Synthesis in pure symbolic with Triton</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Plugin Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="plugin/plugin_usage.html">IDA Plugin Walkthrough</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="plugin/plugin_usage.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin/plugin_usage.html#main-interface">Main Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin/plugin_usage.html#popup-actions">Popup Actions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="plugin/plugin_usage.html#exploiting-results">Exploiting results</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="plugin/plugin_usage.html#showing-ast-s">Showing AST’s</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin/plugin_usage.html#showing-depencencies">Showing Depencencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plugin/plugin_usage.html#reassembly">Reassembly</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="plugin/plugin_usage.html#debugging">Debugging</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Python API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/tritonast.html">TritonAst</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/synthesis.html">Top-Down Synthesizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/synthesis.html#placeholder-based-synthesizer">Placeholder-based Synthesizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/table.html">Grammar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/table.html#oracles">Oracles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/sym_exec.html">Symbolic Execution utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/types.html">Types</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Advanced Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dev_doc/table.html">Lookup table Management</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dev_doc/table.html#qsynthesis-table-manager-utility">qsynthesis-table-manager utility</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev_doc/table.html#table-generation">Table Generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev_doc/table.html#oracle-rest-server">Oracle REST server</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Quarkslab.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,310 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>qsynthesis.grammar.grammar &mdash; QSynthesis 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> QSynthesis
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html"> Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_usage.html"> API usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugin Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../plugin/plugin_usage.html">IDA Plugin Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../plugin/plugin_usage.html#exploiting-results">Exploiting results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../plugin/plugin_usage.html#debugging">Debugging</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Python API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/tritonast.html">TritonAst</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/synthesis.html">Top-Down Synthesizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/synthesis.html#placeholder-based-synthesizer">Placeholder-based Synthesizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/table.html">Grammar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/table.html#oracles">Oracles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/sym_exec.html">Symbolic Execution utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/types.html">Types</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev_doc/table.html">Lookup table Management</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">QSynthesis</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>qsynthesis.grammar.grammar</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for qsynthesis.grammar.grammar</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Standard modules</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="c1"># Qsynthesis types</span>
+<span class="kn">from</span> <span class="nn">qsynthesis.types</span> <span class="kn">import</span> <span class="n">BitSize</span><span class="p">,</span> <span class="n">Char</span><span class="p">,</span> <span class="n">Input</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">qsynthesis.tritonast</span> <span class="kn">import</span> <span class="n">TritonAst</span>
+<span class="kn">from</span> <span class="nn">qsynthesis.grammar.ops</span> <span class="kn">import</span> <span class="n">BvOp</span><span class="p">,</span> <span class="n">Operator</span><span class="p">,</span> <span class="n">OPERATORS</span>
+
+
+<div class="viewcode-block" id="TritonGrammar"><a class="viewcode-back" href="../../../api/table.html#qsynthesis.grammar.grammar.TritonGrammar">[docs]</a><span class="k">class</span> <span class="nc">TritonGrammar</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Triton Grammar class. It represent a set of operators, and variables</span>
+<span class="sd">    of a given size (only 64 bits at the moment).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">vars</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Char</span><span class="p">,</span> <span class="n">BitSize</span><span class="p">]],</span> <span class="n">ops</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">BvOp</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor taking a set of variables (name and size) and a set of operators.</span>
+
+<span class="sd">        :param vars: list of tuple of (name ,size)</span>
+<span class="sd">        :type vars: List[Tuple[:py:obj:`qsynthesis.types.Char`, :py:obj:`qsynthesis.types.BitSize`]]</span>
+<span class="sd">        :param ops: list of BvOp representing operators</span>
+<span class="sd">        :type ops: List[BvOp]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ops</span> <span class="o">=</span> <span class="n">ops</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vars_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">}</span>  <span class="c1"># Dict of str-&gt;size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vars</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vars_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>  <span class="c1"># take size of the first var as they all have the same size</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">non_terminal_operators</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Operator</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the list of non-terminal operators. All unary and</span>
+<span class="sd">        binary operators are non terminal as they can be derived.</span>
+
+<span class="sd">        :return: list of operators namedtuples</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">OPERATORS</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ops</span><span class="p">]</span>
+
+<div class="viewcode-block" id="TritonGrammar.gen_test_inputs"><a class="viewcode-back" href="../../../api/table.html#qsynthesis.grammar.grammar.TritonGrammar.gen_test_inputs">[docs]</a>    <span class="k">def</span> <span class="nf">gen_test_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Input</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate a list of ``n`` input. Thus it generate a random</span>
+<span class="sd">        valuation for each variables of the grammar and that n times.</span>
+
+<span class="sd">        :param n: Number of Input to generate (size of the list)</span>
+<span class="sd">        :type n: int</span>
+<span class="sd">        :returns: list of inputs</span>
+<span class="sd">        :rtype: List[:py:obj:`qsynthesis.types.Input`]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[{</span><span class="n">var</span><span class="p">:</span> <span class="n">random</span><span class="o">.</span><span class="n">getrandbits</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vars_dict</span><span class="p">[</span><span class="n">var</span><span class="p">])</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">}</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span></div>
+
+<div class="viewcode-block" id="TritonGrammar.str_to_expr"><a class="viewcode-back" href="../../../api/table.html#qsynthesis.grammar.grammar.TritonGrammar.str_to_expr">[docs]</a>    <span class="k">def</span> <span class="nf">str_to_expr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TritonAst</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert a string in the format of the grammar into a TritonAst.</span>
+<span class="sd">        In practice an args[0] should be a TritonAst from which to spawn</span>
+<span class="sd">        a new TritonAst. That is required to get the same mapping of normalized</span>
+<span class="sd">        variables than the one used by expr.</span>
+
+<span class="sd">        :param s: expression string to convert to TritonAst</span>
+<span class="sd">        :return: the TritonAst representing the expressions string</span>
+<span class="sd">        :raises: NameError, TypeError</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">expr</span><span class="o">.</span><span class="n">normalized_str_to_ast</span><span class="p">(</span><span class="n">s</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TritonGrammar.to_dict"><a class="viewcode-back" href="../../../api/table.html#qsynthesis.grammar.grammar.TritonGrammar.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a dictionnary representation of the grammar.</span>
+<span class="sd">        This is used for serialization in database etc.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="nb">vars</span><span class="o">=</span><span class="p">[(</span><span class="n">n</span><span class="p">,</span> <span class="n">sz</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">sz</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()],</span>
+            <span class="n">operators</span><span class="o">=</span><span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ops</span><span class="p">]</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="TritonGrammar.from_dict"><a class="viewcode-back" href="../../../api/table.html#qsynthesis.grammar.grammar.TritonGrammar.from_dict">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="n">g_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;TritonGrammar&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Static method instanciating a TritonGrammar from its representation as</span>
+<span class="sd">        a dictionnary.</span>
+
+<span class="sd">        :param g_dict: dictionarry representation of the grammar</span>
+<span class="sd">        :returns: TritonGrammar object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">TritonGrammar</span><span class="p">(</span><span class="n">g_dict</span><span class="p">[</span><span class="s1">&#39;vars&#39;</span><span class="p">],</span> <span class="p">[</span><span class="n">BvOp</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">g_dict</span><span class="p">[</span><span class="s1">&#39;operators&#39;</span><span class="p">]])</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Quarkslab.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

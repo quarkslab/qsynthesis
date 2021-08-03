@@ -1,0 +1,287 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>qsynthesis.algorithms.synthesizer_td &mdash; QSynthesis 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> QSynthesis
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html"> Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_usage.html"> API usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugin Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../plugin/plugin_usage.html">IDA Plugin Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../plugin/plugin_usage.html#exploiting-results">Exploiting results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../plugin/plugin_usage.html#debugging">Debugging</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Python API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/tritonast.html">TritonAst</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/synthesis.html">Top-Down Synthesizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/synthesis.html#placeholder-based-synthesizer">Placeholder-based Synthesizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/table.html">Grammar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/table.html#oracles">Oracles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/sym_exec.html">Symbolic Execution utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/types.html">Types</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev_doc/table.html">Lookup table Management</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">QSynthesis</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>qsynthesis.algorithms.synthesizer_td</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for qsynthesis.algorithms.synthesizer_td</h1><div class="highlight"><pre>
+<span></span><span class="c1"># built-in module</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
+
+<span class="c1"># qsynthesis deps</span>
+<span class="kn">from</span> <span class="nn">qsynthesis.tritonast</span> <span class="kn">import</span> <span class="n">TritonAst</span>
+<span class="kn">from</span> <span class="nn">qsynthesis.algorithms.synthesizer_base</span> <span class="kn">import</span> <span class="n">SynthesizerBase</span><span class="p">,</span> <span class="n">logger</span>
+
+
+<div class="viewcode-block" id="TopDownSynthesizer"><a class="viewcode-back" href="../../../api/synthesis.html#qsynthesis.algorithms.synthesizer_td.TopDownSynthesizer">[docs]</a><span class="k">class</span> <span class="nc">TopDownSynthesizer</span><span class="p">(</span><span class="n">SynthesizerBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Synthesize with a Top-Down **only** AST search based on Triton AST.</span>
+<span class="sd">    The complexity in worst case of the search is then O(n) with</span>
+<span class="sd">    n the number of nodes in the AST to synthesize.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TopDownSynthesizer.synthesize"><a class="viewcode-back" href="../../../api/synthesis.html#qsynthesis.algorithms.synthesizer_td.TopDownSynthesizer.synthesize">[docs]</a>    <span class="k">def</span> <span class="nf">synthesize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ioast</span><span class="p">:</span> <span class="n">TritonAst</span><span class="p">,</span> <span class="n">check_sem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TritonAst</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform the Top-Down search on the ioast to try synthesizing it. The algorithm first</span>
+<span class="sd">        tries to synthesize the root node. If not successful descend recursively in all children</span>
+<span class="sd">        of the AST to try substituting sub-ASTs.</span>
+
+<span class="sd">        :param ioast: TritonAst object to synthesize</span>
+<span class="sd">        :param check_sem: boolean one whether to check the semantic equivalence of expression</span>
+<span class="sd">                          before substituting them. That ensure soundness of the synthesis</span>
+<span class="sd">        :returns: tuple with new TritonAst and whether some replacement took place or not</span>
+
+<span class="sd">        .. warning:: Activating the `check_sem` parameter implies a strong overhead</span>
+<span class="sd">                     on the synthesis as SMT queries are being performed for any candidates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ioast</span> <span class="o">=</span> <span class="n">ioast</span><span class="o">.</span><span class="n">duplicate</span><span class="p">()</span>  <span class="c1"># Make a copy of the AST to modify it with breaking the one given in parameter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expr_cache</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval_cache</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">call_to_eval</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">next_expr_to_send</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">has_been_synthesized</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">is_first</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="n">ioast</span><span class="o">.</span><span class="n">visit_replacement</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">cur_ast</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">next_expr_to_send</span><span class="p">)</span>
+                <span class="n">next_expr_to_send</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># reset next_expr_to_send</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">cur_ast</span><span class="o">.</span><span class="n">has_children</span><span class="p">():</span>  <span class="c1"># If don&#39;t have children either constant or variable</span>
+                    <span class="k">continue</span>
+
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;try synthesis lookup: </span><span class="si">{</span><span class="n">cur_ast</span><span class="o">.</span><span class="n">pp_str</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="n">cur_ast</span><span class="o">.</span><span class="n">var_num</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+
+                <span class="n">synt_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">try_synthesis_lookup</span><span class="p">(</span><span class="n">cur_ast</span><span class="p">,</span> <span class="n">check_sem</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">synt_res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">has_been_synthesized</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Replace: </span><span class="si">{</span><span class="n">cur_ast</span><span class="o">.</span><span class="n">pp_str</span><span class="si">}</span><span class="s2"> ===&gt; </span><span class="si">{</span><span class="n">synt_res</span><span class="o">.</span><span class="n">pp_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">is_first</span><span class="p">:</span>  <span class="c1"># root node has been synthesized</span>
+                        <span class="k">return</span> <span class="n">synt_res</span><span class="p">,</span> <span class="n">has_been_synthesized</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">next_expr_to_send</span> <span class="o">=</span> <span class="n">synt_res</span>
+
+                <span class="n">is_first</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ioast</span><span class="p">,</span> <span class="n">has_been_synthesized</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Quarkslab.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,597 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Grammar &mdash; QSynthesis 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="SimpleSymExec" href="sym_exec.html" />
+    <link rel="prev" title="Top-Down Synthesizer" href="synthesis.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> QSynthesis
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_usage.html"> API usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugin Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_usage.html">IDA Plugin Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_usage.html#exploiting-results">Exploiting results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plugin/plugin_usage.html#debugging">Debugging</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Python API</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="tritonast.html">TritonAst</a></li>
+<li class="toctree-l1"><a class="reference internal" href="synthesis.html">Top-Down Synthesizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="synthesis.html#placeholder-based-synthesizer">Placeholder-based Synthesizer</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Grammar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#oracles">Oracles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sym_exec.html">Symbolic Execution utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Types</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../dev_doc/table.html">Lookup table Management</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QSynthesis</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Grammar</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/api/table.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="grammar">
+<h1>Grammar<a class="headerlink" href="#grammar" title="Permalink to this headline">¶</a></h1>
+<p>Oracles contain pre-computed expression on a given grammar. A grammar is composed
+of variables, and operators (unary/binary) that can be applied on these
+variables. An oracle object is instanciated with such grammar class and an input vector.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsynthesis.grammar.grammar.TritonGrammar">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">qsynthesis.grammar.grammar.</span></span><span class="sig-name descname"><span class="pre">TritonGrammar</span></span><a class="reference internal" href="../_modules/qsynthesis/grammar/grammar.html#TritonGrammar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.grammar.grammar.TritonGrammar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Triton Grammar class. It represent a set of operators, and variables
+of a given size (only 64 bits at the moment).</p>
+<p>Constructor taking a set of variables (name and size) and a set of operators.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vars</strong> (List[Tuple[<a class="reference internal" href="types.html#qsynthesis.types.Char" title="qsynthesis.types.Char"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.Char</span></code></a>, <a class="reference internal" href="types.html#qsynthesis.types.BitSize" title="qsynthesis.types.BitSize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.BitSize</span></code></a>]]) – list of tuple of (name ,size)</p></li>
+<li><p><strong>ops</strong> (<em>List</em><em>[</em><em>BvOp</em><em>]</em>) – list of BvOp representing operators</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsynthesis.grammar.grammar.TritonGrammar.from_dict">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g_dict</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qsynthesis.grammar.grammar.TritonGrammar" title="qsynthesis.grammar.grammar.TritonGrammar"><span class="pre">TritonGrammar</span></a></span></span><a class="reference internal" href="../_modules/qsynthesis/grammar/grammar.html#TritonGrammar.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.grammar.grammar.TritonGrammar.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Static method instanciating a TritonGrammar from its representation as
+a dictionnary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>g_dict</strong> – dictionarry representation of the grammar</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>TritonGrammar object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsynthesis.grammar.grammar.TritonGrammar.gen_test_inputs">
+<span class="sig-name descname"><span class="pre">gen_test_inputs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsynthesis/grammar/grammar.html#TritonGrammar.gen_test_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.grammar.grammar.TritonGrammar.gen_test_inputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a list of <code class="docutils literal notranslate"><span class="pre">n</span></code> input. Thus it generate a random
+valuation for each variables of the grammar and that n times.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Number of Input to generate (size of the list)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of inputs</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[<a class="reference internal" href="types.html#qsynthesis.types.Input" title="qsynthesis.types.Input"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.Input</span></code></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsynthesis.grammar.grammar.TritonGrammar.non_terminal_operators">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">non_terminal_operators</span></span><em class="property"><span class="pre">:</span> <span class="pre">List[qsynthesis.grammar.ops.Operator]</span></em><a class="headerlink" href="#qsynthesis.grammar.grammar.TritonGrammar.non_terminal_operators" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of non-terminal operators. All unary and
+binary operators are non terminal as they can be derived.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>list of operators namedtuples</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsynthesis.grammar.grammar.TritonGrammar.str_to_expr">
+<span class="sig-name descname"><span class="pre">str_to_expr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tritonast.html#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst"><span class="pre">qsynthesis.tritonast.TritonAst</span></a></span></span><a class="reference internal" href="../_modules/qsynthesis/grammar/grammar.html#TritonGrammar.str_to_expr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.grammar.grammar.TritonGrammar.str_to_expr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a string in the format of the grammar into a TritonAst.
+In practice an args[0] should be a TritonAst from which to spawn
+a new TritonAst. That is required to get the same mapping of normalized
+variables than the one used by expr.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>s</strong> – expression string to convert to TritonAst</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the TritonAst representing the expressions string</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p>NameError, TypeError</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsynthesis.grammar.grammar.TritonGrammar.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../_modules/qsynthesis/grammar/grammar.html#TritonGrammar.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.grammar.grammar.TritonGrammar.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a dictionnary representation of the grammar.
+This is used for serialization in database etc.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="oracles">
+<h1>Oracles<a class="headerlink" href="#oracles" title="Permalink to this headline">¶</a></h1>
+<p>QSynthesis support any types of oracles as long as they implement <code class="xref py py-class docutils literal notranslate"><span class="pre">InputOutputOracle</span></code> base class
+which interface is given below. At the moment two children classes implement this interface:</p>
+<ul class="simple">
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">InputOutputOracleLevelDB</span></code>: Main table object where entries are stored in a key-value database
+made by called <a class="reference external" href="https://github.com/google/leveldb">Level-DB</a> made by Google, that guarantee logarithmic
+read in database.</p></li>
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">InputOutputOracleREST</span></code>: Class interfacing a <code class="docutils literal notranslate"><span class="pre">InputOutputOracleLevelDB</span></code> being served on a REST API
+(cf. <a class="reference internal" href="../dev_doc/table.html#label-rest-api"><span class="std std-ref">Oracle REST server</span></a>). This table avoids having a whole table locally.</p></li>
+</ul>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsynthesis.tables.base.InputOutputOracle">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">qsynthesis.tables.base.</span></span><span class="sig-name descname"><span class="pre">InputOutputOracle</span></span><a class="reference internal" href="../_modules/qsynthesis/tables/base.html#InputOutputOracle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.tables.base.InputOutputOracle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base Lookup table class. Specify the interface that child class have to
+implement to be interoperable with other the synthesizer.</p>
+<p>Constructor making a I/O oracle from a grammar a set of inputs and an hash type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gr</strong> – triton grammar</p></li>
+<li><p><strong>inputs</strong> – List of inputs</p></li>
+<li><p><strong>hash_mode</strong> – type of hash to be used as keys in tables</p></li>
+<li><p><strong>f_name</strong> – file name of the table (when being loaded)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsynthesis.tables.base.InputOutputOracle.add_entries">
+<span class="sig-name descname"><span class="pre">add_entries</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsynthesis/tables/base.html#InputOutputOracle.add_entries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.tables.base.InputOutputOracle.add_entries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add the given list of entries in the database. The boolean <code class="docutils literal notranslate"><span class="pre">calc_hash</span></code> indicates
+whether hashes are already computed or not. If false the function should hash the
+hash first.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>worklist</strong> (List[Tuple[<a class="reference internal" href="types.html#qsynthesis.types.Hash" title="qsynthesis.types.Hash"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.Hash</span></code></a>, str]]) – list of entries to add</p></li>
+<li><p><strong>calc_hash</strong> – whether or not hash should be performed on entries keys</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsynthesis.tables.base.InputOutputOracle.add_entry">
+<span class="sig-name descname"><span class="pre">add_entry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hash</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="types.html#qsynthesis.types.Hash" title="qsynthesis.types.Hash"><span class="pre">qsynthesis.types.Hash</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/qsynthesis/tables/base.html#InputOutputOracle.add_entry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.tables.base.InputOutputOracle.add_entry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abstract function to add an entry in the lookuptable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hash</strong> – already computed hash to add</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – expression value to add in the table</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsynthesis.tables.base.InputOutputOracle.bitsize">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">bitsize</span></span><em class="property"><span class="pre">:</span> <span class="pre">qsynthesis.types.BitSize</span></em><a class="headerlink" href="#qsynthesis.tables.base.InputOutputOracle.bitsize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of expression in bit</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="types.html#qsynthesis.types.BitSize" title="qsynthesis.types.BitSize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.BitSize</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsynthesis.tables.base.InputOutputOracle.create">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">create</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsynthesis/tables/base.html#InputOutputOracle.create"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.tables.base.InputOutputOracle.create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new empty lookup table with the given initial parameters, grammars, inputs
+and hash_mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> – filename of the table to create</p></li>
+<li><p><strong>grammar</strong> – TritonGrammar object representing variables and operators</p></li>
+<li><p><strong>inputs</strong> (List[<a class="reference internal" href="types.html#qsynthesis.types.Input" title="qsynthesis.types.Input"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.Input</span></code></a>]) – list of inputs on which to perform evaluation</p></li>
+<li><p><strong>hash_mode</strong> – Hashing mode for keys</p></li>
+<li><p><strong>constants</strong> – list of constants used</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>lookuptable instance object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsynthesis.tables.base.InputOutputOracle.generate">
+<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bitsize</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">constants</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_watch</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">watchdog_threshold</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">90</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linearize</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_use_blacklist</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/qsynthesis/tables/base.html#InputOutputOracle.generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.tables.base.InputOutputOracle.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a new lookup table from scratch with the variables and operators
+set in the constructor of the table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bitsize</strong> – Bitsize of expressions to generate</p></li>
+<li><p><strong>constants</strong> – List of constants to use in the generation</p></li>
+<li><p><strong>do_watch</strong> – Enable RAM watching thread to monitor memory</p></li>
+<li><p><strong>watchdog_threshold</strong> – threshold to be sent to the memory watchdog</p></li>
+<li><p><strong>linearize</strong> – whether or not to apply linearization on expressions</p></li>
+<li><p><strong>do_use_blacklist</strong> – enable blacklist mechanism on commutative operators. Slower but less memory consuming</p></li>
+<li><p><strong>limit</strong> – Maximum number of entries to generate</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsynthesis.tables.base.InputOutputOracle.hash">
+<span class="sig-name descname"><span class="pre">hash</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsynthesis/tables/base.html#InputOutputOracle.hash"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.tables.base.InputOutputOracle.hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main hashing method that dispatch the outputs to the appropriate hashing
+function depending on the <code class="docutils literal notranslate"><span class="pre">hash_mode</span></code> of the table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>outs</strong> (List[<a class="reference internal" href="types.html#qsynthesis.types.Output" title="qsynthesis.types.Output"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.Output</span></code></a>]) – list of outputs to hash</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Hash type (bytes, int ..) of the outputs</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="types.html#qsynthesis.types.Hash" title="qsynthesis.types.Hash"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.Hash</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsynthesis.tables.base.InputOutputOracle.input_number">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">input_number</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#qsynthesis.tables.base.InputOutputOracle.input_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of inputs used in this table</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsynthesis.tables.base.InputOutputOracle.is_expr_compatible">
+<span class="sig-name descname"><span class="pre">is_expr_compatible</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="tritonast.html#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst"><span class="pre">qsynthesis.tritonast.TritonAst</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../_modules/qsynthesis/tables/base.html#InputOutputOracle.is_expr_compatible"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.tables.base.InputOutputOracle.is_expr_compatible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check the compatibility of the given expression with the table.
+The function checks sizes of expr variables against the one of
+its own grammar.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>expr</strong> – TritonAst expression to check</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if the table can decide on this expression</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsynthesis.tables.base.InputOutputOracle.is_writable">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">is_writable</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#qsynthesis.tables.base.InputOutputOracle.is_writable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether the table enable being written (with new expressions)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsynthesis.tables.base.InputOutputOracle.load">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.9)"><span class="pre">pathlib.Path</span></a><span class="p"><span class="pre">,</span> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qsynthesis.tables.base.InputOutputOracle" title="qsynthesis.tables.base.InputOutputOracle"><span class="pre">InputOutputOracle</span></a></span></span><a class="reference internal" href="../_modules/qsynthesis/tables/base.html#InputOutputOracle.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.tables.base.InputOutputOracle.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the given lookup table and returns an instance object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file</strong> – Database file to load</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>InputOutputOracle object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsynthesis.tables.base.InputOutputOracle.lookup">
+<span class="sig-name descname"><span class="pre">lookup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsynthesis/tables/base.html#InputOutputOracle.lookup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.tables.base.InputOutputOracle.lookup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform a lookup in the table with a given set of outputs corresponding
+to the evaluation of an AST against the Input of this exact same table.
+If an entry is found a TritonAst is created and returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>outputs</strong> – list of output result of evaluating an ast against the inputs of this table</p></li>
+<li><p><strong>args</strong> – args forwarded to grammar and ultimately to the tritonAst in charge of building a new TritonAst</p></li>
+<li><p><strong>use_cache</strong> – Boolean enabling caching the the hash of outputs. A second call if the same outputs
+(which is common) will not trigger a lookup in the database</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type</dt>
+<dd class="field-even"><p>List[<a class="reference internal" href="types.html#qsynthesis.types.Output" title="qsynthesis.types.Output"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.Output</span></code></a>]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>optional TritonAst corresponding of the expression found in the table</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsynthesis.tables.base.InputOutputOracle.lookup_hash">
+<span class="sig-name descname"><span class="pre">lookup_hash</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="types.html#qsynthesis.types.Hash" title="qsynthesis.types.Hash"><span class="pre">qsynthesis.types.Hash</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/qsynthesis/tables/base.html#InputOutputOracle.lookup_hash"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.tables.base.InputOutputOracle.lookup_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raw lookup for a given key in database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>h</strong> (<a class="reference internal" href="types.html#qsynthesis.types.Hash" title="qsynthesis.types.Hash"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.Hash</span></code></a>) – hash key to look for in database</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>string of the expression if found</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Optional[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsynthesis.tables.base.InputOutputOracle.name">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#qsynthesis.tables.base.InputOutputOracle.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the table</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsynthesis.tables.base.InputOutputOracle.operator_number">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">operator_number</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#qsynthesis.tables.base.InputOutputOracle.operator_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of operators used in this table</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsynthesis.tables.base.InputOutputOracle.size">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">size</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#qsynthesis.tables.base.InputOutputOracle.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of the table (number of entries)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsynthesis.tables.base.InputOutputOracle.var_number">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">var_number</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#qsynthesis.tables.base.InputOutputOracle.var_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maximum number of variables contained in the table</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="sym_exec.html" class="btn btn-neutral float-right" title="SimpleSymExec" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="synthesis.html" class="btn btn-neutral float-left" title="Top-Down Synthesizer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Quarkslab.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,355 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>IDA Plugin Walkthrough &mdash; QSynthesis 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="TritonAst" href="../api/tritonast.html" />
+    <link rel="prev" title="API Usage" href="../api_usage.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> QSynthesis
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html"> Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_usage.html"> API usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugin Usage</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">IDA Plugin Walkthrough</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#main-interface">Main Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#popup-actions">Popup Actions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#exploiting-results">Exploiting results</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#showing-ast-s">Showing AST’s</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#showing-depencencies">Showing Depencencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reassembly">Reassembly</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#debugging">Debugging</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Python API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/tritonast.html">TritonAst</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/synthesis.html">Top-Down Synthesizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/synthesis.html#placeholder-based-synthesizer">Placeholder-based Synthesizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/table.html">Grammar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/table.html#oracles">Oracles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/sym_exec.html">Symbolic Execution utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/types.html">Types</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../dev_doc/table.html">Lookup table Management</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QSynthesis</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>IDA Plugin Walkthrough</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/plugin/plugin_usage.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="ida-plugin-walkthrough">
+<h1>IDA Plugin Walkthrough<a class="headerlink" href="#ida-plugin-walkthrough" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p id="label-intro-plugin">The default shortcut to launch QSynthesis is: <strong>Alt+S</strong></p>
+</div>
+<div class="section" id="main-interface">
+<h2>Main Interface<a class="headerlink" href="#main-interface" title="Permalink to this headline">¶</a></h2>
+<p>Figure shown below shows the main UI after having sequentially set the parameters
+and clicked ‘Run Triton’ and ‘Run Synthesis’ to synthesize an expression.</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="../_images/main-ui-example.png"><img alt="Main UI" src="../_images/main-ui-example.png" style="width: 780.0px; height: 582.0px;" /></a>
+</div>
+<p>From and To fields defines the address bounds of the trace where to perform
+the symbolic execution. Note that the first occurence in the trace of the start
+address is used. Similarly, the first occurence of the stop address after the start
+address is used. The target is either a register, either a memory location. A
+third is operand but is a high-level refinement for a register or memory.</p>
+<p>The other parameter specifies options for the synthesis, kind of algorithm etc.
+These parameters are directly sent to the APIs.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>In full symbolic mode, ‘From’ and ‘To’ have to be located in the
+same basic block. <em>(Otherwise the algorithm cannot determine which
+parent/children to follow)</em>. For more broad sequence of instruction
+please use the API directly.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In full symbolic the analysis process is the exact same. The only difference
+is that QSynthesis assumes that all items located between ‘From’ and ‘To’ are
+a sequential list of instructions.</p>
+</div>
+</div>
+<div class="section" id="popup-actions">
+<h2>Popup Actions<a class="headerlink" href="#popup-actions" title="Permalink to this headline">¶</a></h2>
+<p>Various context-menu actions are registered in the IDA-View allowing to easily
+select the ‘From’ and ‘To’ addresses right from the GUI. It also allows to synthesize
+a given operand in the view. The image below shows the context-menu added.</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="../_images/popup-actions.png"><img alt="Popup-actions" src="../_images/popup-actions.png" style="width: 762.0px; height: 449.0px;" /></a>
+</div>
+<p>These three actions can directly be triggered with theirs shortcut Ctrl+Shift+A, Ctrl+Shift+Z
+for ‘From’ and ‘To’ <em>(as it is cumbersome to copy past addresses)</em>. The last Ctrl+Shift+O takes
+the operand under the mouse and adjust the target accordingly.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The synthesizing operand action, automatically adjust the ‘To’ address depending
+on whether the operand is a destination operand or a source operand.</p>
+</div>
+</div>
+</div>
+<div class="section" id="exploiting-results">
+<h1>Exploiting results<a class="headerlink" href="#exploiting-results" title="Permalink to this headline">¶</a></h1>
+<p>Results are shown in the two views of the main UI, but buttons at the bottom
+provides various functionalities described hereafter.</p>
+<div class="section" id="showing-ast-s">
+<h2>Showing AST’s<a class="headerlink" href="#showing-ast-s" title="Permalink to this headline">¶</a></h2>
+<p>Bitvector expressions after symbolic expression and after synthesis can be printed using
+the graph API of IDA. The image below shows the two graph side-by-side of the AST before
+synthesis <em>(Show AST button in Triton side)</em> and the AST after synthesis <em>(Show AST button
+in synthesis side)</em></p>
+<div class="figure align-default">
+<img alt="AST shown side-by-side" src="../_images/asts.png" />
+</div>
+</div>
+<div class="section" id="showing-depencencies">
+<h2>Showing Depencencies<a class="headerlink" href="#showing-depencencies" title="Permalink to this headline">¶</a></h2>
+<p>Another feature is to show the dynamic slice dependency of a bitvector expression in the
+IDA View. The button ‘Show Deps’ highlight in the IDA-View all instructions involved in
+the computation of the expression. The image below shows the result obtained.</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="../_images/deps.png"><img alt="Expression dependencies highlighted" src="../_images/deps.png" style="width: 409.0px; height: 514.0px;" /></a>
+</div>
+</div>
+<div class="section" id="reassembly">
+<h2>Reassembly<a class="headerlink" href="#reassembly" title="Permalink to this headline">¶</a></h2>
+<p>The last feature provided by the plugin is a trivial <em>(and unsound)</em> reassembly of the
+synthesized AST into fresh unobfuscated instructions. The reassembly process use the
+amazing <a class="reference external" href="https://github.com/quarkslab/arybo">ayrbo</a> project that turns Triton ASTs
+back to LLVM and then compiled bytes. When clicking the ‘Reassemble’ button. A dialog
+window asks for various parameters.</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="../_images/reassembly-opts.png"><img alt="Reassembly options" src="../_images/reassembly-opts.png" style="width: 402.75px; height: 171.0px;" /></a>
+</div>
+<p>The three scenarios are:</p>
+<ul class="simple">
+<li><p>No ticking of any options: The synthesized expression is reassembled in an IDA graph view</p></li>
+<li><p>Ticking ‘patch functions bytes’: All dependent instructions (cf. above), are erased with
+NOPs and the reassembled instructions are put on the ‘To’ location where it was extracted</p></li>
+<li><p>Ticking ‘patch’ + ‘shrink function’: The function is rewriting with only instructions not
+in the dependency and the reassembled instructions.</p></li>
+</ul>
+<p>The two latest, do tamper the IDB <em>(for good :) )</em> and somehow save the synthesized expression
+result directly back in the IDB. The figure below shows the result obtained with the
+three variants of the reassembly.</p>
+<div class="figure align-center">
+<img alt="Reassembly" src="../_images/reassembly.png" />
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The reassembly does not take in account use-defs etc. The reassembly is purely
+syntactical. Thus it might work, but to program is unlikely to run well. A proper
+non-interference analysis should be performed to make sure the semantic is preserved.</p>
+</div>
+</div>
+</div>
+<div class="section" id="debugging">
+<h1>Debugging<a class="headerlink" href="#debugging" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Once instanciated, it is possible to access the plugin object
+with <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">qsynthesis</span> <span class="pre">import</span> <span class="pre">qsynthesis_plugin</span></code>.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="../api/tritonast.html" class="btn btn-neutral float-right" title="TritonAst" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../api_usage.html" class="btn btn-neutral float-left" title="API Usage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Quarkslab.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,849 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>qsynthesis.tables.base &mdash; QSynthesis 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> QSynthesis
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html"> Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_usage.html"> API usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugin Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../plugin/plugin_usage.html">IDA Plugin Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../plugin/plugin_usage.html#exploiting-results">Exploiting results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../plugin/plugin_usage.html#debugging">Debugging</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Python API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/tritonast.html">TritonAst</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/synthesis.html">Top-Down Synthesizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/synthesis.html#placeholder-based-synthesizer">Placeholder-based Synthesizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/table.html">Grammar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/table.html#oracles">Oracles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/sym_exec.html">Symbolic Execution utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/types.html">Types</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev_doc/table.html">Lookup table Management</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">QSynthesis</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>qsynthesis.tables.base</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for qsynthesis.tables.base</h1><div class="highlight"><pre>
+<span></span><span class="c1"># built-in libs</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span>
+<span class="kn">import</span> <span class="nn">array</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
+<span class="kn">import</span> <span class="nn">ctypes</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="c1"># third-party libs</span>
+<span class="kn">import</span> <span class="nn">psutil</span>
+
+<span class="c1"># qsynthesis deps</span>
+<span class="kn">from</span> <span class="nn">qsynthesis.grammar</span> <span class="kn">import</span> <span class="n">TritonGrammar</span>
+<span class="kn">from</span> <span class="nn">qsynthesis.tritonast</span> <span class="kn">import</span> <span class="n">TritonAst</span>
+<span class="kn">from</span> <span class="nn">qsynthesis.types</span> <span class="kn">import</span> <span class="n">AstNode</span><span class="p">,</span> <span class="n">Hash</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Input</span><span class="p">,</span> <span class="n">Output</span><span class="p">,</span> <span class="n">BitSize</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> \
+                             <span class="n">Generator</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;qsynthesis&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">HashType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Hash types supported by the Lookup table database. In practice solely md5</span>
+<span class="sd">    is used, has it is the fastest of all</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">RAW</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">FNV1A_128</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">MD5</span> <span class="o">=</span> <span class="mi">3</span>
+
+
+<span class="k">class</span> <span class="nc">_EvalCtx</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Small debugging Triton evaluation context. It is used when manipulating</span>
+<span class="sd">    tables in a standalone manner. It enables obtaining TritonAst out of</span>
+<span class="sd">    the databqse entries.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">triton</span> <span class="kn">import</span> <span class="n">TritonContext</span><span class="p">,</span> <span class="n">ARCH</span><span class="p">,</span> <span class="n">AST_REPRESENTATION</span>
+        <span class="c1"># Create the context</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ctx</span> <span class="o">=</span> <span class="n">TritonContext</span><span class="p">(</span><span class="n">ARCH</span><span class="o">.</span><span class="n">X86_64</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="o">.</span><span class="n">setAstRepresentationMode</span><span class="p">(</span><span class="n">AST_REPRESENTATION</span><span class="o">.</span><span class="n">PYTHON</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ast</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="o">.</span><span class="n">getAstContext</span><span class="p">()</span>
+
+        <span class="c1"># Create symbolic variables for grammar variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">symvars</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vars</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">sz</span> <span class="ow">in</span> <span class="n">grammar</span><span class="o">.</span><span class="n">vars_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">sym_v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="o">.</span><span class="n">newSymbolicVariable</span><span class="p">(</span><span class="n">sz</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">symvars</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="n">sym_v</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ast</span><span class="o">.</span><span class="n">variable</span><span class="p">(</span><span class="n">sym_v</span><span class="p">)</span>
+
+        <span class="c1"># Create mapping to triton operators</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tops</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ast</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ast</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">x</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;__&quot;</span><span class="p">)}</span>
+
+    <span class="k">def</span> <span class="nf">eval_str</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AstNode</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Eval the string expression to create an AstNode object&quot;&quot;&quot;</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tops</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">)</span>
+        <span class="n">bv_size</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">getBitvectorSize</span><span class="p">()</span>  <span class="c1"># Assume all vars are of same size</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>  <span class="c1"># In case the expression was in fact an int</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ast</span><span class="o">.</span><span class="n">bv</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">bv_size</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">e</span>
+
+    <span class="k">def</span> <span class="nf">set_symvar_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">Input</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">v_name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="o">.</span><span class="n">setConcreteVariableValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symvars</span><span class="p">[</span><span class="n">v_name</span><span class="p">],</span> <span class="n">value</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="InputOutputOracle"><a class="viewcode-back" href="../../../api/table.html#qsynthesis.tables.base.InputOutputOracle">[docs]</a><span class="k">class</span> <span class="nc">InputOutputOracle</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base Lookup table class. Specify the interface that child class have to</span>
+<span class="sd">    implement to be interoperable with other the synthesizer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gr</span><span class="p">:</span> <span class="n">TritonGrammar</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Input</span><span class="p">],</span> <span class="n">hash_mode</span><span class="p">:</span> <span class="n">HashType</span> <span class="o">=</span> <span class="n">HashType</span><span class="o">.</span><span class="n">RAW</span><span class="p">,</span> <span class="n">f_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor making a I/O oracle from a grammar a set of inputs and an hash type.</span>
+
+<span class="sd">        :param gr: triton grammar</span>
+<span class="sd">        :param inputs: List of inputs</span>
+<span class="sd">        :param hash_mode: type of hash to be used as keys in tables</span>
+<span class="sd">        :param f_name: file name of the table (when being loaded)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">f_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span> <span class="o">=</span> <span class="n">gr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bitsize</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="o">.</span><span class="n">size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expr_cache</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lookup_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lookup_found</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache_hit</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hash_mode</span> <span class="o">=</span> <span class="n">hash_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ectx</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># generation related fields</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">watchdog</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_mem</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Size of the table (number of entries)</span>
+
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Should be implemented by child class&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="n">Hash</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        From a given hash return the associated expression string if</span>
+<span class="sd">        found in the lookup table.</span>
+
+<span class="sd">        :param h: hash of the item to get</span>
+<span class="sd">        :returns: raw expression string if found</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Should be implemented by child class&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="InputOutputOracle.is_expr_compatible"><a class="viewcode-back" href="../../../api/table.html#qsynthesis.tables.base.InputOutputOracle.is_expr_compatible">[docs]</a>    <span class="k">def</span> <span class="nf">is_expr_compatible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="n">TritonAst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check the compatibility of the given expression with the table.</span>
+<span class="sd">        The function checks sizes of expr variables against the one of</span>
+<span class="sd">        its own grammar.</span>
+
+<span class="sd">        :param expr: TritonAst expression to check</span>
+<span class="sd">        :return: True if the table can decide on this expression</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">e_vars</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">getBitSize</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">expr</span><span class="o">.</span><span class="n">symvars</span><span class="p">)</span>
+        <span class="n">e_table</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="o">.</span><span class="n">vars_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">sz</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">e_vars</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">sz</span> <span class="ow">in</span> <span class="n">e_table</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="n">e_table</span><span class="p">[</span><span class="n">sz</span><span class="p">]:</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="InputOutputOracle.lookup"><a class="viewcode-back" href="../../../api/table.html#qsynthesis.tables.base.InputOutputOracle.lookup">[docs]</a>    <span class="k">def</span> <span class="nf">lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outputs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Output</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span>  <span class="n">use_cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TritonAst</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform a lookup in the table with a given set of outputs corresponding</span>
+<span class="sd">        to the evaluation of an AST against the Input of this exact same table.</span>
+<span class="sd">        If an entry is found a TritonAst is created and returned.</span>
+
+<span class="sd">        :param outputs: list of output result of evaluating an ast against the inputs of this table</span>
+<span class="sd">        :type: List[:py:obj:`qsynthesis.types.Output`]</span>
+<span class="sd">        :param args: args forwarded to grammar and ultimately to the tritonAst in charge of building a new TritonAst</span>
+<span class="sd">        :param use_cache: Boolean enabling caching the the hash of outputs. A second call if the same outputs</span>
+<span class="sd">                          (which is common) will not trigger a lookup in the database</span>
+<span class="sd">        :returns: optional TritonAst corresponding of the expression found in the table</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lookup_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hash</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">expr_cache</span> <span class="ow">and</span> <span class="n">use_cache</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cache_hit</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">expr_cache</span><span class="p">[</span><span class="n">h</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_item</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">v</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lookup_found</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">e</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="o">.</span><span class="n">str_to_expr</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">expr_cache</span><span class="p">[</span><span class="n">h</span><span class="p">]</span> <span class="o">=</span> <span class="n">e</span>
+                    <span class="k">return</span> <span class="n">e</span>
+                <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">None</span>
+                <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="InputOutputOracle.lookup_hash"><a class="viewcode-back" href="../../../api/table.html#qsynthesis.tables.base.InputOutputOracle.lookup_hash">[docs]</a>    <span class="k">def</span> <span class="nf">lookup_hash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="n">Hash</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Raw lookup for a given key in database.</span>
+
+<span class="sd">        :param h: hash key to look for in database</span>
+<span class="sd">        :type h: :py:obj:`qsynthesis.types.Hash`</span>
+<span class="sd">        :returns: string of the expression if found</span>
+<span class="sd">        :rtype: Optional[str]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_item</span><span class="p">(</span><span class="n">h</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_writable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Whether the table enable being written (with new expressions)</span>
+
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Name of the table</span>
+
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bitsize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BitSize</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Size of expression in bit</span>
+
+<span class="sd">        :rtype: :py:obj:`qsynthesis.types.BitSize`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bitsize</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">var_number</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Maximum number of variables contained in the table</span>
+
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="o">.</span><span class="n">vars</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">operator_number</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Number of operators used in this table</span>
+
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="o">.</span><span class="n">ops</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">input_number</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Number of inputs used in this table</span>
+
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_fnv1a_128</span><span class="p">(</span><span class="n">outs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Output</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Hash</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Hash the outputs using fnv1a_128 algorithm</span>
+
+<span class="sd">        :param outs: list of outputs to hash</span>
+<span class="sd">        :type outs: List[:py:obj:`qsynthesis.types.Output`]</span>
+<span class="sd">        :returns: Hash value (int) corresponding to the fnv1a of outputs</span>
+<span class="sd">        :rtype: :py:obj:`qsynthesis.types.Hash`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="n">outs</span><span class="p">)</span>
+        <span class="n">FNV1A_128_OFFSET</span> <span class="o">=</span> <span class="mh">0x6c62272e07bb014262b821756295c58d</span>
+        <span class="n">FNV1A_128_PRIME</span> <span class="o">=</span> <span class="mh">0x1000000000000000000013b</span>  <span class="c1"># 2^88 + 2^8 + 0x3b</span>
+
+        <span class="c1"># Set the offset basis</span>
+        <span class="nb">hash</span> <span class="o">=</span> <span class="n">FNV1A_128_OFFSET</span>
+
+        <span class="c1"># For each character</span>
+        <span class="k">for</span> <span class="n">byte</span> <span class="ow">in</span> <span class="n">a</span><span class="o">.</span><span class="n">tobytes</span><span class="p">():</span>
+            <span class="c1"># Xor with the current character</span>
+            <span class="nb">hash</span> <span class="o">^=</span> <span class="n">byte</span>
+            <span class="c1"># Multiply by prime</span>
+            <span class="nb">hash</span> <span class="o">*=</span> <span class="n">FNV1A_128_PRIME</span>
+            <span class="c1"># Clamp</span>
+            <span class="nb">hash</span> <span class="o">&amp;=</span> <span class="mh">0xffffffffffffffffffffffffffffffff</span>
+        <span class="c1"># Return the final hash as a number</span>
+        <span class="k">return</span> <span class="nb">hash</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_md5</span><span class="p">(</span><span class="n">outs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Output</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Hash</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Hash the outputs using MD5 algorithm. Outputs are transformed into an array.</span>
+<span class="sd">        That means the final bytes hashed are the concatenation of uint64 in little</span>
+<span class="sd">        endian.</span>
+
+<span class="sd">        :param outs: list of outputs to hash</span>
+<span class="sd">        :type outs: List[:py:obj:`qsynthesis.types.Output`]</span>
+<span class="sd">        :returns: Bytes corresponding to MD5 hash</span>
+<span class="sd">        :type: :py:obj:`qsynthesis.types.Hash`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="n">outs</span><span class="p">)</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">h</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span>
+
+<div class="viewcode-block" id="InputOutputOracle.hash"><a class="viewcode-back" href="../../../api/table.html#qsynthesis.tables.base.InputOutputOracle.hash">[docs]</a>    <span class="k">def</span> <span class="nf">hash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Output</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Hash</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Main hashing method that dispatch the outputs to the appropriate hashing</span>
+<span class="sd">        function depending on the ``hash_mode`` of the table.</span>
+
+<span class="sd">        :param outs: list of outputs to hash</span>
+<span class="sd">        :type outs: List[:py:obj:`qsynthesis.types.Output`]</span>
+<span class="sd">        :returns: Hash type (bytes, int ..) of the outputs</span>
+<span class="sd">        :rtype: :py:obj:`qsynthesis.types.Hash`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hash_mode</span> <span class="o">==</span> <span class="n">HashType</span><span class="o">.</span><span class="n">RAW</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">outs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">hash_mode</span> <span class="o">==</span> <span class="n">HashType</span><span class="o">.</span><span class="n">FNV1A_128</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fnv1a_128</span><span class="p">(</span><span class="n">outs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">hash_mode</span> <span class="o">==</span> <span class="n">HashType</span><span class="o">.</span><span class="n">MD5</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_md5</span><span class="p">(</span><span class="n">outs</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Hash</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot; Iterator of all the entries as an iterator of pair, hash, expression as string</span>
+
+<span class="sd">        :rtype: Iterable[Tuple[:py:obj:`qsynthesis.types.Hash, str]]`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Should be implemented by child class&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_expr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AstNode</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Utility function that returns a TritonAst from a given expression string.</span>
+<span class="sd">        A TritonContext local to the table is created to enable generating such ASTs.</span>
+
+<span class="sd">        :param expr: Expression</span>
+<span class="sd">        :returns: TritonAst resulting of the parsing of s</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ectx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ectx</span> <span class="o">=</span> <span class="n">_EvalCtx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ectx</span><span class="o">.</span><span class="n">eval_str</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_set_input_lcontext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Input</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the given concrete values of variables in the local TritonContext.</span>
+<span class="sd">        The parameter is either the ith input of the table, or directly an Input</span>
+<span class="sd">        given a valuation for each variables. This function must be called before</span>
+<span class="sd">        performing any evaluation of an AST.</span>
+
+<span class="sd">        :param i: index of the input, or Input object (dict)</span>
+<span class="sd">        :returns: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ectx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ectx</span> <span class="o">=</span> <span class="n">_EvalCtx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ectx</span><span class="o">.</span><span class="n">set_symvar_values</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">i</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_eval_expr_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="n">AstNode</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Output</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Evaluate a given Triton AstNode object on all inputs of the</span>
+<span class="sd">        table. The result is a list of Output values.</span>
+
+<span class="sd">        :param expr: Triton AstNode to evaluate</span>
+<span class="sd">        :type expr: :py:obj:`qsynthesis.types.AstNode`</span>
+<span class="sd">        :returns: list of output values (ready to be hashed)</span>
+<span class="sd">        :rtype: List[:py:obj:`qsynthesis.types.Output`]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">outs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_input_lcontext</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">outs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">expr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">outs</span>
+
+    <span class="k">def</span> <span class="nf">_watchdog_worker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function where the memory watchdog thread is running. This function</span>
+<span class="sd">        allows interrupting table generation when it happens to fill the</span>
+<span class="sd">        given threshold of RAM.</span>
+
+<span class="sd">        :param threshold: percentage of RAM load that triggers the stop of generation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">:</span>
+            <span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">mem</span> <span class="o">=</span> <span class="n">psutil</span><span class="o">.</span><span class="n">virtual_memory</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_mem</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">mem</span><span class="o">.</span><span class="n">used</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_mem</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">mem</span><span class="o">.</span><span class="n">percent</span> <span class="o">&gt;=</span> <span class="n">threshold</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Threshold reached: </span><span class="si">{</span><span class="n">mem</span><span class="o">.</span><span class="n">percent</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stop</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># Should stop self and also main thread</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_try_linearize</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">symbols</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Try applying sympy to linearize ``s`` with the variable symbols</span>
+<span class="sd">        ``symbols``. If any exception is raised in between to expression</span>
+<span class="sd">        string is returned unchanged.</span>
+
+<span class="sd">        :param s: expression string to linearize</span>
+<span class="sd">        :param symbols: dictionnary of variables names to sympy symbol objects</span>
+
+<span class="sd">        .. warning:: This function requires sympy to be installed !</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">sympy</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">lin</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">symbols</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lin</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">boolalg</span><span class="o">.</span><span class="n">BooleanFalse</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[linearization] expression </span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s2"> False&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[linearization] expression linearized </span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s2"> =&gt; </span><span class="si">{</span><span class="n">lin</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">lin</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">s</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">s</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_to_signed</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_longlong</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_to_unsigned</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_ulonglong</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_is_constant</span><span class="p">(</span><span class="n">v1</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">v1</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_custom_permutations</span><span class="p">(</span><span class="n">l</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Custom generator generating all the possible tuples from a list. But instead</span>
+<span class="sd">        of iterating item i with all others 0..n, iterates i with all the previous 0..i.</span>
+<span class="sd">        It generates a somewhat sorted generated that ensure pairs of items appearing</span>
+<span class="sd">        first in the list will be yielded before.</span>
+
+<span class="sd">        :param l: list of any item</span>
+<span class="sd">        :returns: genreator of tuples generating all possibles pairs</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="kc">False</span><span class="p">,</span> <span class="n">l</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="k">yield</span> <span class="kc">False</span><span class="p">,</span> <span class="n">l</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">yield</span> <span class="kc">True</span><span class="p">,</span> <span class="n">l</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+<div class="viewcode-block" id="InputOutputOracle.generate"><a class="viewcode-back" href="../../../api/table.html#qsynthesis.tables.base.InputOutputOracle.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">bitsize</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">constants</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span>
+                 <span class="n">do_watch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">watchdog_threshold</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mi">90</span><span class="p">,</span>
+                 <span class="n">linearize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">do_use_blacklist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate a new lookup table from scratch with the variables and operators</span>
+<span class="sd">        set in the constructor of the table.</span>
+
+<span class="sd">        :param bitsize: Bitsize of expressions to generate</span>
+<span class="sd">        :param constants: List of constants to use in the generation</span>
+<span class="sd">        :param do_watch: Enable RAM watching thread to monitor memory</span>
+<span class="sd">        :param watchdog_threshold: threshold to be sent to the memory watchdog</span>
+<span class="sd">        :param linearize: whether or not to apply linearization on expressions</span>
+<span class="sd">        :param do_use_blacklist: enable blacklist mechanism on commutative operators. Slower but less memory consuming</span>
+<span class="sd">        :param limit: Maximum number of entries to generate</span>
+<span class="sd">        :returns: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">do_watch</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">watchdog</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_watchdog_worker</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">watchdog_threshold</span><span class="p">],</span> <span class="n">daemon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Start watchdog&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">watchdog</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">linearize</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Linearization enabled&quot;</span><span class="p">)</span>
+            <span class="kn">import</span> <span class="nn">sympy</span>
+            <span class="n">symbols</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="n">sympy</span><span class="o">.</span><span class="n">symbols</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="o">.</span><span class="n">vars</span><span class="p">}</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+
+        <span class="kn">from</span> <span class="nn">qsynthesis.grammar</span> <span class="kn">import</span> <span class="n">jitting</span>  <span class="c1"># Import it locally to make sure pydffi is not mandatory</span>
+        <span class="n">CU</span> <span class="o">=</span> <span class="n">jitting</span><span class="o">.</span><span class="n">make_compilation_unit</span><span class="p">(</span><span class="n">bitsize</span><span class="p">)</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_number</span>
+        <span class="n">ArTy</span> <span class="o">=</span> <span class="n">jitting</span><span class="o">.</span><span class="n">get_native_array_type</span><span class="p">(</span><span class="n">bitsize</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+
+        <span class="n">hash_fun</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">x</span><span class="p">))</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hash_mode</span> <span class="o">==</span> <span class="n">HashType</span><span class="o">.</span><span class="n">MD5</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">hash</span>
+
+        <span class="c1"># Initialize worklist with variables</span>
+        <span class="n">worklist</span> <span class="o">=</span> <span class="p">[(</span><span class="n">ArTy</span><span class="p">(),</span> <span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="o">.</span><span class="n">vars</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">inp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">worklist</span><span class="p">:</span>
+                <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">inp</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+
+        <span class="c1"># Initialize worklist with constants</span>
+        <span class="n">csts</span> <span class="o">=</span> <span class="p">[(</span><span class="n">ArTy</span><span class="p">(),</span> <span class="nb">str</span><span class="p">(</span><span class="n">c</span><span class="p">))</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">constants</span><span class="p">]</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">ar</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="ow">in</span> <span class="n">csts</span><span class="p">:</span>
+            <span class="n">jitting</span><span class="o">.</span><span class="n">init_array_cst</span><span class="p">(</span><span class="n">ar</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">),</span> <span class="n">N</span><span class="p">,</span> <span class="n">bitsize</span><span class="p">)</span>
+        <span class="n">worklist</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">csts</span><span class="p">)</span>
+
+        <span class="c1"># initialize set of hash</span>
+        <span class="n">hash_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">hash_fun</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">worklist</span><span class="p">)</span>
+
+        <span class="n">ops</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="o">.</span><span class="n">non_terminal_operators</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">arity</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># sort operators to iterate on unary first</span>
+        <span class="n">cur_depth</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">blacklist</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">item_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">worklist</span><span class="p">)</span>  <span class="c1"># total number of expressions</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">while</span> <span class="n">cur_depth</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># Start a new depth</span>
+                <span class="n">n_items</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">worklist</span><span class="p">)</span>  <span class="c1"># number of items to process at a given depth</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Depth </span><span class="si">{</span><span class="n">cur_depth</span><span class="si">}</span><span class="s2"> (size:</span><span class="si">{</span><span class="n">n_items</span><span class="si">}</span><span class="s2">) (Time:</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">t</span><span class="o">/</span><span class="mi">60</span><span class="p">)</span><span class="si">}</span><span class="s2">m</span><span class="si">{</span><span class="n">t</span><span class="o">%</span><span class="mi">60</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">s)&quot;</span><span class="p">)</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span>
+
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">same</span><span class="p">,</span> <span class="p">(</span><span class="n">vals1</span><span class="p">,</span> <span class="n">name1</span><span class="p">),</span> <span class="p">(</span><span class="n">vals2</span><span class="p">,</span> <span class="n">name2</span><span class="p">))</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_custom_permutations</span><span class="p">(</span><span class="n">worklist</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="n">same</span><span class="p">:</span>
+                        <span class="n">c</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;process: </span><span class="si">{</span><span class="p">(</span><span class="n">c</span><span class="o">*</span><span class="mi">100</span><span class="p">)</span><span class="o">/</span><span class="n">n_items</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%</span><span class="se">\r</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">limit</span> <span class="o">&lt;=</span> <span class="n">item_count</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">stop</span> <span class="o">=</span> <span class="kc">True</span>
+
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Threshold reached, generation interrupted&quot;</span><span class="p">)</span>
+                        <span class="k">raise</span> <span class="ne">KeyboardInterrupt</span><span class="p">()</span>
+
+                    <span class="c1"># Check it here once then iterate operators</span>
+                    <span class="n">name1_cst</span><span class="p">,</span> <span class="n">name2_cst</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_constant</span><span class="p">(</span><span class="n">name1</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_constant</span><span class="p">(</span><span class="n">name2</span><span class="p">)</span>
+                    <span class="n">is_both_constant</span> <span class="o">=</span> <span class="n">name1_cst</span> <span class="o">&amp;</span> <span class="n">name2_cst</span>
+
+                    <span class="k">for</span> <span class="n">op</span><span class="p">,</span> <span class="n">op_eval</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ops</span><span class="p">,</span> <span class="p">[</span><span class="n">jitting</span><span class="o">.</span><span class="n">get_op_eval_array</span><span class="p">(</span><span class="n">CU</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ops</span><span class="p">]):</span>  <span class="c1"># Iterate over all operators</span>
+                        <span class="k">if</span> <span class="n">op</span><span class="o">.</span><span class="n">arity</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="n">new_vals</span> <span class="o">=</span> <span class="n">ArTy</span><span class="p">()</span>
+                            <span class="n">op_eval</span><span class="p">(</span><span class="n">new_vals</span><span class="p">,</span> <span class="n">vals1</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+
+                            <span class="n">h</span> <span class="o">=</span> <span class="n">hash_fun</span><span class="p">(</span><span class="n">new_vals</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">h</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">hash_set</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">name1_cst</span><span class="p">:</span>
+                                    <span class="n">fmt</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_to_signed</span><span class="p">(</span><span class="n">new_vals</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>  <span class="c1"># any value is the new constant value</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">fmt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">op</span><span class="o">.</span><span class="n">symbol</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">name1</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">name1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">op</span><span class="o">.</span><span class="n">symbol</span><span class="si">}{</span><span class="n">name1</span><span class="si">}</span><span class="s2">&quot;</span>
+                                <span class="n">fmt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_try_linearize</span><span class="p">(</span><span class="n">fmt</span><span class="p">,</span> <span class="n">symbols</span><span class="p">)</span> <span class="k">if</span> <span class="n">linearize</span> <span class="k">else</span> <span class="n">fmt</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[add] </span><span class="si">{</span><span class="n">fmt</span><span class="si">:</span><span class="s2"> &lt;20</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">h</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                                <span class="n">hash_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+                                <span class="n">item_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                                <span class="n">worklist</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">new_vals</span><span class="p">,</span> <span class="n">fmt</span><span class="p">))</span>  <span class="c1"># add it in worklist if not already in LUT</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[drop] </span><span class="si">{</span><span class="n">op</span><span class="o">.</span><span class="n">symbol</span><span class="si">}{</span><span class="n">name1</span><span class="si">}</span><span class="s2">  &quot;</span><span class="p">)</span>
+
+                        <span class="k">else</span><span class="p">:</span>  <span class="c1"># arity is 2</span>
+                            <span class="c1"># for identity (a op a) ignore it if the result is known to be 0 or a</span>
+                            <span class="k">if</span> <span class="n">same</span> <span class="ow">and</span> <span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">id_eq</span> <span class="ow">or</span> <span class="n">op</span><span class="o">.</span><span class="n">id_zero</span><span class="p">):</span>
+                                <span class="k">continue</span>
+
+                            <span class="n">sn1</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name1</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">name1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">name1</span><span class="si">}</span><span class="s1">)&#39;</span>
+                            <span class="n">sn2</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name2</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">name2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">name2</span><span class="si">}</span><span class="s1">)&#39;</span>
+                            <span class="n">fmt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">op</span><span class="o">.</span><span class="n">symbol</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">name1</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">name2</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">if</span> <span class="n">op</span><span class="o">.</span><span class="n">is_prefix</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sn1</span><span class="si">}{</span><span class="n">op</span><span class="o">.</span><span class="n">symbol</span><span class="si">}{</span><span class="n">sn2</span><span class="si">}</span><span class="s2">&quot;</span>
+
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">linearize</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">fmt</span> <span class="ow">in</span> <span class="n">blacklist</span><span class="p">:</span>  <span class="c1"># Ignore expression if they are in the blacklist</span>
+                                    <span class="k">continue</span>
+
+                            <span class="n">new_vals</span> <span class="o">=</span> <span class="n">ArTy</span><span class="p">()</span>
+
+                            <span class="n">op_eval</span><span class="p">(</span><span class="n">new_vals</span><span class="p">,</span> <span class="n">vals1</span><span class="p">,</span> <span class="n">vals2</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+
+                            <span class="k">if</span> <span class="n">is_both_constant</span><span class="p">:</span>  <span class="c1"># if both were constant use the constant as repr instead</span>
+                                <span class="n">fmt</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_to_signed</span><span class="p">(</span><span class="n">new_vals</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+                            <span class="n">h</span> <span class="o">=</span> <span class="n">hash_fun</span><span class="p">(</span><span class="n">new_vals</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">h</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">hash_set</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">linearize</span><span class="p">:</span>
+                                    <span class="n">fmt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_try_linearize</span><span class="p">(</span><span class="n">fmt</span><span class="p">,</span> <span class="n">symbols</span><span class="p">)</span> <span class="k">if</span> <span class="n">linearize</span> <span class="k">else</span> <span class="n">fmt</span>
+                                    <span class="k">if</span> <span class="n">fmt</span> <span class="ow">in</span> <span class="n">blacklist</span><span class="p">:</span>  <span class="c1"># if linearize check blacklist here</span>
+                                        <span class="k">continue</span>
+
+                                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[add] </span><span class="si">{</span><span class="n">fmt</span><span class="si">:</span><span class="s2"> &lt;20</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">h</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                                <span class="n">hash_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+                                <span class="n">item_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                                <span class="n">worklist</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">new_vals</span><span class="p">,</span> <span class="n">fmt</span><span class="p">))</span>
+
+                                <span class="k">if</span> <span class="n">op</span><span class="o">.</span><span class="n">commutative</span> <span class="ow">and</span> <span class="n">do_use_blacklist</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_both_constant</span><span class="p">:</span>
+                                    <span class="n">fmt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">op</span><span class="o">.</span><span class="n">symbol</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">name2</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">name1</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">if</span> <span class="n">op</span><span class="o">.</span><span class="n">is_prefix</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sn2</span><span class="si">}{</span><span class="n">op</span><span class="o">.</span><span class="n">symbol</span><span class="si">}{</span><span class="n">sn1</span><span class="si">}</span><span class="s2">&quot;</span>
+                                    <span class="n">fmt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_try_linearize</span><span class="p">(</span><span class="n">fmt</span><span class="p">,</span> <span class="n">symbols</span><span class="p">)</span> <span class="k">if</span> <span class="n">linearize</span> <span class="k">else</span> <span class="n">fmt</span>
+                                    <span class="n">blacklist</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>  <span class="c1"># blacklist commutative equivalent e.g for a+b blacklist: b+a</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[blacklist] </span><span class="si">{</span><span class="n">fmt</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[drop] </span><span class="si">{</span><span class="n">op</span><span class="o">.</span><span class="n">symbol</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">name1</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">name2</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">if</span> <span class="n">op</span><span class="o">.</span><span class="n">is_prefix</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;[drop] (</span><span class="si">{</span><span class="n">name1</span><span class="si">}</span><span class="s2">)</span><span class="si">{</span><span class="n">op</span><span class="o">.</span><span class="n">symbol</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">name2</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+                <span class="n">cur_depth</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Stop required&quot;</span><span class="p">)</span>
+        <span class="c1"># In the end</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Depth </span><span class="si">{</span><span class="n">cur_depth</span><span class="si">}</span><span class="s2"> (size:</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">worklist</span><span class="p">)</span><span class="si">}</span><span class="s2">) (Time:</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">t</span><span class="o">/</span><span class="mi">60</span><span class="p">)</span><span class="si">}</span><span class="s2">m</span><span class="si">{</span><span class="n">t</span><span class="o">%</span><span class="mi">60</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">s) [RAM:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__size_to_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_mem</span><span class="p">)</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_entries</span><span class="p">(</span><span class="n">worklist</span><span class="p">,</span> <span class="n">calc_hash</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">do_watch</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">watchdog</span><span class="o">.</span><span class="n">join</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="InputOutputOracle.add_entry"><a class="viewcode-back" href="../../../api/table.html#qsynthesis.tables.base.InputOutputOracle.add_entry">[docs]</a>    <span class="k">def</span> <span class="nf">add_entry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">hash</span><span class="p">:</span> <span class="n">Hash</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Abstract function to add an entry in the lookuptable.</span>
+
+<span class="sd">        :param hash: already computed hash to add</span>
+<span class="sd">        :type Hash: :py:obj:`qsynthesis.types.Hash`</span>
+<span class="sd">        :param value: expression value to add in the table</span>
+<span class="sd">        :type value: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Should be implemented by child class&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="InputOutputOracle.add_entries"><a class="viewcode-back" href="../../../api/table.html#qsynthesis.tables.base.InputOutputOracle.add_entries">[docs]</a>    <span class="k">def</span> <span class="nf">add_entries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">worklist</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Hash</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span> <span class="n">calc_hash</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add the given list of entries in the database. The boolean ``calc_hash`` indicates</span>
+<span class="sd">        whether hashes are already computed or not. If false the function should hash the</span>
+<span class="sd">        hash first.</span>
+
+<span class="sd">        :param worklist: list of entries to add</span>
+<span class="sd">        :type worklist: List[Tuple[:py:obj:`qsynthesis.types.Hash`, str]]</span>
+<span class="sd">        :param calc_hash: whether or not hash should be performed on entries keys</span>
+<span class="sd">        :returns: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Should be implemented by child class&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="InputOutputOracle.create"><a class="viewcode-back" href="../../../api/table.html#qsynthesis.tables.base.InputOutputOracle.create">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">grammar</span><span class="p">:</span> <span class="n">TritonGrammar</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Input</span><span class="p">],</span> <span class="n">hash_mode</span><span class="p">:</span> <span class="n">HashType</span> <span class="o">=</span> <span class="n">HashType</span><span class="o">.</span><span class="n">RAW</span><span class="p">,</span> <span class="n">constants</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[])</span> <span class="o">-&gt;</span> <span class="s1">&#39;InputOutputOracle&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a new empty lookup table with the given initial parameters, grammars, inputs</span>
+<span class="sd">        and hash_mode.</span>
+
+<span class="sd">        :param filename: filename of the table to create</span>
+<span class="sd">        :param grammar: TritonGrammar object representing variables and operators</span>
+<span class="sd">        :param inputs: list of inputs on which to perform evaluation</span>
+<span class="sd">        :type inputs: List[:py:obj:`qsynthesis.types.Input`]</span>
+<span class="sd">        :param hash_mode: Hashing mode for keys</span>
+<span class="sd">        :param constants: list of constants used</span>
+<span class="sd">        :returns: lookuptable instance object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Should be implemented by child class&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="InputOutputOracle.load"><a class="viewcode-back" href="../../../api/table.html#qsynthesis.tables.base.InputOutputOracle.load">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s1">&#39;InputOutputOracle&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load the given lookup table and returns an instance object.</span>
+
+<span class="sd">        :param file: Database file to load</span>
+<span class="sd">        :returns: InputOutputOracle object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Should be implemented by child class&quot;</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">__size_to_str</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Return pretty printed representation of RAM usage for table generation &quot;&quot;&quot;</span>
+        <span class="n">units</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">float</span><span class="p">(</span><span class="mi">1024</span><span class="p">),</span> <span class="s2">&quot;Kb&quot;</span><span class="p">),</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="mi">1024</span> <span class="o">**</span> <span class="mi">2</span><span class="p">),</span> <span class="s2">&quot;Mb&quot;</span><span class="p">),</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="mi">1024</span> <span class="o">**</span> <span class="mi">3</span><span class="p">),</span> <span class="s2">&quot;Gb&quot;</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">unit</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">units</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="o">/</span> <span class="n">unit</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># We are on the right unit</span>
+                <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">value</span><span class="o">/</span><span class="n">unit</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}{</span><span class="n">s</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">B&quot;</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Quarkslab.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,286 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>API Usage &mdash; QSynthesis 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="IDA Plugin Walkthrough" href="plugin/plugin_usage.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> QSynthesis
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html"> Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#"> API usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#use-case-synthesis-in-pure-symbolic-with-triton">Use-case: Synthesis in pure symbolic with Triton</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugin Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="plugin/plugin_usage.html">IDA Plugin Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugin/plugin_usage.html#exploiting-results">Exploiting results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plugin/plugin_usage.html#debugging">Debugging</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Python API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/tritonast.html">TritonAst</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/synthesis.html">Top-Down Synthesizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/synthesis.html#placeholder-based-synthesizer">Placeholder-based Synthesizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/table.html">Grammar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/table.html#oracles">Oracles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/sym_exec.html">Symbolic Execution utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/types.html">Types</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dev_doc/table.html">Lookup table Management</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">QSynthesis</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>API Usage</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/api_usage.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="api-usage">
+<span id="qsynthesis-api-usage"></span><h1>API Usage<a class="headerlink" href="#api-usage" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="use-case-synthesis-in-pure-symbolic-with-triton">
+<h2>Use-case: Synthesis in pure symbolic with Triton<a class="headerlink" href="#use-case-synthesis-in-pure-symbolic-with-triton" title="Permalink to this headline">¶</a></h2>
+<p>While working on an execution trace is very powerful thanks to concretization that can be made
+we often can’t executed the program or the execution does not reach the intended location. As such,
+this use-case shows a very similar one where instruction are provided by the use directly.</p>
+<p>First lets consider the following bytes representing the x86_64 computation of an obfuscated
+expression.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">INSTRUCTIONS</span> <span class="o">=</span> <span class="p">[</span><span class="sa">b</span><span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x89\xe5</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x89</span><span class="s1">}</span><span class="se">\xf8</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x89</span><span class="s1">u</span><span class="se">\xf0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x89</span><span class="s1">U</span><span class="se">\xe8</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x89</span><span class="s1">M</span><span class="se">\xe0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;L</span><span class="se">\x89</span><span class="s1">E</span><span class="se">\xd8</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x8b</span><span class="s1">E</span><span class="se">\xf0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H#E</span><span class="se">\xe0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x89\xc2</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x8b</span><span class="s1">E</span><span class="se">\xf0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x0b</span><span class="s1">E</span><span class="se">\xe0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x0f\xaf\xd0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x8b</span><span class="s1">E</span><span class="se">\xe0</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\xf7\xd0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H#E</span><span class="se">\xf0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x89\xc1</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x8b</span><span class="s1">E</span><span class="se">\xf0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\xf7\xd0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H#E</span><span class="se">\xe0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x0f\xaf\xc1</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x01\xc2</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x8b</span><span class="s1">E</span><span class="se">\xe0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x0f\xaf\xc0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x89\xd6</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H!</span><span class="se">\xc6</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x8b</span><span class="s1">E</span><span class="se">\xf0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H#E</span><span class="se">\xe0</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x89\xc2</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x8b</span><span class="s1">E</span><span class="se">\xf0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x0b</span><span class="s1">E</span><span class="se">\xe0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x0f\xaf\xd0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x8b</span><span class="s1">E</span><span class="se">\xe0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\xf7\xd0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H#E</span><span class="se">\xf0</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x89\xc1</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x8b</span><span class="s1">E</span><span class="se">\xf0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\xf7\xd0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H#E</span><span class="se">\xe0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x0f\xaf\xc1</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x01\xc2</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x8b</span><span class="s1">E</span><span class="se">\xe0</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x0f\xaf\xc0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\t\xd0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H)</span><span class="se">\xc6</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x89\xf0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x83\xe8\x01</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H3E</span><span class="se">\xf0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x89\xc2</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x8b</span><span class="s1">E</span><span class="se">\xf0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H#E</span><span class="se">\xe0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x89\xc1</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x8b</span><span class="s1">E</span><span class="se">\xf0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x0b</span><span class="s1">E</span><span class="se">\xe0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x0f\xaf\xc8</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x8b</span><span class="s1">E</span><span class="se">\xe0</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\xf7\xd0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H#E</span><span class="se">\xf0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x89\xc6</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x8b</span><span class="s1">E</span><span class="se">\xf0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\xf7\xd0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H#E</span><span class="se">\xe0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x0f\xaf\xc6</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x01\xc1</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x8b</span><span class="s1">E</span><span class="se">\xe0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x0f\xaf\xc0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H1</span><span class="se">\xc8</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H#E</span><span class="se">\xf0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x01\xc0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;H)</span><span class="se">\xc2</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="sa">b</span><span class="s1">&#39;H</span><span class="se">\x89\xd0</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;]&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\xc3</span><span class="s1">&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The first thing to do is to executed these instruction with triton. For that Qsynthesis
+provides an utility class <code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleSymExec</span></code> (cf: <a class="reference internal" href="api/sym_exec.html#label-simplesymexec"><span class="std std-ref">SimpleSymExec</span></a>) facilitating
+various tasks. It takes the architecture in parameter. We arbritrarily initialize <code class="docutils literal notranslate"><span class="pre">rip</span></code> and
+<code class="docutils literal notranslate"><span class="pre">rsp</span></code> to arbitrary addresses and feed all instructions to that wrapper.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">qsynthesis.utils.symexec</span> <span class="kn">import</span> <span class="n">SimpleSymExec</span>
+
+<span class="n">symexec</span> <span class="o">=</span> <span class="n">SimpleSymExec</span><span class="p">(</span><span class="s2">&quot;x86_64&quot;</span><span class="p">)</span>              <span class="c1"># Initialize it with the intended architecture</span>
+<span class="n">symexec</span><span class="o">.</span><span class="n">initialize_register</span><span class="p">(</span><span class="s1">&#39;rip&#39;</span><span class="p">,</span> <span class="mh">0x40B160</span><span class="p">)</span>   <span class="c1"># arbitrary address</span>
+<span class="n">symexec</span><span class="o">.</span><span class="n">initialize_register</span><span class="p">(</span><span class="s1">&#39;rsp&#39;</span><span class="p">,</span> <span class="mh">0x800000</span><span class="p">)</span>   <span class="c1"># arbitrary address</span>
+<span class="k">for</span> <span class="n">opcode</span> <span class="ow">in</span> <span class="n">INSTRUCTIONS</span><span class="p">:</span>
+    <span class="n">symexec</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">opcode</span><span class="p">)</span>                    <span class="c1"># Execute the given opcode</span>
+<span class="n">rax</span> <span class="o">=</span> <span class="n">symexec</span><span class="o">.</span><span class="n">get_register_ast</span><span class="p">(</span><span class="s2">&quot;rax&quot;</span><span class="p">)</span>          <span class="c1"># Retrieve rax AST after executing instructions</span>
+</pre></div>
+</div>
+<p>As of now the <code class="docutils literal notranslate"><span class="pre">rax</span></code> expression can be synthesized by instanciating the synthesizer with
+an oracle table.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">qsynthesis</span> <span class="kn">import</span> <span class="n">TopDownSynthesizer</span><span class="p">,</span> <span class="n">InputOutputOracleLevelDB</span>
+
+<span class="n">table</span> <span class="o">=</span> <span class="n">InputOutputOracleLevelDB</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;my_leveldb_table/&quot;</span><span class="p">)</span>  <span class="c1"># Load the lookup table database</span>
+
+<span class="n">synthesizer</span> <span class="o">=</span> <span class="n">TopDownSynthesizer</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>       <span class="c1"># Instanciate the synthesize of the table</span>
+<span class="n">synt_rax</span><span class="p">,</span> <span class="n">simp_bool</span> <span class="o">=</span> <span class="n">synthesizer</span><span class="o">.</span><span class="n">synthesize</span><span class="p">(</span><span class="n">rax</span><span class="p">)</span>  <span class="c1"># Trigger synthesize of the rax expression</span>
+
+<span class="c1"># Print synthesis results</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;simplified: </span><span class="si">{</span><span class="n">simp_bool</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;synthesized expression: </span><span class="si">{</span><span class="n">synt_rax</span><span class="o">.</span><span class="n">pp_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;size: </span><span class="si">{</span><span class="n">rax</span><span class="o">.</span><span class="n">node_count</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">synt_rax</span><span class="o">.</span><span class="n">node_count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="plugin/plugin_usage.html" class="btn btn-neutral float-right" title="IDA Plugin Walkthrough" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Quarkslab.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

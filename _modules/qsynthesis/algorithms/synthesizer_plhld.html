@@ -1,0 +1,373 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>qsynthesis.algorithms.synthesizer_plhld &mdash; QSynthesis 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> QSynthesis
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html"> Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_usage.html"> API usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugin Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../plugin/plugin_usage.html">IDA Plugin Walkthrough</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../plugin/plugin_usage.html#exploiting-results">Exploiting results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../plugin/plugin_usage.html#debugging">Debugging</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Python API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/tritonast.html">TritonAst</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/synthesis.html">Top-Down Synthesizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/synthesis.html#placeholder-based-synthesizer">Placeholder-based Synthesizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/table.html">Grammar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/table.html#oracles">Oracles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/sym_exec.html">Symbolic Execution utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/types.html">Types</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev_doc/table.html">Lookup table Management</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">QSynthesis</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>qsynthesis.algorithms.synthesizer_plhld</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for qsynthesis.algorithms.synthesizer_plhld</h1><div class="highlight"><pre>
+<span></span><span class="c1"># built-in modules</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span>
+
+<span class="c1"># qsynthesis modules</span>
+<span class="kn">from</span> <span class="nn">qsynthesis.tritonast</span> <span class="kn">import</span> <span class="n">TritonAst</span>
+<span class="kn">from</span> <span class="nn">qsynthesis.algorithms.synthesizer_tdbu</span> <span class="kn">import</span> <span class="n">TopDownBottomUpSynthesizer</span><span class="p">,</span> <span class="n">YieldT</span><span class="p">,</span> <span class="n">logger</span>
+
+
+<div class="viewcode-block" id="PlaceHolderSynthesizer"><a class="viewcode-back" href="../../../api/synthesis.html#qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer">[docs]</a><span class="k">class</span> <span class="nc">PlaceHolderSynthesizer</span><span class="p">(</span><span class="n">TopDownBottomUpSynthesizer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Synthesizer inherited from TopDownBottomUpSynthesizer which thus</span>
+<span class="sd">    form the search in that manner. The specificity of this synthesizer</span>
+<span class="sd">    is to temporarily replacing synthesized expressions with a placeholder</span>
+<span class="sd">    variable that will &#39;abstract the behavior of the synthesized AST&#39;. The</span>
+<span class="sd">    intended effect is to recursively synthesized previously synthesized</span>
+<span class="sd">    sub-AST (with these placeholders). At the end of the search all placeholder</span>
+<span class="sd">    variables are substituted by their associated synthesized expression.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PlaceHolderSynthesizer.synthesize"><a class="viewcode-back" href="../../../api/synthesis.html#qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer.synthesize">[docs]</a>    <span class="k">def</span> <span class="nf">synthesize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ioast</span><span class="p">:</span> <span class="n">TritonAst</span><span class="p">,</span> <span class="n">check_sem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TritonAst</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs the placeholder based top-down and then bottom-up search for synthesizing</span>
+<span class="sd">        the given TritonAst.</span>
+
+<span class="sd">        :param ioast: TritonAst object to synthesize</span>
+<span class="sd">        :param check_sem: boolean one whether to check the semantic equivalence of expression</span>
+<span class="sd">                          before substituting them. That ensure soundness of the synthesis</span>
+<span class="sd">        :return: tuple with new TritonAst and whether some replacement took place or not</span>
+
+<span class="sd">        .. warning:: Activating the `check_sem` parameter implies a strong overhead</span>
+<span class="sd">                     on the synthesis as SMT queries are being performed for any candidates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ioast</span> <span class="o">=</span> <span class="n">ioast</span><span class="o">.</span><span class="n">duplicate</span><span class="p">()</span>  <span class="c1"># Make a copy of the AST to to modify it</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expr_cache</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval_cache</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">call_to_eval</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">expr_repl_visitor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visit_replacement_bfs</span><span class="p">(</span><span class="n">ioast</span><span class="p">)</span>
+        <span class="n">new_expr_to_send</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># hold Ast replacement</span>
+        <span class="n">expr_modified</span> <span class="o">=</span> <span class="kc">False</span>    <span class="c1"># True as soon as one sub-ast has been synthesized</span>
+        <span class="n">replacements</span> <span class="o">=</span> <span class="p">{}</span>        <span class="c1"># AST -&gt; Placeholder AST</span>
+        <span class="n">replacements_hashs</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># AST hash -&gt; Placeholder</span>
+        <span class="n">cur_placeholder</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[plhdr] sending: </span><span class="si">{</span><span class="n">new_expr_to_send</span><span class="o">.</span><span class="n">pp_str</span> <span class="k">if</span> <span class="n">new_expr_to_send</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">cur_ast</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">expr_repl_visitor</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">new_expr_to_send</span><span class="p">)</span>  <span class="c1"># Iterate generator</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="n">final_ast</span> <span class="o">=</span> <span class="n">cur_ast</span>
+                <span class="k">break</span> <span class="c1"># Don&#39;t do anything of final expr return</span>
+
+            <span class="c1"># Check if not already substituted, if so yield directly the placeholder</span>
+            <span class="k">if</span> <span class="n">cur_ast</span><span class="o">.</span><span class="n">hash</span> <span class="ow">in</span> <span class="n">replacements_hashs</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[plhdr] Hash match: </span><span class="si">{</span><span class="n">cur_ast</span><span class="o">.</span><span class="n">pp_str</span><span class="si">}</span><span class="s2"> ==&gt; </span><span class="si">{</span><span class="n">replacements_hashs</span><span class="p">[</span><span class="n">cur_ast</span><span class="o">.</span><span class="n">hash</span><span class="p">]</span><span class="o">.</span><span class="n">pp_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">new_expr_to_send</span> <span class="o">=</span> <span class="n">replacements_hashs</span><span class="p">[</span><span class="n">cur_ast</span><span class="o">.</span><span class="n">hash</span><span class="p">]</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># If don&#39;t have children either constant or variable just continue</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">cur_ast</span><span class="o">.</span><span class="n">has_children</span><span class="p">():</span> <span class="c1"># FIXME: If constant maybe symbolizing it</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Try synthesizing expression</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[phldr] try synthesis lookup: </span><span class="si">{</span><span class="n">cur_ast</span><span class="o">.</span><span class="n">pp_str</span> <span class="k">if</span> <span class="n">cur_ast</span><span class="o">.</span><span class="n">node_count</span> <span class="o">&lt;</span> <span class="mi">50</span> <span class="k">else</span> <span class="s1">&#39;too large&#39;</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="n">cur_ast</span><span class="o">.</span><span class="n">node_count</span><span class="si">}</span><span class="s2">] [</span><span class="si">{</span><span class="n">info</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+            <span class="n">synt_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">try_synthesis_lookup</span><span class="p">(</span><span class="n">cur_ast</span><span class="p">,</span> <span class="n">check_sem</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">synt_res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">expr_modified</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_expr_to_send</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">info</span> <span class="o">==</span> <span class="n">YieldT</span><span class="o">.</span><span class="n">TopBottom</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># BottomUp</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ast_binop_with_cst</span><span class="p">(</span><span class="n">cur_ast</span><span class="p">):</span>  <span class="c1"># If binary operation with a constant make a placeholder</span>
+                        <span class="n">synt_res</span> <span class="o">=</span> <span class="n">cur_ast</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
+            <span class="c1"># Here necessarily synthesized of BottomUp</span>
+
+            <span class="c1"># Create the a placeholder whether or not we synthesized the expression !</span>
+            <span class="n">placeholder</span> <span class="o">=</span> <span class="n">ioast</span><span class="o">.</span><span class="n">mk_variable</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;plhd_</span><span class="si">{</span><span class="n">cur_placeholder</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">synt_res</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+            <span class="n">cur_placeholder</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">replacements</span><span class="p">[</span><span class="n">placeholder</span><span class="p">]</span> <span class="o">=</span> <span class="n">synt_res</span>
+            <span class="n">replacements_hashs</span><span class="p">[</span><span class="n">cur_ast</span><span class="o">.</span><span class="n">hash</span><span class="p">]</span> <span class="o">=</span> <span class="n">placeholder</span>
+            <span class="n">new_expr_to_send</span> <span class="o">=</span> <span class="n">placeholder</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[plhdr] Create Placeholder plhd_</span><span class="si">{</span><span class="n">cur_placeholder</span><span class="o">-</span><span class="mi">1</span><span class="si">}</span><span class="s2"> for: </span><span class="si">{</span><span class="n">synt_res</span><span class="o">.</span><span class="n">pp_str</span><span class="si">}</span><span class="s2"> ptr_id: </span><span class="si">{</span><span class="n">synt_res</span><span class="o">.</span><span class="n">ptr_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[plhdr] AST before replacement: </span><span class="si">{</span><span class="n">final_ast</span><span class="o">.</span><span class="n">pp_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">replacements</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Final replace </span><span class="si">{</span><span class="n">k</span><span class="o">.</span><span class="n">pp_str</span><span class="si">}</span><span class="s2">  ==&gt; </span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">pp_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">replace_all</span><span class="p">(</span><span class="n">final_ast</span><span class="p">,</span> <span class="n">replacements</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">final_ast</span><span class="o">.</span><span class="n">update_all</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Final AST: </span><span class="si">{</span><span class="n">final_ast</span><span class="o">.</span><span class="n">pp_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">final_ast</span><span class="p">,</span> <span class="n">expr_modified</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_ast_binop_with_cst</span><span class="p">(</span><span class="n">ast</span><span class="p">:</span> <span class="n">TritonAst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find if either the left or right branch of an AST is a constant.</span>
+<span class="sd">        That enable replacing them with placeholder variable to help the</span>
+<span class="sd">        synthesis by temporarily getting rid of constants.</span>
+
+<span class="sd">        :param ast: TritonAst</span>
+<span class="sd">        :return: True if left or right child of the AST is a constant</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">is_constant</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ast</span><span class="o">.</span><span class="n">get_children</span><span class="p">())</span> <span class="o">!=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="PlaceHolderSynthesizer.replace_all"><a class="viewcode-back" href="../../../api/synthesis.html#qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer.replace_all">[docs]</a>    <span class="k">def</span> <span class="nf">replace_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ast</span><span class="p">:</span> <span class="n">TritonAst</span><span class="p">,</span> <span class="n">replacement</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TritonAst</span><span class="p">,</span> <span class="n">TritonAst</span><span class="p">],</span> <span class="n">recursive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs the final replacement of Placeholder variable with their synthesized expression equivalence</span>
+<span class="sd">        in `ast` provided in parameter.</span>
+
+<span class="sd">        :param ast: TritonAst object in which to perform all substitutions</span>
+<span class="sd">        :param replacement: dictionnary of placeholder variable as TritonAst to synthesized expression (TritonAst)</span>
+<span class="sd">        :param recursive: whether to also perform the substitution in synthesized expressions given in the dictionnary</span>
+<span class="sd">        :return: None as the `ast` object is modified in place</span>
+
+<span class="sd">        .. warning:: All the expressions to replace should be present only once because TritonAst objects</span>
+<span class="sd">                     are not deepcopied. Thus duplicating it at various location of the AST would be various dangerous</span>
+<span class="sd">                     for attributes coherence when calling update</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">new_expr_to_send</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">hash_mapping</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="o">.</span><span class="n">hash</span><span class="p">:</span> <span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">replacement</span><span class="p">}</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Len replacement: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">replacement</span><span class="p">)</span><span class="si">}</span><span class="s2">  len hash_mapping:</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">hash_mapping</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">g</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">visit_replacement</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">cur_ast</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">new_expr_to_send</span><span class="p">)</span>
+                <span class="n">new_expr_to_send</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">cur_ast_id</span> <span class="o">=</span> <span class="n">cur_ast</span><span class="o">.</span><span class="n">hash</span>
+
+                <span class="k">if</span> <span class="n">cur_ast_id</span> <span class="ow">in</span> <span class="n">hash_mapping</span><span class="p">:</span>  <span class="c1"># Prefilter with hash to check if current ast might be substituted</span>
+                    <span class="n">key</span> <span class="o">=</span> <span class="n">hash_mapping</span><span class="p">[</span><span class="n">cur_ast_id</span><span class="p">]</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cur_ast: </span><span class="si">{</span><span class="n">cur_ast</span><span class="o">.</span><span class="n">pp_str</span><span class="si">}</span><span class="s2">  key:</span><span class="si">{</span><span class="n">key</span><span class="o">.</span><span class="n">pp_str</span><span class="si">}</span><span class="s2">  equal:</span><span class="si">{</span><span class="n">cur_ast</span><span class="o">.</span><span class="n">expr</span><span class="o">.</span><span class="n">equalTo</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">expr</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">cur_ast</span><span class="o">.</span><span class="n">expr</span><span class="o">.</span><span class="n">equalTo</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">expr</span><span class="p">):</span>  <span class="c1"># Check that they are equal</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;two different expressions !&quot;</span><span class="p">)</span>
+
+                    <span class="n">new_expr_to_send</span> <span class="o">=</span> <span class="n">replacement</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Will replace </span><span class="si">{</span><span class="n">cur_ast</span><span class="o">.</span><span class="n">pp_str</span><span class="si">}</span><span class="s2">  ==&gt; </span><span class="si">{</span><span class="n">new_expr_to_send</span><span class="o">.</span><span class="n">pp_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">recursive</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">replace_all</span><span class="p">(</span><span class="n">new_expr_to_send</span><span class="p">,</span> <span class="n">replacement</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="n">recursive</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="k">pass</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Quarkslab.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
