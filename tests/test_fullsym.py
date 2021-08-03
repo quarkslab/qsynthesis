@@ -1,24 +1,25 @@
+import logging
 import sys
 
 from triton import ARCH
 
 from qsynthesis import SimpleSymExec, TopDownSynthesizer, InputOutputOracleLevelDB
+import qsynthesis
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
+qsynthesis.enable_logging()
 
 
 RIP_ADDR = 0x40B160
 RSP_ADDR = 0x800000
 
-INSTRUCTIONS = [b'U', b'H\x89\xe5', b'H\x89}\xf8', b'H\x89u\xf0', b'H\x89U\xe8', b'H\x89M\xe0', b'L\x89E\xd8',
-                b'H\x8bE\xf0', b'H#E\xe0', b'H\x89\xc2', b'H\x8bE\xf0', b'H\x0bE\xe0', b'H\x0f\xaf\xd0', b'H\x8bE\xe0',
-                b'H\xf7\xd0', b'H#E\xf0', b'H\x89\xc1', b'H\x8bE\xf0', b'H\xf7\xd0', b'H#E\xe0', b'H\x0f\xaf\xc1',
-                b'H\x01\xc2', b'H\x8bE\xe0', b'H\x0f\xaf\xc0', b'H\x89\xd6', b'H!\xc6', b'H\x8bE\xf0', b'H#E\xe0',
-                b'H\x89\xc2', b'H\x8bE\xf0', b'H\x0bE\xe0', b'H\x0f\xaf\xd0', b'H\x8bE\xe0', b'H\xf7\xd0', b'H#E\xf0',
-                b'H\x89\xc1', b'H\x8bE\xf0', b'H\xf7\xd0', b'H#E\xe0', b'H\x0f\xaf\xc1', b'H\x01\xc2', b'H\x8bE\xe0',
-                b'H\x0f\xaf\xc0', b'H\t\xd0', b'H)\xc6', b'H\x89\xf0', b'H\x83\xe8\x01', b'H3E\xf0', b'H\x89\xc2',
-                b'H\x8bE\xf0', b'H#E\xe0', b'H\x89\xc1', b'H\x8bE\xf0', b'H\x0bE\xe0', b'H\x0f\xaf\xc8', b'H\x8bE\xe0',
-                b'H\xf7\xd0', b'H#E\xf0', b'H\x89\xc6', b'H\x8bE\xf0', b'H\xf7\xd0', b'H#E\xe0', b'H\x0f\xaf\xc6',
-                b'H\x01\xc1', b'H\x8bE\xe0', b'H\x0f\xaf\xc0', b'H1\xc8', b'H#E\xf0', b'H\x01\xc0', b'H)\xc2',
-                b'H\x89\xd0', b']', b'\xc3']
+blob = b'UH\x89\xe5H\x89}\xf8H\x89u\xf0H\x89U\xe8H\x89M\xe0L\x89E\xd8H\x8bE' \
+       b'\xe0H\xf7\xd0H\x0bE\xf8H\x89\xc2H\x8bE\xe0H\x01\xd0H\x8dH\x01H\x8b' \
+       b'E\xf8H+E\xe8H\x8bU\xe8H\xf7\xd2H\x0bU\xf8H\x01\xd2H)\xd0H\x83\xe8' \
+       b'\x02H!\xc1H\x8bE\xe0H\xf7\xd0H\x0bE\xf8H\x89\xc2H\x8bE\xe0H\x01\xd0' \
+       b'H\x8dp\x01H\x8bE\xf8H+E\xe8H\x8bU\xe8H\xf7\xd2H\x0bU\xf8H\x01\xd2' \
+       b'H)\xd0H\x83\xe8\x02H\t\xf0H)\xc1H\x89\xc8H\x83\xe8\x01]\xc3'
 
 
 def test(oracle_file):
@@ -26,8 +27,7 @@ def test(oracle_file):
     symexec = SimpleSymExec(ARCH.X86_64)
     symexec.initialize_register('rip', RIP_ADDR)
     symexec.initialize_register('rsp', RSP_ADDR)
-    for opcode in INSTRUCTIONS:
-        symexec.execute(opcode)
+    symexec.execute_blob(blob, RIP_ADDR)
     rax = symexec.get_register_ast("rax")
 
     # Load lookup tables
@@ -40,17 +40,19 @@ def test(oracle_file):
     # Print synthesis results
     print(f"simplified: {simp}")
     print(f"synthesized expression: {synt_rax.pp_str}")
-    print(f"size: {rax.node_count} -> {synt_rax.node_count} scale reduction:{synt_rax.node_count/rax.node_count:.2f}")
-    return symexec, synt_rax
+    sz, nsz = rax.node_count, synt_rax.node_count
+    print(f"size: {rax.node_count} -> {synt_rax.node_count}\nsize reduction:{((sz-nsz)*100)/sz:.2f}%")
+    return symexec, rax, synt_rax
 
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print(f"./{sys.argv[0]} oracle_table")
         sys.exit(1)
-    sx, srax = test(sys.argv[1])
+    sx, rax, srax = test(sys.argv[1])
 '''
 simplified: True
-synthesized expression: ((((~(((rsi * rcx)))) ^ ((rcx * rcx))) - rsi))
-size: 95 -> 10 scale reduction:0.11
+synthesized expression: (((~(rcx)) & rdi) ^ (~(rdx)))
+size: 51 -> 7
+size reduction:86.27%
 '''

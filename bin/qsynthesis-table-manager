@@ -46,7 +46,7 @@ def main():
 @click.option("-v", "--verbosity", default=0, count=True, help="increase output verbosity")
 @click.option('--ops', type=str, default='', help='specifying operators to uses')
 @click.option('--inputs', type=str, default='', help='specifying input vector to use')
-@click.option('--hash-mode', default=HashType.RAW.name, type=click.Choice([x.name for x in HashType]), help="Hash function for keys in table")
+@click.option('--hash-mode', default=HashType.MD5.name, type=click.Choice([x.name for x in HashType]), help="Hash function for keys in table")
 @click.option('--watchdog', type=float, help="Activate RAM watchdog (percentage of load when to stop)")
 @click.option('-c', '--cst', type=str, help="Constant to add in the generation process", multiple=True)
 @click.option('--linearization', is_flag=True, type=bool, default=False, help="If set activate linearization of expressions")
