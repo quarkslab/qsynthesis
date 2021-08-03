@@ -41,6 +41,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
+    'sphinx.ext.githubpages',
     'breathe',
     'sphinx.ext.intersphinx',
     'sphinx_fontawesome'
