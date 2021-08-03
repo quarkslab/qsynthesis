@@ -28,6 +28,7 @@ jobs:
 
       - name: "Build Sphinx Doc"
         run: |
+          cd doc/
           make html
 
       - name: "Deploy Github Pages"
@@ -35,4 +36,4 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages
-          FOLDER: _build/html/
+          FOLDER: doc/_build/html/
