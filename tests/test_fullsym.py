@@ -40,7 +40,8 @@ def test(oracle_file):
     # Print synthesis results
     print(f"simplified: {simp}")
     print(f"synthesized expression: {synt_rax.pp_str}")
-    print(f"size: {rax.node_count} -> {synt_rax.node_count} scale reduction:{synt_rax.node_count/rax.node_count:.2f}")
+    sz, nsz = rax.node_count, synt_rax.node_count
+    print(f"size: {rax.node_count} -> {synt_rax.node_count}\nsize reduction:{((sz-nsz)*100)/sz:.2f}%")
     return symexec, rax, synt_rax
 
 
@@ -52,5 +53,6 @@ if __name__ == "__main__":
 '''
 simplified: True
 synthesized expression: (((~(rcx)) & rdi) ^ (~(rdx)))
-size: 51 -> 7 scale reduction:0.14
+size: 51 -> 7
+size reduction:86.27%
 '''
