@@ -12,28 +12,27 @@ jobs:
         with:
           version: latest
           platform: x64
-      - name: Install dependencies on ubuntu9
-        run: |
-          sudo apt-get update
-          sudo apt-get install ninja-build cmake gcc g++
+
       - uses: actions/checkout@v2
-      - uses: ammaraskar/sphinx-action@master
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v1
         with:
-          docs-folder: "doc/"
-      - name: Commit documentation changes
+          python-version: 3.8
+
+      - name: "Install Python dependencies"
         run: |
-          git clone https://github.com/quarkslab/qsynthesis.git --branch gh-pages --single-branch gh-pages
-          cp -r doc/_build/html/* gh-pages/
-          cd gh-pages
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add .
-          git commit -m "Update documentation" -a || true
-          # The above command will fail if no changes were present, so we ignore
-          # the return code.
-      - name: Push changes
-        uses: ad-m/github-push-action@master
+          cd doc/
+          pip3 install setuptools
+          pip3 install -r requirements.txt
+
+      - name: "Build Sphinx Doc"
+        run: |
+          make html
+
+      - name: "Deploy Github Pages"
+        uses: JamesIves/github-pages-deploy-action@3.7.1
         with:
-          branch: gh-pages
-          directory: gh-pages
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: _build/html/
