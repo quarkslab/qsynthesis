@@ -148,6 +148,9 @@ class SynthetizeOperand(SynthetizeFromHere):
         if ida_bytes.is_code(ida_bytes.get_flags(ea)):
             op_num = ida_kernwin.get_opnum()
             i = self.widget.get_instruction(ea)
+            if i is None:
+                QtWidgets.QMessageBox.critical(self.widget, "Invalid instruction", f"Cannot disassembl instruction at: {ea:#x}")
+                return False
             op = i.operands[op_num]
             if op.is_register() or op.is_memory():
                 self.widget.to_line.setText(f"{ea:#x}")

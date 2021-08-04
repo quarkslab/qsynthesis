@@ -75,7 +75,7 @@ class InputOutputOracle:
     Base Lookup table class. Specify the interface that child class have to
     implement to be interoperable with other the synthesizer.
     """
-    def __init__(self, gr: TritonGrammar, inputs: List[Input], hash_mode: HashType = HashType.RAW, f_name: str = ""):
+    def __init__(self, gr: TritonGrammar, inputs: List[Input], hash_mode: HashType = HashType.RAW, f_name: Union[Path, str] = ""):
         """
         Constructor making a I/O oracle from a grammar a set of inputs and an hash type.
 

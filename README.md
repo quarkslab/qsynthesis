@@ -1,6 +1,6 @@
 # Qsynthesis
 
-QSynthesis is a Python API to perform I/O based program synthesis
+QSynthesis is a Python3 API to perform I/O based program synthesis
 of bitvector expressions. It aims at facilitating code deobfuscation.
 The algorithm is greybox approach combining both a blackbox I/O based
 synthesis and a whitebox AST search to synthesize sub-expressions *(if
@@ -42,7 +42,9 @@ the whole framework. It provides the following functionalities:
 
 ### Installation
 
-In order to work Triton first has to be installed: [install documentation]().
+In order to work Triton first has to be installed: [install documentation](https://triton.quarkslab.com/documentation/doxygen/index.html#install_sec).
+Triton does not automatically install itself in a virtualenv, copy it in your venv or use --system-site-packages when configuring your venv.
+
 Then:
 
     $ git clone gitlab@gitlab.qb:synthesis/qsynthesis.git
