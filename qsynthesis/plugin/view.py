@@ -1077,6 +1077,8 @@ class SynthesizerView(ida_kernwin.PluginForm, QtWidgets.QWidget, Ui_synthesis_vi
 
             opc = ida_bytes.get_bytes(self.stop_addr, ida_bytes.get_item_size(self.stop_addr))
             inst = self.arch.disasm_one(opc, self.stop_addr)
+            if inst is None:
+                return False, None
             op = inst.operands[self.op_num]
             if op.is_register():
                 op_name = ida_lines.tag_remove(ida_ua.print_operand(self.stop_addr, self.op_num))

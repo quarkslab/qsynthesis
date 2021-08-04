@@ -15,7 +15,6 @@ except ImportError:
     print("Triton module should be installed first")
     #sys.exit(1)
 
-#base_deps = ["orderedset", "psutil", "click", "plyvel", "requests", "arybo"]
 generate_deps = ['pydffi==0.8.0', 'sympy']
 server_deps = ['fastapi', 'uvicorn']
 assembly_deps = ["arybo", "llvmlite"]
@@ -26,7 +25,7 @@ setup(
     description="Python API to synthesize Triton AST's",
     packages=find_packages(),
     setup_requires=[],
-    install_requires=["orderedset", "psutil", "click", "plyvel", "requests"],
+    install_requires=["orderedset", "psutil", "click", "plyvel", "requests", "capstone"],
     tests_require=[],
     license="qb",
     author="Quarkslab",
