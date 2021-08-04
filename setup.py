@@ -16,7 +16,7 @@ except ImportError:
     #sys.exit(1)
 
 #base_deps = ["orderedset", "psutil", "click", "plyvel", "requests", "arybo"]
-generate_deps = ['pydffi', 'sympy']
+generate_deps = ['pydffi==0.8.0', 'sympy']
 server_deps = ['fastapi', 'uvicorn']
 assembly_deps = ["arybo", "llvmlite"]
 
