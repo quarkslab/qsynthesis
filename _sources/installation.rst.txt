@@ -8,6 +8,8 @@ Installing **QSynthesis** is rather straightforward, you just need to:
 * (Optional) copy the `ida_plugin/qsynthesis_plugin.py` in the IDA Pro plugin folder
 * (Optional) install additionnal dependencies to generate tables or to serve tables as server
 
+.. warning:: Triton does not support installation in a virtualenv by default. To install qsynthesis in a virtualenv
+             either copy triton.so in the venv libs, or configure the venv with the option --system-site-packages.
 
 Installing QSynthesis
 ---------------------
