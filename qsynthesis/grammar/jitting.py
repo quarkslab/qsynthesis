@@ -51,7 +51,7 @@ void ror_arr(uint64_t* dst, uint64_t* i, uint64_t* n, size_t sz) { for(int j=0; 
 void mod_arr(uint64_t* dst, uint64_t* a, uint64_t* b, size_t n) { for(int i=0; i < n; i ++) { dst[i] = a[i] % b[i] ; } }
 '''
 
-ffi_ctx = pydffi.FFI()
+ffi_ctx = pydffi.FFI(lazyJITWrappers=False)
 
 
 def make_compilation_unit(bitsize: int):

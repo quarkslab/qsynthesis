@@ -15,7 +15,7 @@ except ImportError:
     print("Triton module should be installed first")
     #sys.exit(1)
 
-generate_deps = ['pydffi==0.8.0', 'sympy']
+generate_deps = ['pydffi>=0.9.1', 'sympy']
 server_deps = ['fastapi', 'uvicorn']
 assembly_deps = ["arybo", "llvmlite"]
 
