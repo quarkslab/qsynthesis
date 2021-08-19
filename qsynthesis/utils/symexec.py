@@ -412,6 +412,7 @@ class SimpleSymExec:
         blob = data[:]
         while blob:
             i = self.disassemble(blob, addr)
+            addr = None  # reset to None if it was provided
             if not self.execute_instruction(i):
                 return False
             blob = blob[i.getSize():]
