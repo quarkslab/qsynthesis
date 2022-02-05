@@ -49,6 +49,7 @@ class SimpleSymExec:
         self.cur_inst = None
         self.inst_id = 0
         self._expr_id = 0
+        self._inst_cbs = []
 
     @property
     def expr_id(self) -> int:
@@ -397,10 +398,38 @@ class SimpleSymExec:
         self.cur_inst = inst  # Set it if require to query get_operand_symbolic_expression
         return inst
 
-    def execute_blob(self, data: bytes, addr: Optional[Addr] = None) -> bool:
+    def execute_blob(self, data: bytes, addr: Addr) -> bool:
+        """
+        Execute instructions of the blob while the program counter
+        remains in the blob. Consume the whole data and execute it
+        symbolically.
+
+        .. warning: This method writes payload into triton context.
+
+        :param data: bytes of instructions to execute
+        :type data: bytes
+        :param addr:  address of the first instruction
+        :type addr: :py:obj:`qsynthesis.types.Addr`
+        :returns: True if execution of all instructions succeeded
+        :rtype: bool
+        """
+        self.ctx.setConcreteMemoryAreaValue(addr, data)  # set concrete data in memory
+        self.ctx.setConcreteRegisterValue(self.ins_ptr_reg, addr) # set program counter value
+        pc = addr
+
+        while addr <= pc < (addr + len(data)):  # while we remain in the blob
+            opcode = self.ctx.getConcreteMemoryAreaValue(pc, 16) 
+            if not self.execute(opcode, pc):
+                return False
+            pc =  self.ctx.getConcreteRegisterValue(self.ins_ptr_reg)
+            
+        return True
+
+    def execute_basic_block(self, data: bytes, addr: Optional[Addr] = None) -> bool:
         """
         Execute a whole bunch of bytes as instructions. Consume the whole
-        data and execute it symbolically.
+        data and execute it symbolically. No payload is written in the triton
+        context. The basic block is executed 'out of thin air'.
 
         :param data: bytes of instructions to execute
         :type data: bytes
@@ -448,6 +477,12 @@ class SimpleSymExec:
 
         # Process instruction
         self._turn_on()
+
+        # Call any instruction callback if any
+        if self._inst_cbs:
+            for cb in self._inst_cbs:
+                cb(instr)
+        
         r = self.ctx.processing(instr)
 
         # Set a unique comment on each symbolic expressions
@@ -460,6 +495,13 @@ class SimpleSymExec:
     def _fmt_comment(self) -> str:
         """Return a string identifying a SymbolicExpression in a unique manner"""
         return f"{self.inst_id}#{self.expr_id}#{self.current_address}"
+
+    def add_instruction_callback(self, cb: Callable) -> None:
+        """
+        Add an Instruction callback that will be called for every
+        instruction executed.
+        """
+        self._inst_cbs.append(cb)
 
     @staticmethod
     def _memacc_to_all_addr(ma: MemoryAccess) -> Set[int]:
