@@ -18,7 +18,7 @@ After installation of Triton, just run the following command:
 
 .. code-block:: bash
 
-    $ git clone gitlab@gitlab.qb:synthesis/qsynthesis.git
+    $ git clone https://github.com/quarkslab/qsynthesis.git
     $ cd qsynthesis
     $ pip3 install .
 
