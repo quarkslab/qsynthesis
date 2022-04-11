@@ -47,7 +47,7 @@ Triton does not automatically install itself in a virtualenv, copy it in your ve
 
 Then:
 
-    $ git clone gitlab@gitlab.qb:synthesis/qsynthesis.git
+    $ git clone https://github.com/quarkslab/qsynthesis.git
     $ cd qsynthesis
     $ pip3 install '.[all]'
 
