@@ -3,7 +3,7 @@ from typing import List, Tuple, Generator, Union
 from enum import IntEnum
 
 # third-party modules
-from orderedset import OrderedSet
+from ordered_set import OrderedSet
 
 # qsynthesis modules
 from qsynthesis.tables.base import InputOutputOracle
