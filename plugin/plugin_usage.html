@@ -14,7 +14,9 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -98,13 +100,13 @@
            <div itemprop="articleBody">
              
   <section id="ida-plugin-walkthrough">
-<h1>IDA Plugin Walkthrough<a class="headerlink" href="#ida-plugin-walkthrough" title="Permalink to this headline"></a></h1>
+<h1>IDA Plugin Walkthrough<a class="headerlink" href="#ida-plugin-walkthrough" title="Permalink to this heading"></a></h1>
 <section id="introduction">
-<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline"></a></h2>
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading"></a></h2>
 <p id="label-intro-plugin">The default shortcut to launch QSynthesis is: <strong>Alt+S</strong></p>
 </section>
 <section id="main-interface">
-<h2>Main Interface<a class="headerlink" href="#main-interface" title="Permalink to this headline"></a></h2>
+<h2>Main Interface<a class="headerlink" href="#main-interface" title="Permalink to this heading"></a></h2>
 <p>Figure shown below shows the main UI after having sequentially set the parameters
 and clicked ‘Run Triton’ and ‘Run Synthesis’ to synthesize an expression.</p>
 <figure class="align-center">
@@ -132,7 +134,7 @@ a sequential list of instructions.</p>
 </div>
 </section>
 <section id="popup-actions">
-<h2>Popup Actions<a class="headerlink" href="#popup-actions" title="Permalink to this headline"></a></h2>
+<h2>Popup Actions<a class="headerlink" href="#popup-actions" title="Permalink to this heading"></a></h2>
 <p>Various context-menu actions are registered in the IDA-View allowing to easily
 select the ‘From’ and ‘To’ addresses right from the GUI. It also allows to synthesize
 a given operand in the view. The image below shows the context-menu added.</p>
@@ -150,11 +152,11 @@ on whether the operand is a destination operand or a source operand.</p>
 </section>
 </section>
 <section id="exploiting-results">
-<h1>Exploiting results<a class="headerlink" href="#exploiting-results" title="Permalink to this headline"></a></h1>
+<h1>Exploiting results<a class="headerlink" href="#exploiting-results" title="Permalink to this heading"></a></h1>
 <p>Results are shown in the two views of the main UI, but buttons at the bottom
 provides various functionalities described hereafter.</p>
 <section id="showing-ast-s">
-<h2>Showing AST’s<a class="headerlink" href="#showing-ast-s" title="Permalink to this headline"></a></h2>
+<h2>Showing AST’s<a class="headerlink" href="#showing-ast-s" title="Permalink to this heading"></a></h2>
 <p>Bitvector expressions after symbolic expression and after synthesis can be printed using
 the graph API of IDA. The image below shows the two graph side-by-side of the AST before
 synthesis <em>(Show AST button in Triton side)</em> and the AST after synthesis <em>(Show AST button
@@ -164,7 +166,7 @@ in synthesis side)</em></p>
 </figure>
 </section>
 <section id="showing-depencencies">
-<h2>Showing Depencencies<a class="headerlink" href="#showing-depencencies" title="Permalink to this headline"></a></h2>
+<h2>Showing Depencencies<a class="headerlink" href="#showing-depencencies" title="Permalink to this heading"></a></h2>
 <p>Another feature is to show the dynamic slice dependency of a bitvector expression in the
 IDA View. The button ‘Show Deps’ highlight in the IDA-View all instructions involved in
 the computation of the expression. The image below shows the result obtained.</p>
@@ -173,7 +175,7 @@ the computation of the expression. The image below shows the result obtained.</p
 </figure>
 </section>
 <section id="reassembly">
-<h2>Reassembly<a class="headerlink" href="#reassembly" title="Permalink to this headline"></a></h2>
+<h2>Reassembly<a class="headerlink" href="#reassembly" title="Permalink to this heading"></a></h2>
 <p>The last feature provided by the plugin is a trivial <em>(and unsound)</em> reassembly of the
 synthesized AST into fresh unobfuscated instructions. The reassembly process use the
 amazing <a class="reference external" href="https://github.com/quarkslab/arybo">ayrbo</a> project that turns Triton ASTs
@@ -205,7 +207,7 @@ non-interference analysis should be performed to make sure the semantic is prese
 </section>
 </section>
 <section id="debugging">
-<h1>Debugging<a class="headerlink" href="#debugging" title="Permalink to this headline"></a></h1>
+<h1>Debugging<a class="headerlink" href="#debugging" title="Permalink to this heading"></a></h1>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Once instanciated, it is possible to access the plugin object

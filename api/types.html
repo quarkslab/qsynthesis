@@ -14,7 +14,9 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -56,7 +58,25 @@
 <li class="toctree-l1"><a class="reference internal" href="table.html">Grammar</a></li>
 <li class="toctree-l1"><a class="reference internal" href="table.html#oracles">Oracles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sym_exec.html">Symbolic Execution utilities</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Types</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#qsynthesis.types.Addr"><code class="docutils literal notranslate"><span class="pre">Addr</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qsynthesis.types.AstNode"><code class="docutils literal notranslate"><span class="pre">AstNode</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qsynthesis.types.AstType"><code class="docutils literal notranslate"><span class="pre">AstType</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qsynthesis.types.BitSize"><code class="docutils literal notranslate"><span class="pre">BitSize</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qsynthesis.types.ByteSize"><code class="docutils literal notranslate"><span class="pre">ByteSize</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qsynthesis.types.Char"><code class="docutils literal notranslate"><span class="pre">Char</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qsynthesis.types.Expr"><code class="docutils literal notranslate"><span class="pre">Expr</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qsynthesis.types.Hash"><code class="docutils literal notranslate"><span class="pre">Hash</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qsynthesis.types.IOPair"><code class="docutils literal notranslate"><span class="pre">IOPair</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qsynthesis.types.IOVector"><code class="docutils literal notranslate"><span class="pre">IOVector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qsynthesis.types.Input"><code class="docutils literal notranslate"><span class="pre">Input</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qsynthesis.types.Output"><code class="docutils literal notranslate"><span class="pre">Output</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qsynthesis.types.Register"><code class="docutils literal notranslate"><span class="pre">Register</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qsynthesis.types.SymVarMap"><code class="docutils literal notranslate"><span class="pre">SymVarMap</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qsynthesis.types.SymbolicExpression"><code class="docutils literal notranslate"><span class="pre">SymbolicExpression</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qsynthesis.types.SymbolicVariable"><code class="docutils literal notranslate"><span class="pre">SymbolicVariable</span></code></a></li>
+</ul>
+</li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Advanced Usage</span></p>
 <ul>
@@ -88,7 +108,7 @@
            <div itemprop="articleBody">
              
   <section id="module-qsynthesis.types">
-<span id="types"></span><h1>Types<a class="headerlink" href="#module-qsynthesis.types" title="Permalink to this headline"></a></h1>
+<span id="types"></span><h1>Types<a class="headerlink" href="#module-qsynthesis.types" title="Permalink to this heading"></a></h1>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qsynthesis.types.Addr">
 <span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">Addr</span></span><a class="headerlink" href="#qsynthesis.types.Addr" title="Permalink to this definition"></a></dt>
@@ -179,7 +199,7 @@ table a Hash value might be hashed before being used to perform the lookup.</p>
 <dt class="sig sig-object py" id="qsynthesis.types.SymVarMap">
 <span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">SymVarMap</span></span><a class="headerlink" href="#qsynthesis.types.SymVarMap" title="Permalink to this definition"></a></dt>
 <dd><p>Dictionnary of symbolic variables names to theirs Triton object instance</p>
-<p>alias of <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference internal" href="#qsynthesis.types.SymbolicVariable" title="qsynthesis.types.SymbolicVariable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.SymbolicVariable</span></code></a>]</p>
+<p>alias of <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference internal" href="#qsynthesis.types.SymbolicVariable" title="qsynthesis.types.SymbolicVariable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SymbolicVariable</span></code></a>]</p>
 </dd></dl>
 
 <dl class="py data">

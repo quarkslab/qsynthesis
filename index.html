@@ -14,7 +14,9 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -87,7 +89,7 @@
            <div itemprop="articleBody">
              
   <section id="qsynthesis-documentation">
-<h1>QSynthesis documentation<a class="headerlink" href="#qsynthesis-documentation" title="Permalink to this headline"></a></h1>
+<h1>QSynthesis documentation<a class="headerlink" href="#qsynthesis-documentation" title="Permalink to this heading"></a></h1>
 <p><strong>QSynthesis</strong> is a Python API to perform Greybox synthesis of bitvector
 expressions. The base synthesis algorithm is based on
 both a blackbox I/O based approach comparing solely input-to-output
@@ -105,8 +107,7 @@ in the database.</p>
 <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html"> Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#installing-qsynthesis">Installing QSynthesis</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#installing-the-ida-plugin">Installing the IDA Plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#optional-dependencies">Optional dependencies</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api_usage.html"> API usage</a><ul>
@@ -136,13 +137,130 @@ in the database.</p>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Python API</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api/tritonast.html">TritonAst</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/synthesis.html">Top-Down Synthesizer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/synthesis.html#placeholder-based-synthesizer">Placeholder-based Synthesizer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/table.html">Grammar</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/table.html#oracles">Oracles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/tritonast.html">TritonAst</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst"><code class="docutils literal notranslate"><span class="pre">TritonAst</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.compare_behavior"><code class="docutils literal notranslate"><span class="pre">TritonAst.compare_behavior()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.depth"><code class="docutils literal notranslate"><span class="pre">TritonAst.depth</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.duplicate"><code class="docutils literal notranslate"><span class="pre">TritonAst.duplicate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.dyn_depth"><code class="docutils literal notranslate"><span class="pre">TritonAst.dyn_depth()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.dyn_node_count"><code class="docutils literal notranslate"><span class="pre">TritonAst.dyn_node_count()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.eval_oracle"><code class="docutils literal notranslate"><span class="pre">TritonAst.eval_oracle()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.from_z3"><code class="docutils literal notranslate"><span class="pre">TritonAst.from_z3()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.get_children"><code class="docutils literal notranslate"><span class="pre">TritonAst.get_children()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.has_children"><code class="docutils literal notranslate"><span class="pre">TritonAst.has_children()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.hash"><code class="docutils literal notranslate"><span class="pre">TritonAst.hash</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.is_constant"><code class="docutils literal notranslate"><span class="pre">TritonAst.is_constant()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.is_constant_expr"><code class="docutils literal notranslate"><span class="pre">TritonAst.is_constant_expr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.is_leaf"><code class="docutils literal notranslate"><span class="pre">TritonAst.is_leaf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.is_root"><code class="docutils literal notranslate"><span class="pre">TritonAst.is_root()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.is_semantically_equal"><code class="docutils literal notranslate"><span class="pre">TritonAst.is_semantically_equal()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.is_variable"><code class="docutils literal notranslate"><span class="pre">TritonAst.is_variable()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.make_ast"><code class="docutils literal notranslate"><span class="pre">TritonAst.make_ast()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.make_graph"><code class="docutils literal notranslate"><span class="pre">TritonAst.make_graph()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.mapping"><code class="docutils literal notranslate"><span class="pre">TritonAst.mapping</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.mk_constant"><code class="docutils literal notranslate"><span class="pre">TritonAst.mk_constant()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.mk_variable"><code class="docutils literal notranslate"><span class="pre">TritonAst.mk_variable()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.node_count"><code class="docutils literal notranslate"><span class="pre">TritonAst.node_count</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.normalized_str_to_ast"><code class="docutils literal notranslate"><span class="pre">TritonAst.normalized_str_to_ast()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.parents"><code class="docutils literal notranslate"><span class="pre">TritonAst.parents</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.pp_str"><code class="docutils literal notranslate"><span class="pre">TritonAst.pp_str</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.ptr_id"><code class="docutils literal notranslate"><span class="pre">TritonAst.ptr_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.random_sampling"><code class="docutils literal notranslate"><span class="pre">TritonAst.random_sampling()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.reassemble"><code class="docutils literal notranslate"><span class="pre">TritonAst.reassemble()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.replace_self"><code class="docutils literal notranslate"><span class="pre">TritonAst.replace_self()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.set_child"><code class="docutils literal notranslate"><span class="pre">TritonAst.set_child()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.sub_map"><code class="docutils literal notranslate"><span class="pre">TritonAst.sub_map</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.symbol"><code class="docutils literal notranslate"><span class="pre">TritonAst.symbol</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.symvar_type"><code class="docutils literal notranslate"><span class="pre">TritonAst.symvar_type()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.symvars"><code class="docutils literal notranslate"><span class="pre">TritonAst.symvars</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.to_normalized_str"><code class="docutils literal notranslate"><span class="pre">TritonAst.to_normalized_str()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.to_z3"><code class="docutils literal notranslate"><span class="pre">TritonAst.to_z3()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.type"><code class="docutils literal notranslate"><span class="pre">TritonAst.type</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.update"><code class="docutils literal notranslate"><span class="pre">TritonAst.update()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.update_all"><code class="docutils literal notranslate"><span class="pre">TritonAst.update_all()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.update_parents"><code class="docutils literal notranslate"><span class="pre">TritonAst.update_parents()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.var_num"><code class="docutils literal notranslate"><span class="pre">TritonAst.var_num</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.variable_id"><code class="docutils literal notranslate"><span class="pre">TritonAst.variable_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.visit_expr"><code class="docutils literal notranslate"><span class="pre">TritonAst.visit_expr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/tritonast.html#qsynthesis.tritonast.TritonAst.visit_replacement"><code class="docutils literal notranslate"><span class="pre">TritonAst.visit_replacement()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/synthesis.html">Top-Down Synthesizer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/synthesis.html#qsynthesis.algorithms.synthesizer_td.TopDownSynthesizer"><code class="docutils literal notranslate"><span class="pre">TopDownSynthesizer</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/synthesis.html#qsynthesis.algorithms.synthesizer_td.TopDownSynthesizer.eval_ast"><code class="docutils literal notranslate"><span class="pre">TopDownSynthesizer.eval_ast()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/synthesis.html#qsynthesis.algorithms.synthesizer_td.TopDownSynthesizer.run_direct_synthesis"><code class="docutils literal notranslate"><span class="pre">TopDownSynthesizer.run_direct_synthesis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/synthesis.html#qsynthesis.algorithms.synthesizer_td.TopDownSynthesizer.synthesize"><code class="docutils literal notranslate"><span class="pre">TopDownSynthesizer.synthesize()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/synthesis.html#qsynthesis.algorithms.synthesizer_td.TopDownSynthesizer.try_synthesis_lookup"><code class="docutils literal notranslate"><span class="pre">TopDownSynthesizer.try_synthesis_lookup()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/synthesis.html#placeholder-based-synthesizer">Placeholder-based Synthesizer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/synthesis.html#qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer"><code class="docutils literal notranslate"><span class="pre">PlaceHolderSynthesizer</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/synthesis.html#qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer.eval_ast"><code class="docutils literal notranslate"><span class="pre">PlaceHolderSynthesizer.eval_ast()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/synthesis.html#qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer.replace_all"><code class="docutils literal notranslate"><span class="pre">PlaceHolderSynthesizer.replace_all()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/synthesis.html#qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer.run_direct_synthesis"><code class="docutils literal notranslate"><span class="pre">PlaceHolderSynthesizer.run_direct_synthesis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/synthesis.html#qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer.synthesize"><code class="docutils literal notranslate"><span class="pre">PlaceHolderSynthesizer.synthesize()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/synthesis.html#qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer.try_synthesis_lookup"><code class="docutils literal notranslate"><span class="pre">PlaceHolderSynthesizer.try_synthesis_lookup()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/table.html">Grammar</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/table.html#qsynthesis.grammar.grammar.TritonGrammar"><code class="docutils literal notranslate"><span class="pre">TritonGrammar</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/table.html#qsynthesis.grammar.grammar.TritonGrammar.from_dict"><code class="docutils literal notranslate"><span class="pre">TritonGrammar.from_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/table.html#qsynthesis.grammar.grammar.TritonGrammar.gen_test_inputs"><code class="docutils literal notranslate"><span class="pre">TritonGrammar.gen_test_inputs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/table.html#qsynthesis.grammar.grammar.TritonGrammar.non_terminal_operators"><code class="docutils literal notranslate"><span class="pre">TritonGrammar.non_terminal_operators</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/table.html#qsynthesis.grammar.grammar.TritonGrammar.str_to_expr"><code class="docutils literal notranslate"><span class="pre">TritonGrammar.str_to_expr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/table.html#qsynthesis.grammar.grammar.TritonGrammar.to_dict"><code class="docutils literal notranslate"><span class="pre">TritonGrammar.to_dict()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/table.html#oracles">Oracles</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/table.html#qsynthesis.tables.base.InputOutputOracle"><code class="docutils literal notranslate"><span class="pre">InputOutputOracle</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/table.html#qsynthesis.tables.base.InputOutputOracle.add_entries"><code class="docutils literal notranslate"><span class="pre">InputOutputOracle.add_entries()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/table.html#qsynthesis.tables.base.InputOutputOracle.add_entry"><code class="docutils literal notranslate"><span class="pre">InputOutputOracle.add_entry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/table.html#qsynthesis.tables.base.InputOutputOracle.bitsize"><code class="docutils literal notranslate"><span class="pre">InputOutputOracle.bitsize</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/table.html#qsynthesis.tables.base.InputOutputOracle.create"><code class="docutils literal notranslate"><span class="pre">InputOutputOracle.create()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/table.html#qsynthesis.tables.base.InputOutputOracle.generate"><code class="docutils literal notranslate"><span class="pre">InputOutputOracle.generate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/table.html#qsynthesis.tables.base.InputOutputOracle.hash"><code class="docutils literal notranslate"><span class="pre">InputOutputOracle.hash()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/table.html#qsynthesis.tables.base.InputOutputOracle.input_number"><code class="docutils literal notranslate"><span class="pre">InputOutputOracle.input_number</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/table.html#qsynthesis.tables.base.InputOutputOracle.is_expr_compatible"><code class="docutils literal notranslate"><span class="pre">InputOutputOracle.is_expr_compatible()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/table.html#qsynthesis.tables.base.InputOutputOracle.is_writable"><code class="docutils literal notranslate"><span class="pre">InputOutputOracle.is_writable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/table.html#qsynthesis.tables.base.InputOutputOracle.load"><code class="docutils literal notranslate"><span class="pre">InputOutputOracle.load()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/table.html#qsynthesis.tables.base.InputOutputOracle.lookup"><code class="docutils literal notranslate"><span class="pre">InputOutputOracle.lookup()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/table.html#qsynthesis.tables.base.InputOutputOracle.lookup_hash"><code class="docutils literal notranslate"><span class="pre">InputOutputOracle.lookup_hash()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/table.html#qsynthesis.tables.base.InputOutputOracle.name"><code class="docutils literal notranslate"><span class="pre">InputOutputOracle.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/table.html#qsynthesis.tables.base.InputOutputOracle.operator_number"><code class="docutils literal notranslate"><span class="pre">InputOutputOracle.operator_number</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/table.html#qsynthesis.tables.base.InputOutputOracle.size"><code class="docutils literal notranslate"><span class="pre">InputOutputOracle.size</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/table.html#qsynthesis.tables.base.InputOutputOracle.var_number"><code class="docutils literal notranslate"><span class="pre">InputOutputOracle.var_number</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="api/sym_exec.html">Symbolic Execution utilities</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/types.html">Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/types.html">Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/types.html#qsynthesis.types.Addr"><code class="docutils literal notranslate"><span class="pre">Addr</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/types.html#qsynthesis.types.AstNode"><code class="docutils literal notranslate"><span class="pre">AstNode</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/types.html#qsynthesis.types.AstType"><code class="docutils literal notranslate"><span class="pre">AstType</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/types.html#qsynthesis.types.BitSize"><code class="docutils literal notranslate"><span class="pre">BitSize</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/types.html#qsynthesis.types.ByteSize"><code class="docutils literal notranslate"><span class="pre">ByteSize</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/types.html#qsynthesis.types.Char"><code class="docutils literal notranslate"><span class="pre">Char</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/types.html#qsynthesis.types.Expr"><code class="docutils literal notranslate"><span class="pre">Expr</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/types.html#qsynthesis.types.Hash"><code class="docutils literal notranslate"><span class="pre">Hash</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/types.html#qsynthesis.types.IOPair"><code class="docutils literal notranslate"><span class="pre">IOPair</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/types.html#qsynthesis.types.IOVector"><code class="docutils literal notranslate"><span class="pre">IOVector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/types.html#qsynthesis.types.Input"><code class="docutils literal notranslate"><span class="pre">Input</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/types.html#qsynthesis.types.Output"><code class="docutils literal notranslate"><span class="pre">Output</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/types.html#qsynthesis.types.Register"><code class="docutils literal notranslate"><span class="pre">Register</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/types.html#qsynthesis.types.SymVarMap"><code class="docutils literal notranslate"><span class="pre">SymVarMap</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/types.html#qsynthesis.types.SymbolicExpression"><code class="docutils literal notranslate"><span class="pre">SymbolicExpression</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/types.html#qsynthesis.types.SymbolicVariable"><code class="docutils literal notranslate"><span class="pre">SymbolicVariable</span></code></a></li>
+</ul>
+</li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">

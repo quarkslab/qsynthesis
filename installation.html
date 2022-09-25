@@ -14,7 +14,9 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -40,11 +42,10 @@
               <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#"> Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#installing-qsynthesis">Installing QSynthesis</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#optional-dependencies">Optional dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#optional-dependencies">Optional dependencies</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#installing-the-ida-plugin">Installing the IDA Plugin</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#installing-the-ida-plugin">Installing the IDA Plugin</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api_usage.html"> API usage</a></li>
@@ -95,22 +96,14 @@
            <div itemprop="articleBody">
              
   <section id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h1>
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h1>
 <p>Installing <strong>QSynthesis</strong> is rather straightforward, you just need to:</p>
 <ul class="simple">
-<li><p>Install Triton on your system (cf. <a class="reference external" href="https://triton.quarkslab.com/documentation/doxygen/index.html#install_sec">Documentation</a>)</p></li>
 <li><p>Use the provided <cite>setup.py</cite> to install QSynthesis</p></li>
 <li><p>(Optional) copy the <cite>ida_plugin/qsynthesis_plugin.py</cite> in the IDA Pro plugin folder</p></li>
 <li><p>(Optional) install additionnal dependencies to generate tables or to serve tables as server</p></li>
 </ul>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Triton does not support installation in a virtualenv by default. To install qsynthesis in a virtualenv
-either copy triton.so in the venv libs, or configure the venv with the option –system-site-packages.</p>
-</div>
-<section id="installing-qsynthesis">
-<h2>Installing QSynthesis<a class="headerlink" href="#installing-qsynthesis" title="Permalink to this headline"></a></h2>
-<p>After installation of Triton, just run the following command:</p>
+<p>Thus it can be done with:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ git clone https://github.com/quarkslab/qsynthesis.git
 $ <span class="nb">cd</span> qsynthesis
 $ pip3 install .
@@ -118,7 +111,7 @@ $ pip3 install .
 </div>
 <p>You’re ready to go !</p>
 <section id="optional-dependencies">
-<h3>Optional dependencies<a class="headerlink" href="#optional-dependencies" title="Permalink to this headline"></a></h3>
+<h2>Optional dependencies<a class="headerlink" href="#optional-dependencies" title="Permalink to this heading"></a></h2>
 <p>Not to install too many third-party libraries the default installation
 only install the strict minimum. Various features requires installing
 additional packages.</p>
@@ -128,15 +121,14 @@ additional packages.</p>
 <li><p><strong>Server</strong>: requires <a class="reference external" href="https://fastapi.tiangolo.com">FastAPI</a> <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">.[server]</span></code></p></li>
 </ul>
 <p>You can install all dependencies all at once with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">.[all]</span></code>.</p>
-</section>
-</section>
 <section id="installing-the-ida-plugin">
-<h2>Installing the IDA Plugin<a class="headerlink" href="#installing-the-ida-plugin" title="Permalink to this headline"></a></h2>
+<h3>Installing the IDA Plugin<a class="headerlink" href="#installing-the-ida-plugin" title="Permalink to this heading"></a></h3>
 <p>Then to install the plugin just copy the file <cite>ida_plugin/qsynthesis_plugin.py</cite> in your IDA Pro plugin directory.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>The plugin is solely working on IDA with Python3, and latest versions of IDA.</p>
 </div>
+</section>
 </section>
 </section>
 

@@ -14,7 +14,9 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -92,9 +94,9 @@
            <div itemprop="articleBody">
              
   <section id="oracle-management">
-<h1>Oracle Management<a class="headerlink" href="#oracle-management" title="Permalink to this headline"></a></h1>
+<h1>Oracle Management<a class="headerlink" href="#oracle-management" title="Permalink to this heading"></a></h1>
 <section id="qsynthesis-table-manager-utility">
-<h2>qsynthesis-table-manager utility<a class="headerlink" href="#qsynthesis-table-manager-utility" title="Permalink to this headline"></a></h2>
+<h2>qsynthesis-table-manager utility<a class="headerlink" href="#qsynthesis-table-manager-utility" title="Permalink to this heading"></a></h2>
 <p>The tedious task about using QSynthesis is having good tables (aka oracles)
 for efficient synthesis. QSynthesis provides <cite>qsynthesis-table-manager</cite>
 which provide high-level function to manage tables. Its help file is:</p>
@@ -123,7 +125,7 @@ they have in common thus not in common.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">merge</span></code> command merge two tables as long as they are using the same set of inputs.</p>
 </section>
 <section id="table-generation">
-<h2>Table Generation<a class="headerlink" href="#table-generation" title="Permalink to this headline"></a></h2>
+<h2>Table Generation<a class="headerlink" href="#table-generation" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">generate</span></code> command of the utility, enables generating new tables. It provides various parameters.
 The help message is the following:</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Usage: qsynthesis-table-manager generate [OPTIONS] OUTPUT_FILE
@@ -178,7 +180,7 @@ the value is the percentage of RAM above which the generation should be stopped.
 files can be imported in a Level-db database with <code class="docutils literal notranslate"><span class="pre">qsynthesis-table-manager</span> <span class="pre">import</span> <span class="pre">table.bin</span> <span class="pre">new_table_ldb</span></code>.</p>
 </section>
 <section id="oracle-rest-server">
-<span id="label-rest-api"></span><h2>Oracle REST server<a class="headerlink" href="#oracle-rest-server" title="Permalink to this headline"></a></h2>
+<span id="label-rest-api"></span><h2>Oracle REST server<a class="headerlink" href="#oracle-rest-server" title="Permalink to this heading"></a></h2>
 <p>For large oracles it is convenient to serve them on an API instead of having them locally.
 The synthesis is slower but more flexible. Qsynthesis provides <code class="docutils literal notranslate"><span class="pre">qsynthesis-table-server</span></code>
 allowing to serve Level-DB database via a REST API.</p>
