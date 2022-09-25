@@ -1,5 +1,5 @@
 sphinx_rtd_theme
-sphinx
+sphinx!=5.2.0.post0
 breathe
 sphinx_fontawesome
 sphinx-autodoc-typehints
