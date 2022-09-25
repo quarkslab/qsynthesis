@@ -2,18 +2,7 @@
 # coding: utf-8
 """Installation script for qsynthesis module."""
 
-import sys
 from setuptools import setup, find_packages
-
-try:
-    # Check that we have the appropriate Triton version
-    import triton
-    if triton.VERSION.BUILD < 1467:
-        print("Triton >=0.8 is required")
-        sys.exit(1)
-except ImportError:
-    print("Triton module should be installed first")
-    #sys.exit(1)
 
 generate_deps = ['pydffi>=0.9.1', 'sympy']
 server_deps = ['fastapi', 'uvicorn']

@@ -6,4 +6,4 @@ sphinx-autodoc-typehints
 
 # added for mock
 psutil
-orderedset
+ordered_set
