@@ -25,7 +25,7 @@ setup(
     description="Python API to synthesize Triton AST's",
     packages=find_packages(),
     setup_requires=[],
-    install_requires=["orderedset", "psutil", "click", "plyvel", "requests", "capstone"],
+    install_requires=["triton-library", "ordered_set", "psutil", "click", "plyvel", "requests", "capstone"],
     tests_require=[],
     license="qb",
     author="Quarkslab",
