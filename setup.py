@@ -8,10 +8,14 @@ generate_deps = ['sympy']
 server_deps = ['fastapi', 'uvicorn']
 assembly_deps = ["arybo", "llvmlite"]
 
+with open("README.md") as f:
+    readme = f.read()
+
 setup(
     name="qsynthesis",
     version="0.1.0",
     description="Python API to synthesize Triton AST's",
+    long_description=readme,
     packages=find_packages(),
     setup_requires=[],
     install_requires=["triton-library",
