@@ -13,7 +13,14 @@ setup(
     version="0.1.0",
     description="Python API to synthesize Triton AST's",
     long_description_content_type='text/markdown',
+    long_description="file: README.md",
     packages=find_packages(),
+    url="https://github.com/quarkslab/qsynthesis",
+    project_urls={
+        "Documentation": "https://quarkslab.github.io/qsynthesis/",
+        "Bug Tracker": "https://github.com/quarkslab/qsynthesis/issues",
+        "Source": "https://github.com/quarkslab/qsynthesis"
+    },
     setup_requires=[],
     install_requires=["triton-library",
                       "ordered_set",
