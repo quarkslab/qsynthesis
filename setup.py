@@ -4,20 +4,27 @@
 
 from setuptools import setup, find_packages
 
-generate_deps = ['pydffi>=0.9.1', 'sympy']
+generate_deps = ['sympy']
 server_deps = ['fastapi', 'uvicorn']
 assembly_deps = ["arybo", "llvmlite"]
 
 setup(
     name="qsynthesis",
-    version="0.1",
+    version="0.1.0",
     description="Python API to synthesize Triton AST's",
     packages=find_packages(),
     setup_requires=[],
-    install_requires=["triton-library", "ordered_set", "psutil", "click", "plyvel", "requests", "capstone"],
+    install_requires=["triton-library",
+                      "ordered_set",
+                      "psutil",
+                      "click",
+                      "plyvel",
+                      "requests",
+                      "capstone",
+                      "pydffi>=0.9.1"],
     tests_require=[],
-    license="qb",
-    author="Quarkslab",
+    license="AGPL-3.0",
+    author="Robin David",
     classifiers=[
         'Topic :: Security',
         'Environment :: Console',
