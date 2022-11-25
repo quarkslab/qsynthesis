@@ -10,7 +10,7 @@ assembly_deps = ["arybo", "llvmlite"]
 
 setup(
     name="qsynthesis",
-    version="0.1.0",
+    version="0.1.1",
     description="Python API to synthesize Triton AST's",
     long_description_content_type='text/markdown',
     long_description="file: README.md",
