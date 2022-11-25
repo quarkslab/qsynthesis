@@ -8,12 +8,15 @@ generate_deps = ['sympy']
 server_deps = ['fastapi', 'uvicorn']
 assembly_deps = ["arybo", "llvmlite"]
 
+with open("README.md") as f:
+    README = f.read()
+
 setup(
     name="qsynthesis",
-    version="0.1.1",
+    version="0.1.2",
     description="Python API to synthesize Triton AST's",
     long_description_content_type='text/markdown',
-    long_description="file: README.md",
+    long_description=README,
     packages=find_packages(),
     url="https://github.com/quarkslab/qsynthesis",
     project_urls={
