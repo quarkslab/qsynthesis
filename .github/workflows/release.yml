@@ -49,12 +49,12 @@ jobs:
           path: dist
 
       - name: Publish a Python distribution to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.5.1
+        uses: pypa/gh-action-pypi-publish@v1.8.2
         with:
           password: ${{ secrets.PYPI_DEPLOY_TOKEN }}
 
       - name: Upload Python packages for release notes
-        uses: softprops/action-gh-release@v0.1.14
+        uses: softprops/action-gh-release@v0.1.15
         with:
           files: |
             dist/*
