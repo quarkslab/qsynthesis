@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TritonAst &mdash; QSynthesis 0.1 documentation</title>
@@ -12,9 +12,6 @@
   <![endif]-->
   
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -29,11 +26,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> QSynthesis
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QSynthesis
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -127,7 +128,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">TritonAst</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/api/tritonast.rst.txt" rel="nofollow"> View page source</a>
@@ -144,14 +145,14 @@
 many utility functions.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qsynthesis.tritonast.TritonAst">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsynthesis.tritonast.</span></span><span class="sig-name descname"><span class="pre">TritonAst</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TritonContext</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AstNode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_c</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">vars</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">SymbolicVariable</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">children</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst"><span class="pre">TritonAst</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsynthesis/tritonast.html#TritonAst"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.tritonast.TritonAst" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsynthesis.tritonast.</span></span><span class="sig-name descname"><span class="pre">TritonAst</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TritonContext</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="types.html#qsynthesis.types.AstNode" title="qsynthesis.types.AstNode"><span class="pre">AstNode</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_c</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">vars</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="types.html#qsynthesis.types.SymbolicVariable" title="qsynthesis.types.SymbolicVariable"><span class="pre">SymbolicVariable</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">children</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst"><span class="pre">TritonAst</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsynthesis/tritonast.html#TritonAst"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.tritonast.TritonAst" title="Permalink to this definition"></a></dt>
 <dd><p>Wrapping class on top of Triton AstNode objects. This is the main entity manipulated
 throughout the synthesis process. It provides many utility fonctions on these ASTs
 like <a class="reference internal" href="#qsynthesis.tritonast.TritonAst.node_count" title="qsynthesis.tritonast.TritonAst.node_count"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TritonAst.node_count</span></code></a> holding the number of node of the AST, or
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">TritonAst.reassembly()</span></code> that allows reassembling the AST into assembly.</p>
 <p>Instanciate a TritonAst with some precomputed fields given in parameters.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> (<a class="reference external" href="https://triton.quarkslab.com/documentation/doxygen/py_TritonContext_page.html">TritonContext</a>) – Triton context</p></li>
 <li><p><strong>node</strong> (<a class="reference internal" href="types.html#qsynthesis.types.AstNode" title="qsynthesis.types.AstNode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.AstNode</span></code></a>) – Triton AstNode to wrap</p></li>
@@ -174,16 +175,16 @@ trough the <a class="reference internal" href="#qsynthesis.tritonast.TritonAst.m
 behavior on the given set of inputs. The comparison returns -1 if not applicable
 (as involving different variables, 0 if different and 1 if equal.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ast</strong> – other ast to compare against</p></li>
 <li><p><strong>inps</strong> – Set of inputs to use for evaluation</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>-1 if not applicable, 0 if different and 1 if equal</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a></p>
 </dd>
 </dl>
@@ -194,7 +195,7 @@ behavior on the given set of inputs. The comparison returns -1 if not applicable
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">depth</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#qsynthesis.tritonast.TritonAst.depth" title="Permalink to this definition"></a></dt>
 <dd><p>Pre-computed depth of the AST <em>(complexity O(1))</em></p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a></p>
 </dd>
 </dl>
@@ -208,14 +209,14 @@ behavior on the given set of inputs. The comparison returns -1 if not applicable
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsynthesis.tritonast.TritonAst.dyn_depth">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dyn_depth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AstNode</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../_modules/qsynthesis/tritonast.html#TritonAst.dyn_depth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.tritonast.TritonAst.dyn_depth" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dyn_depth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="types.html#qsynthesis.types.AstNode" title="qsynthesis.types.AstNode"><span class="pre">AstNode</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../_modules/qsynthesis/tritonast.html#TritonAst.dyn_depth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.tritonast.TritonAst.dyn_depth" title="Permalink to this definition"></a></dt>
 <dd><p>Returns the effective depth of the node of the expression by iterating the
 AstNode object recursively. The complexity is O(N) with N the depth of the AST.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>expr</strong> (<a class="reference internal" href="types.html#qsynthesis.types.AstNode" title="qsynthesis.types.AstNode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.AstNode</span></code></a>) – AstNode to iterate</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>AST depth</p>
 </dd>
 </dl>
@@ -223,14 +224,14 @@ AstNode object recursively. The complexity is O(N) with N the depth of the AST.<
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsynthesis.tritonast.TritonAst.dyn_node_count">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dyn_node_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AstNode</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../_modules/qsynthesis/tritonast.html#TritonAst.dyn_node_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.tritonast.TritonAst.dyn_node_count" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dyn_node_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="types.html#qsynthesis.types.AstNode" title="qsynthesis.types.AstNode"><span class="pre">AstNode</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../_modules/qsynthesis/tritonast.html#TritonAst.dyn_node_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.tritonast.TritonAst.dyn_node_count" title="Permalink to this definition"></a></dt>
 <dd><p>Returns the effective count of node of the expression by iterating the
 AstNode object recursively. The complexity is O(N) with N the number of node.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>expr</strong> (<a class="reference internal" href="types.html#qsynthesis.types.AstNode" title="qsynthesis.types.AstNode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.AstNode</span></code></a>) – AstNode to iterate</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Number of nodes in the AST.</p>
 </dd>
 </dl>
@@ -248,14 +249,14 @@ them as one.</p>
 <dd><p>Oracle corresponding to the wrapped AST. It takes a valuation for all its
 symbolic variables and as an oracle returns the associated output.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>inp</strong> (<a class="reference internal" href="types.html#qsynthesis.types.Input" title="qsynthesis.types.Input"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.Input</span></code></a>) – a mapping of variable to a given input value which will be used
 as concrete values for the symbolic variables in the wrapped AST</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The result computed by means of evaluating the AST</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="types.html#qsynthesis.types.Output" title="qsynthesis.types.Output"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.Output</span></code></a></p>
 </dd>
 </dl>
@@ -266,13 +267,13 @@ as concrete values for the symbolic variables in the wrapped AST</p>
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_z3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TritonContext</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">z3.z3.ExprRef</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst"><span class="pre">TritonAst</span></a></span></span><a class="reference internal" href="../_modules/qsynthesis/tritonast.html#TritonAst.from_z3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.tritonast.TritonAst.from_z3" title="Permalink to this definition"></a></dt>
 <dd><p>Create a TritonAst out of a Z3 expressions</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Triton Context in which to create the expression</p></li>
 <li><p><strong>expr</strong> – Z3 expression</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>TritonAst</p>
 </dd>
 </dl>
@@ -300,7 +301,7 @@ as concrete values for the symbolic variables in the wrapped AST</p>
 <dd><p>Returns the Triton hash of the AstNode. This hash is meant to be unique
 for all AstNode, but is also meant to be similar to commutative expressions.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a></p>
 </dd>
 </dl>
@@ -337,10 +338,10 @@ any parents).</p>
 <span class="sig-name descname"><span class="pre">is_semantically_equal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst"><span class="pre">TritonAst</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../_modules/qsynthesis/tritonast.html#TritonAst.is_semantically_equal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.tritonast.TritonAst.is_semantically_equal" title="Permalink to this definition"></a></dt>
 <dd><p>Allows checking if the current AST is semantically equal to the one provided.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>other</strong> – TritonAst on which to test against</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>bool – True if both ASTs are semantically equals</p>
 </dd>
 </dl>
@@ -354,19 +355,19 @@ any parents).</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsynthesis.tritonast.TritonAst.make_ast">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_ast</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TritonContext</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AstNode</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst"><span class="pre">TritonAst</span></a></span></span><a class="reference internal" href="../_modules/qsynthesis/tritonast.html#TritonAst.make_ast"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.tritonast.TritonAst.make_ast" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make_ast</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TritonContext</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="types.html#qsynthesis.types.AstNode" title="qsynthesis.types.AstNode"><span class="pre">AstNode</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst"><span class="pre">TritonAst</span></a></span></span><a class="reference internal" href="../_modules/qsynthesis/tritonast.html#TritonAst.make_ast"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.tritonast.TritonAst.make_ast" title="Permalink to this definition"></a></dt>
 <dd><p>Main staticmethod meant to create all TritonAst object. This method iterates
 all the given expression <code class="docutils literal notranslate"><span class="pre">expr</span></code> recursively to create TritonAst’s
 all the way down and pre-computing along the way the important fields like
 node_count, depth and symvars.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Triton context on which to work on</p></li>
 <li><p><strong>exp</strong> – AstNode object to iterate</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>TritonAst instance wrapping the exp object</p>
 </dd>
 </dl>
@@ -386,11 +387,11 @@ by following <cite>https://git.skewed.de/count0/graph-tool/-/wikis/installation-
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qsynthesis.tritonast.TritonAst.mapping">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mapping</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><span class="pre">qsynthesis.types.Char</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">SymbolicVariable</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qsynthesis.tritonast.TritonAst.mapping" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mapping</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><span class="pre">qsynthesis.types.Char</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="types.html#qsynthesis.types.SymbolicVariable" title="qsynthesis.types.SymbolicVariable"><span class="pre">SymbolicVariable</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qsynthesis.tritonast.TritonAst.mapping" title="Permalink to this definition"></a></dt>
 <dd><p>Mapping a placeholder character (‘a’, ‘b’, ‘c’ ..) to all the SymbolicVariable
 of the object.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Dict[<a class="reference internal" href="types.html#qsynthesis.types.Char" title="qsynthesis.types.Char"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.Char</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">SymbolicVariable</span></code>]</p>
 </dd>
 </dl>
@@ -414,7 +415,7 @@ The variable is created in the TritonContext of the current object.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">node_count</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#qsynthesis.tritonast.TritonAst.node_count" title="Permalink to this definition"></a></dt>
 <dd><p>Pre-computed O(1) count of the number of node contained in this AST.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a></p>
 </dd>
 </dl>
@@ -426,10 +427,10 @@ The variable is created in the TritonContext of the current object.</p>
 <dd><p>Evaluate expression like “a + b - 1” creating a triton AST expression out
 of it. All variables have to be present in the AST.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>s</strong> – expression to evaluate</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Triton AST node of the expression</p>
 </dd>
 </dl>
@@ -447,7 +448,7 @@ exact same TritonAst (otherwise names would be shuffled)</p>
 ONE parent but Triton share common expression with multiple parents (wihtin
 the same expression)</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>List[<a class="reference internal" href="#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst">TritonAst</a>]</p>
 </dd>
 </dl>
@@ -459,7 +460,7 @@ the same expression)</p>
 <dd><p>Hacky function that strips masks used in the AST_REPRESENTATION.PYTHON
 of Triton.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
 </dd>
 </dl>
@@ -471,7 +472,7 @@ of Triton.</p>
 <dd><p>Returns the hash of the AstNode object. This attribute is meant to differentiate
 to different python object have the exact same AST structure.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a></p>
 </dd>
 </dl>
@@ -482,13 +483,13 @@ to different python object have the exact same AST structure.</p>
 <span class="sig-name descname"><span class="pre">random_sampling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">qsynthesis.types.IOVector</span></span></span><a class="reference internal" href="../_modules/qsynthesis/tritonast.html#TritonAst.random_sampling"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.tritonast.TritonAst.random_sampling" title="Permalink to this definition"></a></dt>
 <dd><p>Generates a random list of I/O samples pair.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>n</strong> – number of samples to generate</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>a list of n (inputs, output) tuples</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="types.html#qsynthesis.types.IOVector" title="qsynthesis.types.IOVector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.IOVector</span></code></a></p>
 </dd>
 </dl>
@@ -496,23 +497,23 @@ to different python object have the exact same AST structure.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsynthesis.tritonast.TritonAst.reassemble">
-<span class="sig-name descname"><span class="pre">reassemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dst_reg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_arch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></span></span><a class="reference internal" href="../_modules/qsynthesis/tritonast.html#TritonAst.reassemble"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.tritonast.TritonAst.reassemble" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">reassemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dst_reg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_arch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></span></span><a class="reference internal" href="../_modules/qsynthesis/tritonast.html#TritonAst.reassemble"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.tritonast.TritonAst.reassemble" title="Permalink to this definition"></a></dt>
 <dd><p>Reassemble the TritonAst in assembly. <code class="docutils literal notranslate"><span class="pre">dst_reg</span></code> is the destination register of the
 result of the computation of the AST. Parameter <code class="docutils literal notranslate"><span class="pre">target_arch</span></code> is either a QtraceDB
 architecture object or the string identifier of the architecture as defined by the
 LLVM architecture triple: <a class="reference external" href="https://llvm.org/doxygen/classllvm_1_1Triple.html#a547abd13f7a3c063aa72c8192a868154">https://llvm.org/doxygen/classllvm_1_1Triple.html#a547abd13f7a3c063aa72c8192a868154</a>
 If no architecture is provided, use the same than the one that the AST.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dst_reg</strong> – destination register as lowercase string</p></li>
 <li><p><strong>target_arch</strong> – target architecture in which to reassemble the AST</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>bytes of the AST reassembled in the given architecture</p>
 </dd>
-<dt class="field-odd">Raises</dt>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p>ReassemblyError</p>
 </dd>
 </dl>
@@ -538,7 +539,7 @@ parents by replace the child that correspond to the current object by the replac
 <dd><p>Replace the ith child of the current TritonAst with new given ast object. Optional
 parameters indicates if inner fields of the object and its parent have to be updated.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>i</strong> – index of the child to replace</p></li>
 <li><p><strong>ast</strong> – TritonAst to be used as replacement of the child</p></li>
@@ -551,11 +552,11 @@ parameters indicates if inner fields of the object and its parent have to be upd
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qsynthesis.tritonast.TritonAst.sub_map">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sub_map</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><span class="pre">qsynthesis.types.Char</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">AstNode</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qsynthesis.tritonast.TritonAst.sub_map" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sub_map</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><span class="pre">qsynthesis.types.Char</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="types.html#qsynthesis.types.AstNode" title="qsynthesis.types.AstNode"><span class="pre">AstNode</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qsynthesis.tritonast.TritonAst.sub_map" title="Permalink to this definition"></a></dt>
 <dd><p>Similar to mapping but map a placeholder character (‘a’, ‘b’, ‘c’ ..) to
 the AstNode counterpart of SymbolicVariables.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Dict[<a class="reference internal" href="types.html#qsynthesis.types.Char" title="qsynthesis.types.Char"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.Char</span></code></a>, <a class="reference internal" href="types.html#qsynthesis.types.AstNode" title="qsynthesis.types.AstNode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.AstNode</span></code></a>]</p>
 </dd>
 </dl>
@@ -567,7 +568,7 @@ the AstNode counterpart of SymbolicVariables.</p>
 <dd><p>Returns the symbol of the current AstNode, operator if binary expression
 variable name if variable or constant value if constant.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
 </dd>
 </dl>
@@ -575,16 +576,16 @@ variable name if variable or constant value if constant.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsynthesis.tritonast.TritonAst.symvar_type">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">symvar_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">SymbolicVariable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">SymVarType</span></span></span><a class="reference internal" href="../_modules/qsynthesis/tritonast.html#TritonAst.symvar_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.tritonast.TritonAst.symvar_type" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">symvar_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="types.html#qsynthesis.types.SymbolicVariable" title="qsynthesis.types.SymbolicVariable"><span class="pre">SymbolicVariable</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">SymVarType</span></span></span><a class="reference internal" href="../_modules/qsynthesis/tritonast.html#TritonAst.symvar_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.tritonast.TritonAst.symvar_type" title="Permalink to this definition"></a></dt>
 <dd><p>Static method returning the type of a given symbolic variable object</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>v</strong> (<a class="reference internal" href="types.html#qsynthesis.types.SymbolicVariable" title="qsynthesis.types.SymbolicVariable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.SymbolicVariable</span></code></a>) – symbolic variable object</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Type of the symbolic variables</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.SymVarType</span></code></p>
 </dd>
 </dl>
@@ -592,10 +593,10 @@ variable name if variable or constant value if constant.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qsynthesis.tritonast.TritonAst.symvars">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">symvars</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><span class="pre">SymbolicVariable</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qsynthesis.tritonast.TritonAst.symvars" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">symvars</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="types.html#qsynthesis.types.SymbolicVariable" title="qsynthesis.types.SymbolicVariable"><span class="pre">SymbolicVariable</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qsynthesis.tritonast.TritonAst.symvars" title="Permalink to this definition"></a></dt>
 <dd><p>Returns the list of SymbolicVariable object of the current object</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>List[<a class="reference internal" href="types.html#qsynthesis.types.SymbolicVariable" title="qsynthesis.types.SymbolicVariable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.SymbolicVariable</span></code></a>]</p>
 </dd>
 </dl>
@@ -620,7 +621,7 @@ it as a string.</p>
 <dd><p>Returns the type of current AstNode object. The
 type is identical to the AST_NODE enum of Triton.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="types.html#qsynthesis.types.AstType" title="qsynthesis.types.AstType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.AstType</span></code></a></p>
 </dd>
 </dl>
@@ -656,7 +657,7 @@ operation O(depth).
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">var_num</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#qsynthesis.tritonast.TritonAst.var_num" title="Permalink to this definition"></a></dt>
 <dd><p>Returns the number of different symbolic variables of the expression</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a></p>
 </dd>
 </dl>
@@ -667,7 +668,7 @@ operation O(depth).
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">variable_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#qsynthesis.tritonast.TritonAst.variable_id" title="Permalink to this definition"></a></dt>
 <dd><p>Get the Triton unique id for a variable.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Raises</dt>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p>KeyError</p>
 </dd>
 </dl>
@@ -686,10 +687,10 @@ operation O(depth).
 every sub-expression and replace it with the expression received throught
 the send mechanism.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>update</strong> – whether to update each node after having been replaced</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>generator of TritonAst, which for each AST yielded wait to
 receive either None meaning the it should not be replaced or a new
 TritonAst to be put in replacement.</p>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Top-Down Synthesizer &mdash; QSynthesis 0.1 documentation</title>
@@ -12,9 +12,6 @@
   <![endif]-->
   
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -29,11 +26,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> QSynthesis
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QSynthesis
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -97,7 +98,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">Top-Down Synthesizer</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/api/synthesis.rst.txt" rel="nofollow"> View page source</a>
@@ -112,14 +113,14 @@
 <h1>Top-Down Synthesizer<a class="headerlink" href="#top-down-synthesizer" title="Permalink to this heading"></a></h1>
 <span class="target" id="label-topdown"></span><dl class="py class">
 <dt class="sig sig-object py" id="qsynthesis.algorithms.synthesizer_td.TopDownSynthesizer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsynthesis.algorithms.synthesizer_td.</span></span><span class="sig-name descname"><span class="pre">TopDownSynthesizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ltms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="table.html#qsynthesis.tables.base.InputOutputOracle" title="qsynthesis.tables.base.InputOutputOracle"><span class="pre">InputOutputOracle</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="table.html#qsynthesis.tables.base.InputOutputOracle" title="qsynthesis.tables.base.InputOutputOracle"><span class="pre">InputOutputOracle</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_first_match</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_new_exprs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsynthesis/algorithms/synthesizer_td.html#TopDownSynthesizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.algorithms.synthesizer_td.TopDownSynthesizer" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsynthesis.algorithms.synthesizer_td.</span></span><span class="sig-name descname"><span class="pre">TopDownSynthesizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ltms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="table.html#qsynthesis.tables.base.InputOutputOracle" title="qsynthesis.tables.base.InputOutputOracle"><span class="pre">InputOutputOracle</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="table.html#qsynthesis.tables.base.InputOutputOracle" title="qsynthesis.tables.base.InputOutputOracle"><span class="pre">InputOutputOracle</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_first_match</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_new_exprs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsynthesis/algorithms/synthesizer_td.html#TopDownSynthesizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.algorithms.synthesizer_td.TopDownSynthesizer" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SynthesizerBase</span></code></p>
 <p>Synthesize with a Top-Down <strong>only</strong> AST search based on Triton AST.
 The complexity in worst case of the search is then O(n) with
 n the number of nodes in the AST to synthesize.</p>
 <p>Constructor that takes one or multiple oracles as input.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ltms</strong> – Single oracle or a list</p></li>
 <li><p><strong>only_first_match</strong> – boolean that stop interating over tables as soon as the lookup is successfull for one</p></li>
@@ -134,17 +135,17 @@ to be bigger than the one submitted</p></li>
 <dd><p>Run evaluation of the TritonAst <cite>ioast</cite> on the given Input (valuation for all vars).
 The result is an Output (integer)</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ioast</strong> (<a class="reference internal" href="tritonast.html#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst"><em>TritonAst</em></a>) – TritonAst to evaluate</p></li>
 <li><p><strong>input</strong> (<a class="reference internal" href="types.html#qsynthesis.types.Input" title="qsynthesis.types.Input"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.Input</span></code></a>) – Input on which to evaluate the AST. All variables of ioast must
 be defined in input</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Output which is the result of evaluation (made by Triton)</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="types.html#qsynthesis.types.Output" title="qsynthesis.types.Output"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.Output</span></code></a></p>
 </dd>
 </dl>
@@ -152,18 +153,18 @@ be defined in input</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsynthesis.algorithms.synthesizer_td.TopDownSynthesizer.run_direct_synthesis">
-<span class="sig-name descname"><span class="pre">run_direct_synthesis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ltm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="table.html#qsynthesis.tables.base.InputOutputOracle" title="qsynthesis.tables.base.InputOutputOracle"><span class="pre">InputOutputOracle</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_ast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tritonast.html#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst"><span class="pre">TritonAst</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="tritonast.html#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst"><span class="pre">TritonAst</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsynthesis.algorithms.synthesizer_td.TopDownSynthesizer.run_direct_synthesis" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run_direct_synthesis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ltm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="table.html#qsynthesis.tables.base.InputOutputOracle" title="qsynthesis.tables.base.InputOutputOracle"><span class="pre">InputOutputOracle</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_ast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tritonast.html#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst"><span class="pre">TritonAst</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tritonast.html#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst"><span class="pre">TritonAst</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#qsynthesis.algorithms.synthesizer_td.TopDownSynthesizer.run_direct_synthesis" title="Permalink to this definition"></a></dt>
 <dd><p>Evaluate <cite>cur_ast</cite> on inputs provided by <cite>ltm</cite> the oracle which provide an
 output vector then used to perform the lookup in the database. If an entry is found
 it is returned.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ltm</strong> – InputOutputOracle object in which to perform the query</p></li>
 <li><p><strong>cur_ast</strong> – TritonAst object to synthesize</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>optional TritonAst if the an entry was found</p>
 </dd>
 </dl>
@@ -176,14 +177,14 @@ it is returned.</p>
 tries to synthesize the root node. If not successful descend recursively in all children
 of the AST to try substituting sub-ASTs.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ioast</strong> – TritonAst object to synthesize</p></li>
 <li><p><strong>check_sem</strong> – boolean one whether to check the semantic equivalence of expression
 before substituting them. That ensure soundness of the synthesis</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>tuple with new TritonAst and whether some replacement took place or not</p>
 </dd>
 </dl>
@@ -196,20 +197,20 @@ on the synthesis as SMT queries are being performed for any candidates</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsynthesis.algorithms.synthesizer_td.TopDownSynthesizer.try_synthesis_lookup">
-<span class="sig-name descname"><span class="pre">try_synthesis_lookup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cur_ast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tritonast.html#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst"><span class="pre">TritonAst</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_sem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="tritonast.html#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst"><span class="pre">TritonAst</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsynthesis.algorithms.synthesizer_td.TopDownSynthesizer.try_synthesis_lookup" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">try_synthesis_lookup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cur_ast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tritonast.html#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst"><span class="pre">TritonAst</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_sem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tritonast.html#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst"><span class="pre">TritonAst</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#qsynthesis.algorithms.synthesizer_td.TopDownSynthesizer.try_synthesis_lookup" title="Permalink to this definition"></a></dt>
 <dd><p>Performs a direct synthesis lookup. And returns an optional TritonAst if it the
 I/O evaluation has been found in one of the tables. Unlike <code class="xref py py-meth docutils literal notranslate"><span class="pre">SynthesizerBase.synthesize()</span></code>
 which can go down the AST to try simplifying sub-AST here only the root node is
 attempted to be synthesized.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>cur_ast</strong> – TritonAst to synthesize</p></li>
 <li><p><strong>check_sem</strong> – boolean on whether to check the semantic equivalence of expression
 before performing substituting.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>optional TritonAst if the the AST has been synthesized</p>
 </dd>
 </dl>
@@ -222,7 +223,7 @@ before performing substituting.</p></li>
 <h1>Placeholder-based Synthesizer<a class="headerlink" href="#placeholder-based-synthesizer" title="Permalink to this heading"></a></h1>
 <span class="target" id="label-plhdr"></span><dl class="py class">
 <dt class="sig sig-object py" id="qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsynthesis.algorithms.synthesizer_plhld.</span></span><span class="sig-name descname"><span class="pre">PlaceHolderSynthesizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ltms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="table.html#qsynthesis.tables.base.InputOutputOracle" title="qsynthesis.tables.base.InputOutputOracle"><span class="pre">InputOutputOracle</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="table.html#qsynthesis.tables.base.InputOutputOracle" title="qsynthesis.tables.base.InputOutputOracle"><span class="pre">InputOutputOracle</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_first_match</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_new_exprs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsynthesis/algorithms/synthesizer_plhld.html#PlaceHolderSynthesizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsynthesis.algorithms.synthesizer_plhld.</span></span><span class="sig-name descname"><span class="pre">PlaceHolderSynthesizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ltms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="table.html#qsynthesis.tables.base.InputOutputOracle" title="qsynthesis.tables.base.InputOutputOracle"><span class="pre">InputOutputOracle</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="table.html#qsynthesis.tables.base.InputOutputOracle" title="qsynthesis.tables.base.InputOutputOracle"><span class="pre">InputOutputOracle</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_first_match</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_new_exprs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsynthesis/algorithms/synthesizer_plhld.html#PlaceHolderSynthesizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TopDownBottomUpSynthesizer</span></code></p>
 <p>Synthesizer inherited from TopDownBottomUpSynthesizer which thus
 form the search in that manner. The specificity of this synthesizer
@@ -233,7 +234,7 @@ sub-AST (with these placeholders). At the end of the search all placeholder
 variables are substituted by their associated synthesized expression.</p>
 <p>Constructor that takes lookup tables as input.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ltms</strong> – Single lookup table of a list of them</p></li>
 <li><p><strong>only_first_match</strong> – boolean that stop interating over tables as soon as the lookup is successfull for one</p></li>
@@ -248,17 +249,17 @@ to be bigger than the one submitted</p></li>
 <dd><p>Run evaluation of the TritonAst <cite>ioast</cite> on the given Input (valuation for all vars).
 The result is an Output (integer)</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ioast</strong> (<a class="reference internal" href="tritonast.html#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst"><em>TritonAst</em></a>) – TritonAst to evaluate</p></li>
 <li><p><strong>input</strong> (<a class="reference internal" href="types.html#qsynthesis.types.Input" title="qsynthesis.types.Input"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.Input</span></code></a>) – Input on which to evaluate the AST. All variables of ioast must
 be defined in input</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Output which is the result of evaluation (made by Triton)</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="types.html#qsynthesis.types.Output" title="qsynthesis.types.Output"><code class="xref py py-obj docutils literal notranslate"><span class="pre">qsynthesis.types.Output</span></code></a></p>
 </dd>
 </dl>
@@ -270,14 +271,14 @@ be defined in input</p></li>
 <dd><p>Performs the final replacement of Placeholder variable with their synthesized expression equivalence
 in <cite>ast</cite> provided in parameter.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ast</strong> – TritonAst object in which to perform all substitutions</p></li>
 <li><p><strong>replacement</strong> – dictionnary of placeholder variable as TritonAst to synthesized expression (TritonAst)</p></li>
 <li><p><strong>recursive</strong> – whether to also perform the substitution in synthesized expressions given in the dictionnary</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>None as the <cite>ast</cite> object is modified in place</p>
 </dd>
 </dl>
@@ -291,18 +292,18 @@ for attributes coherence when calling update</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer.run_direct_synthesis">
-<span class="sig-name descname"><span class="pre">run_direct_synthesis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ltm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="table.html#qsynthesis.tables.base.InputOutputOracle" title="qsynthesis.tables.base.InputOutputOracle"><span class="pre">InputOutputOracle</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_ast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tritonast.html#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst"><span class="pre">TritonAst</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="tritonast.html#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst"><span class="pre">TritonAst</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer.run_direct_synthesis" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run_direct_synthesis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ltm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="table.html#qsynthesis.tables.base.InputOutputOracle" title="qsynthesis.tables.base.InputOutputOracle"><span class="pre">InputOutputOracle</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_ast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tritonast.html#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst"><span class="pre">TritonAst</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tritonast.html#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst"><span class="pre">TritonAst</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer.run_direct_synthesis" title="Permalink to this definition"></a></dt>
 <dd><p>Evaluate <cite>cur_ast</cite> on inputs provided by <cite>ltm</cite> the oracle which provide an
 output vector then used to perform the lookup in the database. If an entry is found
 it is returned.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ltm</strong> – InputOutputOracle object in which to perform the query</p></li>
 <li><p><strong>cur_ast</strong> – TritonAst object to synthesize</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>optional TritonAst if the an entry was found</p>
 </dd>
 </dl>
@@ -314,14 +315,14 @@ it is returned.</p>
 <dd><p>Performs the placeholder based top-down and then bottom-up search for synthesizing
 the given TritonAst.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ioast</strong> – TritonAst object to synthesize</p></li>
 <li><p><strong>check_sem</strong> – boolean one whether to check the semantic equivalence of expression
 before substituting them. That ensure soundness of the synthesis</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>tuple with new TritonAst and whether some replacement took place or not</p>
 </dd>
 </dl>
@@ -334,20 +335,20 @@ on the synthesis as SMT queries are being performed for any candidates</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer.try_synthesis_lookup">
-<span class="sig-name descname"><span class="pre">try_synthesis_lookup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cur_ast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tritonast.html#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst"><span class="pre">TritonAst</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_sem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="tritonast.html#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst"><span class="pre">TritonAst</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer.try_synthesis_lookup" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">try_synthesis_lookup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cur_ast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tritonast.html#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst"><span class="pre">TritonAst</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_sem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tritonast.html#qsynthesis.tritonast.TritonAst" title="qsynthesis.tritonast.TritonAst"><span class="pre">TritonAst</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer.try_synthesis_lookup" title="Permalink to this definition"></a></dt>
 <dd><p>Performs a direct synthesis lookup. And returns an optional TritonAst if it the
 I/O evaluation has been found in one of the tables. Unlike <code class="xref py py-meth docutils literal notranslate"><span class="pre">SynthesizerBase.synthesize()</span></code>
 which can go down the AST to try simplifying sub-AST here only the root node is
 attempted to be synthesized.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>cur_ast</strong> – TritonAst to synthesize</p></li>
 <li><p><strong>check_sem</strong> – boolean on whether to check the semantic equivalence of expression
 before performing substituting.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>optional TritonAst if the the AST has been synthesized</p>
 </dd>
 </dl>

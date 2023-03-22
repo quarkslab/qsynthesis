@@ -11,9 +11,6 @@
   <![endif]-->
   
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -26,11 +23,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> QSynthesis
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            QSynthesis
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -75,7 +76,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
       <li class="breadcrumb-item active">qsynthesis.tritonast</li>
       <li class="wy-breadcrumbs-aside">
@@ -106,7 +107,7 @@
 
 
 <span class="k">class</span> <span class="nc">ReassemblyError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Wrapping exception for all exceptions that might be raised during the</span>
 <span class="sd">    reassembly process.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -114,7 +115,7 @@
 
 
 <span class="k">class</span> <span class="nc">SymVarType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Enum representing the different types of SymbolicVariables of Triton</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">REGISTER</span> <span class="o">=</span> <span class="n">SYMBOLIC</span><span class="o">.</span><span class="n">REGISTER_VARIABLE</span>
@@ -137,7 +138,7 @@
 
 
 <div class="viewcode-block" id="TritonAst"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst">[docs]</a><span class="k">class</span> <span class="nc">TritonAst</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Wrapping class on top of Triton AstNode objects. This is the main entity manipulated</span>
 <span class="sd">    throughout the synthesis process. It provides many utility fonctions on these ASTs</span>
 <span class="sd">    like :attr:`TritonAst.node_count` holding the number of node of the AST, or</span>
@@ -147,7 +148,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">TritonContext</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">AstNode</span><span class="p">,</span> <span class="n">node_c</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">vars</span><span class="p">:</span> <span class="n">SymVarMap</span><span class="p">,</span> <span class="n">children</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="s1">&#39;TritonAst&#39;</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s1">&#39;TritonAst&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Instanciate a TritonAst with some precomputed fields given in parameters.</span>
 
 <span class="sd">        :param ctx: Triton context</span>
@@ -180,7 +181,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">parents</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="s1">&#39;TritonAst&#39;</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the list of parents of a given AST. An AST is meant to have only</span>
 <span class="sd">        ONE parent but Triton share common expression with multiple parents (wihtin</span>
 <span class="sd">        the same expression)</span>
@@ -191,7 +192,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Char</span><span class="p">,</span> <span class="n">SymbolicVariable</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Mapping a placeholder character (&#39;a&#39;, &#39;b&#39;, &#39;c&#39; ..) to all the SymbolicVariable</span>
 <span class="sd">        of the object.</span>
 
@@ -201,14 +202,14 @@
 
     <span class="nd">@mapping</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Char</span><span class="p">,</span> <span class="n">SymbolicVariable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the given mapping of placeholder to their SymbolicVariable in the object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_mapping</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">sub_map</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Char</span><span class="p">,</span> <span class="n">AstNode</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Similar to mapping but map a placeholder character (&#39;a&#39;, &#39;b&#39;, &#39;c&#39; ..) to</span>
 <span class="sd">        the AstNode counterpart of SymbolicVariables.</span>
 
@@ -218,7 +219,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AstType</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the type of current AstNode object. The</span>
 <span class="sd">        type is identical to the AST_NODE enum of Triton.</span>
 
@@ -228,7 +229,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">hash</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the Triton hash of the AstNode. This hash is meant to be unique</span>
 <span class="sd">        for all AstNode, but is also meant to be similar to commutative expressions.</span>
 
@@ -238,7 +239,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">ptr_id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the hash of the AstNode object. This attribute is meant to differentiate</span>
 <span class="sd">        to different python object have the exact same AST structure.</span>
 
@@ -247,21 +248,21 @@
         <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expr</span><span class="p">)</span>
 
 <div class="viewcode-block" id="TritonAst.is_constant_expr"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.is_constant_expr">[docs]</a>    <span class="k">def</span> <span class="nf">is_constant_expr</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns whether the AST expression is constant or not (namely does not</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns whether the AST expression is constant or not (namely does not</span>
 <span class="sd">        have any symbolic variables in it).&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symvars</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span></div>
 
 <div class="viewcode-block" id="TritonAst.is_variable"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.is_variable">[docs]</a>    <span class="k">def</span> <span class="nf">is_variable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns of the TritonAst is a variable node.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns of the TritonAst is a variable node.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">AstType</span><span class="o">.</span><span class="n">VARIABLE</span></div>
 
 <div class="viewcode-block" id="TritonAst.is_constant"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.is_constant">[docs]</a>    <span class="k">def</span> <span class="nf">is_constant</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns True if the type of the object is Bitvector (namely constant)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns True if the type of the object is Bitvector (namely constant)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">AstType</span><span class="o">.</span><span class="n">BV</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">variable_id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the Triton unique id for a variable.</span>
 
 <span class="sd">        :raises: KeyError</span>
@@ -273,7 +274,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">var_num</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the number of different symbolic variables of the expression</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the number of different symbolic variables of the expression</span>
 
 <span class="sd">        :rtype: int</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -281,7 +282,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">pp_str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Hacky function that strips masks used in the AST_REPRESENTATION.PYTHON</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Hacky function that strips masks used in the AST_REPRESENTATION.PYTHON</span>
 <span class="sd">        of Triton.</span>
 
 <span class="sd">        :rtype: str</span>
@@ -290,7 +291,7 @@
 
 
 <div class="viewcode-block" id="TritonAst.visit_expr"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.visit_expr">[docs]</a>    <span class="k">def</span> <span class="nf">visit_expr</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="s1">&#39;TritonAst&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot; Pre-Order visit of all the sub-AstNode&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Pre-Order visit of all the sub-AstNode&quot;&quot;&quot;</span>
         <span class="k">def</span> <span class="nf">rec</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
             <span class="k">yield</span> <span class="n">e</span>
             <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">get_children</span><span class="p">():</span>
@@ -299,7 +300,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">symvars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">SymbolicVariable</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the list of SymbolicVariable object of the current object</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the list of SymbolicVariable object of the current object</span>
 
 <span class="sd">        :rtype: List[:py:obj:`qsynthesis.types.SymbolicVariable`]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -307,7 +308,7 @@
 
 <div class="viewcode-block" id="TritonAst.symvar_type"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.symvar_type">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">symvar_type</span><span class="p">(</span><span class="n">v</span><span class="p">:</span> <span class="n">SymbolicVariable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymVarType</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Static method returning the type of a given symbolic variable object</span>
 
 <span class="sd">        :param v: symbolic variable object</span>
@@ -318,27 +319,27 @@
         <span class="k">return</span> <span class="n">SymVarType</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">getType</span><span class="p">())</span></div>
 
 <div class="viewcode-block" id="TritonAst.get_children"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.get_children">[docs]</a>    <span class="k">def</span> <span class="nf">get_children</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="s1">&#39;TritonAst&#39;</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Return the list of children TritonAst&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the list of children TritonAst&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span></div>
 
 <div class="viewcode-block" id="TritonAst.has_children"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.has_children">[docs]</a>    <span class="k">def</span> <span class="nf">has_children</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;True whether the object has children or not&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;True whether the object has children or not&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_children</span><span class="p">()</span> <span class="o">!=</span> <span class="p">[]</span></div>
 
 <div class="viewcode-block" id="TritonAst.is_root"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.is_root">[docs]</a>    <span class="k">def</span> <span class="nf">is_root</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return True whether the object is a root node (namely does not have</span>
 <span class="sd">        any parents).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="ow">not</span><span class="p">(</span><span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parents</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="TritonAst.is_leaf"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.is_leaf">[docs]</a>    <span class="k">def</span> <span class="nf">is_leaf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;True if the AST has no children&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;True if the AST has no children&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_children</span><span class="p">()</span> <span class="o">==</span> <span class="p">[]</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">node_count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Pre-computed O(1) count of the number of node contained in this AST.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Pre-computed O(1) count of the number of node contained in this AST.</span>
 
 <span class="sd">        :rtype: int</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -346,7 +347,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">depth</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Pre-computed depth of the AST *(complexity O(1))*</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Pre-computed depth of the AST *(complexity O(1))*</span>
 
 <span class="sd">        :rtype: int</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -354,7 +355,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the symbol of the current AstNode, operator if binary expression</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the symbol of the current AstNode, operator if binary expression</span>
 <span class="sd">        variable name if variable or constant value if constant.</span>
 
 <span class="sd">        :rtype: str</span>
@@ -368,11 +369,11 @@
             <span class="k">return</span> <span class="n">op_str</span><span class="p">[</span><span class="n">t</span><span class="p">]</span>
 
 <div class="viewcode-block" id="TritonAst.mk_constant"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.mk_constant">[docs]</a>    <span class="k">def</span> <span class="nf">mk_constant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;TritonAst&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Create a new constant as a TritonAst (holding a Triton bv object).&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new constant as a TritonAst (holding a Triton bv object).&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">TritonAst</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ast</span><span class="o">.</span><span class="n">bv</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">size</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">{},</span> <span class="p">[])</span></div>
 
 <div class="viewcode-block" id="TritonAst.mk_variable"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.mk_variable">[docs]</a>    <span class="k">def</span> <span class="nf">mk_variable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alias</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;TritonAst&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a new variable node as a TritonAst (holding a Triton variable object).</span>
 <span class="sd">        The variable is created in the TritonContext of the current object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -382,7 +383,7 @@
         <span class="k">return</span> <span class="n">TritonAst</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">,</span> <span class="n">ast_s</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">{</span><span class="n">s</span><span class="o">.</span><span class="n">getName</span><span class="p">():</span> <span class="n">s</span><span class="p">},</span> <span class="p">[])</span></div>
 
 <div class="viewcode-block" id="TritonAst.normalized_str_to_ast"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.normalized_str_to_ast">[docs]</a>    <span class="k">def</span> <span class="nf">normalized_str_to_ast</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;TritonAst&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Evaluate expression like &quot;a + b - 1&quot; creating a triton AST expression out</span>
 <span class="sd">        of it. All variables have to be present in the AST.</span>
 
@@ -409,7 +410,7 @@
         <span class="k">return</span> <span class="n">ast</span></div>
 
     <span class="k">def</span> <span class="nf">_try_mangle_ast</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;TritonAst&#39;</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Hacky function to mangle expression like &#39;a**2&#39; generated by sympy.</span>
 <span class="sd">        Triton AST and SMT does not support pow operators thus they have to</span>
 <span class="sd">        be unrolled. This function tries to do it and if succeed try to generate</span>
@@ -439,7 +440,7 @@
             <span class="k">return</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="TritonAst.to_normalized_str"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.to_normalized_str">[docs]</a>    <span class="k">def</span> <span class="nf">to_normalized_str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Normalize the AST (replace variables by placeholder &#39;a&#39;, &#39;b&#39; ..) and return</span>
 <span class="sd">        it as a string.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -455,7 +456,7 @@
         <span class="k">return</span> <span class="n">final_s</span></div>
 
 <div class="viewcode-block" id="TritonAst.update_all"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.update_all">[docs]</a>    <span class="k">def</span> <span class="nf">update_all</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update all children recursively of the current object. Fields being updated</span>
 <span class="sd">        are node_count, depth and symvars. This might be used when some of the AST</span>
 <span class="sd">        has been rewritten. All pre-computed values are then &#39;dirty&#39; and have to be</span>
@@ -471,7 +472,7 @@
         <span class="n">rec</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="TritonAst.update"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update the current AST node, with information of its directly children.</span>
 <span class="sd">        Information of children are thus considered genuine.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -482,7 +483,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_node_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">node_count</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">chs</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span></div>
 
 <div class="viewcode-block" id="TritonAst.update_parents"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.update_parents">[docs]</a>    <span class="k">def</span> <span class="nf">update_parents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recursive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update the parent of the current TritonAst. `recursive` indicates</span>
 <span class="sd">        if it has to be performed recrusively. If so the complexity of the</span>
 <span class="sd">        operation O(depth).</span>
@@ -495,7 +496,7 @@
                 <span class="n">p</span><span class="o">.</span><span class="n">update_parents</span><span class="p">(</span><span class="n">recursive</span><span class="o">=</span><span class="n">recursive</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="TritonAst.set_child"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.set_child">[docs]</a>    <span class="k">def</span> <span class="nf">set_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ast</span><span class="p">:</span> <span class="s1">&#39;TritonAst&#39;</span><span class="p">,</span> <span class="n">update_node</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">update_parents</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Replace the ith child of the current TritonAst with new given ast object. Optional</span>
 <span class="sd">        parameters indicates if inner fields of the object and its parent have to be updated.</span>
 
@@ -516,7 +517,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">update_parents</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="TritonAst.replace_self"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.replace_self">[docs]</a>    <span class="k">def</span> <span class="nf">replace_self</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repl</span><span class="p">:</span> <span class="s1">&#39;TritonAst&#39;</span><span class="p">,</span> <span class="n">update_parents</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Replace the current object by the given TritonAst. This function thus replace</span>
 <span class="sd">        parents by replace the child that correspond to the current object by the replacement.</span>
 <span class="sd">        :param repl: TritonAst used to replace the current object</span>
@@ -532,7 +533,7 @@
 
 <div class="viewcode-block" id="TritonAst.make_ast"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.make_ast">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">make_ast</span><span class="p">(</span><span class="n">ctx</span><span class="p">:</span> <span class="n">TritonContext</span><span class="p">,</span> <span class="n">exp</span><span class="p">:</span> <span class="n">AstNode</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;TritonAst&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Main staticmethod meant to create all TritonAst object. This method iterates</span>
 <span class="sd">        all the given expression ``expr`` recursively to create TritonAst&#39;s</span>
 <span class="sd">        all the way down and pre-computing along the way the important fields like</span>
@@ -575,14 +576,14 @@
         <span class="k">return</span> <span class="n">rec</span><span class="p">(</span><span class="n">exp</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="TritonAst.duplicate"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.duplicate">[docs]</a>    <span class="k">def</span> <span class="nf">duplicate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;TritonAst&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a new distinct instance of TritonAst</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">new_expr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ast</span><span class="o">.</span><span class="n">duplicate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expr</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">TritonAst</span><span class="o">.</span><span class="n">make_ast</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">,</span> <span class="n">new_expr</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="TritonAst.random_sampling"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.random_sampling">[docs]</a>    <span class="k">def</span> <span class="nf">random_sampling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IOVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates a random list of I/O samples pair.</span>
 
 <span class="sd">        :param n: number of samples to generate</span>
@@ -598,7 +599,7 @@
         <span class="k">return</span> <span class="n">samples</span></div>
 
 <div class="viewcode-block" id="TritonAst.eval_oracle"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.eval_oracle">[docs]</a>    <span class="k">def</span> <span class="nf">eval_oracle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">:</span> <span class="n">Input</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Output</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Oracle corresponding to the wrapped AST. It takes a valuation for all its</span>
 <span class="sd">        symbolic variables and as an oracle returns the associated output.</span>
 
@@ -613,7 +614,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">expr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="TritonAst.compare_behavior"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.compare_behavior">[docs]</a>    <span class="k">def</span> <span class="nf">compare_behavior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ast</span><span class="p">:</span> <span class="n">TritonAst</span><span class="p">,</span> <span class="n">inps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Input</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compare the current expression with the one given in parameter wrt theirs</span>
 <span class="sd">        behavior on the given set of inputs. The comparison returns -1 if not applicable</span>
 <span class="sd">        (as involving different variables, 0 if different and 1 if equal.</span>
@@ -638,12 +639,12 @@
         <span class="k">return</span> <span class="n">res</span></div>
 
 <div class="viewcode-block" id="TritonAst.to_z3"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.to_z3">[docs]</a>    <span class="k">def</span> <span class="nf">to_z3</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;z3.z3.ExprRef&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the Z3 expression associated with the Triton AST expression&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the Z3 expression associated with the Triton AST expression&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ast</span><span class="o">.</span><span class="n">tritonToZ3</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expr</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="TritonAst.from_z3"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.from_z3">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_z3</span><span class="p">(</span><span class="n">ctx</span><span class="p">:</span> <span class="n">TritonContext</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="s1">&#39;z3.z3.ExprRef&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;TritonAst&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a TritonAst out of a Z3 expressions</span>
 
 <span class="sd">        :param ctx: Triton Context in which to create the expression</span>
@@ -657,7 +658,7 @@
         <span class="k">return</span> <span class="n">TritonAst</span><span class="o">.</span><span class="n">make_ast</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">ast</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="TritonAst.is_semantically_equal"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.is_semantically_equal">[docs]</a>    <span class="k">def</span> <span class="nf">is_semantically_equal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">&#39;TritonAst&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Allows checking if the current AST is semantically equal to the one provided.</span>
 
 <span class="sd">        :param other: TritonAst on which to test against</span>
@@ -668,7 +669,7 @@
 
 <div class="viewcode-block" id="TritonAst.dyn_node_count"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.dyn_node_count">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">dyn_node_count</span><span class="p">(</span><span class="n">expr</span><span class="p">:</span> <span class="n">AstNode</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the effective count of node of the expression by iterating the</span>
 <span class="sd">        AstNode object recursively. The complexity is O(N) with N the number of node.</span>
 
@@ -692,7 +693,7 @@
 
 <div class="viewcode-block" id="TritonAst.dyn_depth"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.dyn_depth">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">dyn_depth</span><span class="p">(</span><span class="n">expr</span><span class="p">:</span> <span class="n">AstNode</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the effective depth of the node of the expression by iterating the</span>
 <span class="sd">        AstNode object recursively. The complexity is O(N) with N the depth of the AST.</span>
 
@@ -743,7 +744,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_children</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">_children</span>
 
 <div class="viewcode-block" id="TritonAst.visit_replacement"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.visit_replacement">[docs]</a>    <span class="k">def</span> <span class="nf">visit_replacement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="s1">&#39;TritonAst&#39;</span><span class="p">,</span> <span class="s1">&#39;TritonAst&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Triton AST expression replacement visitor in a Top-Down manner. It yields</span>
 <span class="sd">        every sub-expression and replace it with the expression received throught</span>
 <span class="sd">        the send mechanism.</span>
@@ -768,7 +769,7 @@
                     <span class="k">return</span></div>
 
 <div class="viewcode-block" id="TritonAst.reassemble"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.reassemble">[docs]</a>    <span class="k">def</span> <span class="nf">reassemble</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst_reg</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">target_arch</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reassemble the TritonAst in assembly. ``dst_reg`` is the destination register of the</span>
 <span class="sd">        result of the computation of the AST. Parameter ``target_arch`` is either a QtraceDB</span>
 <span class="sd">        architecture object or the string identifier of the architecture as defined by the</span>
@@ -819,7 +820,7 @@
             <span class="k">raise</span> <span class="n">ReassemblyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Something went wrong during reassembly: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="TritonAst.make_graph"><a class="viewcode-back" href="../../api/tritonast.html#qsynthesis.tritonast.TritonAst.make_graph">[docs]</a>    <span class="k">def</span> <span class="nf">make_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Graph&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate a graph object representing the AST</span>
 <span class="sd">        as a graph_tool object.</span>
 

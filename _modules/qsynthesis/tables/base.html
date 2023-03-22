@@ -11,9 +11,6 @@
   <![endif]-->
   
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
         <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -26,11 +23,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> QSynthesis
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            QSynthesis
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -75,7 +76,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
       <li class="breadcrumb-item active">qsynthesis.tables.base</li>
       <li class="wy-breadcrumbs-aside">
@@ -112,7 +113,7 @@
 
 
 <span class="k">class</span> <span class="nc">HashType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Hash types supported by the Lookup table database. In practice solely md5</span>
 <span class="sd">    is used, has it is the fastest of all</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -122,7 +123,7 @@
 
 
 <span class="k">class</span> <span class="nc">_EvalCtx</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Small debugging Triton evaluation context. It is used when manipulating</span>
 <span class="sd">    tables in a standalone manner. It enables obtaining TritonAst out of</span>
 <span class="sd">    the databqse entries.</span>
@@ -146,7 +147,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">tops</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ast</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ast</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">x</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;__&quot;</span><span class="p">)}</span>
 
     <span class="k">def</span> <span class="nf">eval_str</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AstNode</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Eval the string expression to create an AstNode object&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Eval the string expression to create an AstNode object&quot;&quot;&quot;</span>
         <span class="n">e</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tops</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">)</span>
         <span class="n">bv_size</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">getBitvectorSize</span><span class="p">()</span>  <span class="c1"># Assume all vars are of same size</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>  <span class="c1"># In case the expression was in fact an int</span>
@@ -160,12 +161,12 @@
 
 
 <div class="viewcode-block" id="InputOutputOracle"><a class="viewcode-back" href="../../../api/table.html#qsynthesis.tables.base.InputOutputOracle">[docs]</a><span class="k">class</span> <span class="nc">InputOutputOracle</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base Lookup table class. Specify the interface that child class have to</span>
 <span class="sd">    implement to be interoperable with other the synthesizer.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gr</span><span class="p">:</span> <span class="n">TritonGrammar</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Input</span><span class="p">],</span> <span class="n">hash_mode</span><span class="p">:</span> <span class="n">HashType</span> <span class="o">=</span> <span class="n">HashType</span><span class="o">.</span><span class="n">RAW</span><span class="p">,</span> <span class="n">f_name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor making a I/O oracle from a grammar a set of inputs and an hash type.</span>
 
 <span class="sd">        :param gr: triton grammar</span>
@@ -191,14 +192,14 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Size of the table (number of entries)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Size of the table (number of entries)</span>
 
 <span class="sd">        :rtype: int</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Should be implemented by child class&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="n">Hash</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        From a given hash return the associated expression string if</span>
 <span class="sd">        found in the lookup table.</span>
 
@@ -208,7 +209,7 @@
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Should be implemented by child class&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="InputOutputOracle.is_expr_compatible"><a class="viewcode-back" href="../../../api/table.html#qsynthesis.tables.base.InputOutputOracle.is_expr_compatible">[docs]</a>    <span class="k">def</span> <span class="nf">is_expr_compatible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="n">TritonAst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check the compatibility of the given expression with the table.</span>
 <span class="sd">        The function checks sizes of expr variables against the one of</span>
 <span class="sd">        its own grammar.</span>
@@ -227,7 +228,7 @@
         <span class="k">return</span> <span class="kc">True</span></div>
 
 <div class="viewcode-block" id="InputOutputOracle.lookup"><a class="viewcode-back" href="../../../api/table.html#qsynthesis.tables.base.InputOutputOracle.lookup">[docs]</a>    <span class="k">def</span> <span class="nf">lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outputs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Output</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span>  <span class="n">use_cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TritonAst</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Perform a lookup in the table with a given set of outputs corresponding</span>
 <span class="sd">        to the evaluation of an AST against the Input of this exact same table.</span>
 <span class="sd">        If an entry is found a TritonAst is created and returned.</span>
@@ -260,7 +261,7 @@
                 <span class="k">return</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="InputOutputOracle.lookup_hash"><a class="viewcode-back" href="../../../api/table.html#qsynthesis.tables.base.InputOutputOracle.lookup_hash">[docs]</a>    <span class="k">def</span> <span class="nf">lookup_hash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="n">Hash</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Raw lookup for a given key in database.</span>
 
 <span class="sd">        :param h: hash key to look for in database</span>
@@ -272,7 +273,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">is_writable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Whether the table enable being written (with new expressions)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Whether the table enable being written (with new expressions)</span>
 
 <span class="sd">        :rtype: bool</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -280,7 +281,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Name of the table</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Name of the table</span>
 
 <span class="sd">        :rtype: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -288,7 +289,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">bitsize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BitSize</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Size of expression in bit</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Size of expression in bit</span>
 
 <span class="sd">        :rtype: :py:obj:`qsynthesis.types.BitSize`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -296,7 +297,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">var_number</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Maximum number of variables contained in the table</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Maximum number of variables contained in the table</span>
 
 <span class="sd">        :rtype: int</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -304,7 +305,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">operator_number</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Number of operators used in this table</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Number of operators used in this table</span>
 
 <span class="sd">        :rtype: int</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -312,7 +313,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">input_number</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Number of inputs used in this table</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Number of inputs used in this table</span>
 
 <span class="sd">        :rtype: int</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -320,7 +321,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_fnv1a_128</span><span class="p">(</span><span class="n">outs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Output</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Hash</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Hash the outputs using fnv1a_128 algorithm</span>
 
 <span class="sd">        :param outs: list of outputs to hash</span>
@@ -348,7 +349,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_md5</span><span class="p">(</span><span class="n">outs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Output</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Hash</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Hash the outputs using MD5 algorithm. Outputs are transformed into an array.</span>
 <span class="sd">        That means the final bytes hashed are the concatenation of uint64 in little</span>
 <span class="sd">        endian.</span>
@@ -363,7 +364,7 @@
         <span class="k">return</span> <span class="n">h</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span>
 
 <div class="viewcode-block" id="InputOutputOracle.hash"><a class="viewcode-back" href="../../../api/table.html#qsynthesis.tables.base.InputOutputOracle.hash">[docs]</a>    <span class="k">def</span> <span class="nf">hash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Output</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Hash</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Main hashing method that dispatch the outputs to the appropriate hashing</span>
 <span class="sd">        function depending on the ``hash_mode`` of the table.</span>
 
@@ -380,14 +381,14 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_md5</span><span class="p">(</span><span class="n">outs</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Hash</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
-        <span class="sd">&quot;&quot;&quot; Iterator of all the entries as an iterator of pair, hash, expression as string</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Iterator of all the entries as an iterator of pair, hash, expression as string</span>
 
 <span class="sd">        :rtype: Iterable[Tuple[:py:obj:`qsynthesis.types.Hash, str]]`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Should be implemented by child class&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_expr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AstNode</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Utility function that returns a TritonAst from a given expression string.</span>
 <span class="sd">        A TritonContext local to the table is created to enable generating such ASTs.</span>
 
@@ -399,7 +400,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ectx</span><span class="o">.</span><span class="n">eval_str</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_set_input_lcontext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Input</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the given concrete values of variables in the local TritonContext.</span>
 <span class="sd">        The parameter is either the ith input of the table, or directly an Input</span>
 <span class="sd">        given a valuation for each variables. This function must be called before</span>
@@ -413,7 +414,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_ectx</span><span class="o">.</span><span class="n">set_symvar_values</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">i</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_eval_expr_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="n">AstNode</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Output</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Evaluate a given Triton AstNode object on all inputs of the</span>
 <span class="sd">        table. The result is a list of Output values.</span>
 
@@ -429,7 +430,7 @@
         <span class="k">return</span> <span class="n">outs</span>
 
     <span class="k">def</span> <span class="nf">_watchdog_worker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Function where the memory watchdog thread is running. This function</span>
 <span class="sd">        allows interrupting table generation when it happens to fill the</span>
 <span class="sd">        given threshold of RAM.</span>
@@ -446,7 +447,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_try_linearize</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">symbols</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Try applying sympy to linearize ``s`` with the variable symbols</span>
 <span class="sd">        ``symbols``. If any exception is raised in between to expression</span>
 <span class="sd">        string is returned unchanged.</span>
@@ -486,7 +487,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_custom_permutations</span><span class="p">(</span><span class="n">l</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Custom generator generating all the possible tuples from a list. But instead</span>
 <span class="sd">        of iterating item i with all others 0..n, iterates i with all the previous 0..i.</span>
 <span class="sd">        It generates a somewhat sorted generated that ensure pairs of items appearing</span>
@@ -509,7 +510,7 @@
                  <span class="n">linearize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                  <span class="n">do_use_blacklist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                  <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate a new lookup table from scratch with the variables and operators</span>
 <span class="sd">        set in the constructor of the table.</span>
 
@@ -654,7 +655,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">watchdog</span><span class="o">.</span><span class="n">join</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="InputOutputOracle.add_entry"><a class="viewcode-back" href="../../../api/table.html#qsynthesis.tables.base.InputOutputOracle.add_entry">[docs]</a>    <span class="k">def</span> <span class="nf">add_entry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">hash</span><span class="p">:</span> <span class="n">Hash</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Abstract function to add an entry in the lookuptable.</span>
 
 <span class="sd">        :param hash: already computed hash to add</span>
@@ -665,7 +666,7 @@
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Should be implemented by child class&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="InputOutputOracle.add_entries"><a class="viewcode-back" href="../../../api/table.html#qsynthesis.tables.base.InputOutputOracle.add_entries">[docs]</a>    <span class="k">def</span> <span class="nf">add_entries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">worklist</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Hash</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span> <span class="n">calc_hash</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add the given list of entries in the database. The boolean ``calc_hash`` indicates</span>
 <span class="sd">        whether hashes are already computed or not. If false the function should hash the</span>
 <span class="sd">        hash first.</span>
@@ -679,7 +680,7 @@
 
 <div class="viewcode-block" id="InputOutputOracle.create"><a class="viewcode-back" href="../../../api/table.html#qsynthesis.tables.base.InputOutputOracle.create">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">grammar</span><span class="p">:</span> <span class="n">TritonGrammar</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Input</span><span class="p">],</span> <span class="n">hash_mode</span><span class="p">:</span> <span class="n">HashType</span> <span class="o">=</span> <span class="n">HashType</span><span class="o">.</span><span class="n">RAW</span><span class="p">,</span> <span class="n">constants</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[])</span> <span class="o">-&gt;</span> <span class="s1">&#39;InputOutputOracle&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a new empty lookup table with the given initial parameters, grammars, inputs</span>
 <span class="sd">        and hash_mode.</span>
 
@@ -695,7 +696,7 @@
 
 <div class="viewcode-block" id="InputOutputOracle.load"><a class="viewcode-back" href="../../../api/table.html#qsynthesis.tables.base.InputOutputOracle.load">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s1">&#39;InputOutputOracle&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load the given lookup table and returns an instance object.</span>
 
 <span class="sd">        :param file: Database file to load</span>
@@ -705,7 +706,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">__size_to_str</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Return pretty printed representation of RAM usage for table generation &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return pretty printed representation of RAM usage for table generation &quot;&quot;&quot;</span>
         <span class="n">units</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">float</span><span class="p">(</span><span class="mi">1024</span><span class="p">),</span> <span class="s2">&quot;Kb&quot;</span><span class="p">),</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="mi">1024</span> <span class="o">**</span> <span class="mi">2</span><span class="p">),</span> <span class="s2">&quot;Mb&quot;</span><span class="p">),</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="mi">1024</span> <span class="o">**</span> <span class="mi">3</span><span class="p">),</span> <span class="s2">&quot;Gb&quot;</span><span class="p">)]</span>
         <span class="k">for</span> <span class="n">unit</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">units</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">value</span> <span class="o">/</span> <span class="n">unit</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>

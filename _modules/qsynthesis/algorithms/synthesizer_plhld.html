@@ -11,9 +11,6 @@
   <![endif]-->
   
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
         <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -26,11 +23,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> QSynthesis
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            QSynthesis
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -75,7 +76,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
       <li class="breadcrumb-item active">qsynthesis.algorithms.synthesizer_plhld</li>
       <li class="wy-breadcrumbs-aside">
@@ -96,7 +97,7 @@
 
 
 <div class="viewcode-block" id="PlaceHolderSynthesizer"><a class="viewcode-back" href="../../../api/synthesis.html#qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer">[docs]</a><span class="k">class</span> <span class="nc">PlaceHolderSynthesizer</span><span class="p">(</span><span class="n">TopDownBottomUpSynthesizer</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Synthesizer inherited from TopDownBottomUpSynthesizer which thus</span>
 <span class="sd">    form the search in that manner. The specificity of this synthesizer</span>
 <span class="sd">    is to temporarily replacing synthesized expressions with a placeholder</span>
@@ -107,7 +108,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="PlaceHolderSynthesizer.synthesize"><a class="viewcode-back" href="../../../api/synthesis.html#qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer.synthesize">[docs]</a>    <span class="k">def</span> <span class="nf">synthesize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ioast</span><span class="p">:</span> <span class="n">TritonAst</span><span class="p">,</span> <span class="n">check_sem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TritonAst</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Performs the placeholder based top-down and then bottom-up search for synthesizing</span>
 <span class="sd">        the given TritonAst.</span>
 
@@ -133,7 +134,7 @@
         <span class="n">cur_placeholder</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[plhdr] sending: </span><span class="si">{</span><span class="n">new_expr_to_send</span><span class="o">.</span><span class="n">pp_str</span> <span class="k">if</span> <span class="n">new_expr_to_send</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[plhdr] sending: </span><span class="si">{</span><span class="n">new_expr_to_send</span><span class="o">.</span><span class="n">pp_str</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">new_expr_to_send</span><span class="w"> </span><span class="ow">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="kc">None</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="kc">None</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">cur_ast</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">expr_repl_visitor</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">new_expr_to_send</span><span class="p">)</span>  <span class="c1"># Iterate generator</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
@@ -151,7 +152,7 @@
                 <span class="k">continue</span>
 
             <span class="c1"># Try synthesizing expression</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[phldr] try synthesis lookup: </span><span class="si">{</span><span class="n">cur_ast</span><span class="o">.</span><span class="n">pp_str</span> <span class="k">if</span> <span class="n">cur_ast</span><span class="o">.</span><span class="n">node_count</span> <span class="o">&lt;</span> <span class="mi">50</span> <span class="k">else</span> <span class="s1">&#39;too large&#39;</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="n">cur_ast</span><span class="o">.</span><span class="n">node_count</span><span class="si">}</span><span class="s2">] [</span><span class="si">{</span><span class="n">info</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[phldr] try synthesis lookup: </span><span class="si">{</span><span class="n">cur_ast</span><span class="o">.</span><span class="n">pp_str</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">cur_ast</span><span class="o">.</span><span class="n">node_count</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">50</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;too large&#39;</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="n">cur_ast</span><span class="o">.</span><span class="n">node_count</span><span class="si">}</span><span class="s2">] [</span><span class="si">{</span><span class="n">info</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
             <span class="n">synt_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">try_synthesis_lookup</span><span class="p">(</span><span class="n">cur_ast</span><span class="p">,</span> <span class="n">check_sem</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">synt_res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -186,7 +187,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_ast_binop_with_cst</span><span class="p">(</span><span class="n">ast</span><span class="p">:</span> <span class="n">TritonAst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find if either the left or right branch of an AST is a constant.</span>
 <span class="sd">        That enable replacing them with placeholder variable to help the</span>
 <span class="sd">        synthesis by temporarily getting rid of constants.</span>
@@ -197,7 +198,7 @@
         <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">is_constant</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ast</span><span class="o">.</span><span class="n">get_children</span><span class="p">())</span> <span class="o">!=</span> <span class="mi">0</span>
 
 <div class="viewcode-block" id="PlaceHolderSynthesizer.replace_all"><a class="viewcode-back" href="../../../api/synthesis.html#qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer.replace_all">[docs]</a>    <span class="k">def</span> <span class="nf">replace_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ast</span><span class="p">:</span> <span class="n">TritonAst</span><span class="p">,</span> <span class="n">replacement</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TritonAst</span><span class="p">,</span> <span class="n">TritonAst</span><span class="p">],</span> <span class="n">recursive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Performs the final replacement of Placeholder variable with their synthesized expression equivalence</span>
 <span class="sd">        in `ast` provided in parameter.</span>
 
