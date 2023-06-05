@@ -13,7 +13,7 @@ with open("README.md") as f:
 
 setup(
     name="qsynthesis",
-    version="0.1.2",
+    version="0.2.0",
     description="Python API to synthesize Triton AST's",
     long_description_content_type='text/markdown',
     long_description=README,
