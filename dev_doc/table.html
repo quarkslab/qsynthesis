@@ -11,6 +11,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
@@ -144,8 +146,6 @@ Options:
   -v, --verbosity                 increase output verbosity
   --ops TEXT                      specifying operators to uses
   --inputs TEXT                   specifying input vector to use
-  --hash-mode [RAW|FNV1A_128|MD5]
-                                  Hash function for keys in table
   --watchdog FLOAT                Activate RAM watchdog (percentage of load
                                   when to stop)
 
@@ -166,7 +166,6 @@ vectors might induce false positives, while too long vectors might uselessly be 
 <li><p><code class="docutils literal notranslate"><span class="pre">ops</span></code>: takes comma separated operators to use for generation (if not provided they are selected randomly)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">inputs</span></code>: Should be given as a1,b1,c1,a2,b2,c2 where a,b,c are the variable. (a1,b1,c1) is the first input etc.
 If not provided inputs are selected randomly using the <code class="docutils literal notranslate"><span class="pre">random-level</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">hash-mode</span></code>: Hashing function to apply on output vectors. <strong>(use MD5)</strong></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">watchdog</span></code>: Generation is highly RAM consuming <em>(exponential algorithm)</em>. That enable a watchdog and
 the value is the percentage of RAM above which the generation should be stopped.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">cst</span></code>: Additional constants to introduce in the generation process.</p></li>

@@ -11,6 +11,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
@@ -154,12 +156,11 @@
 <p>alias of TypeVar(‘AstNode’)</p>
 </dd></dl>
 
-<dl class="py data">
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qsynthesis.types.Hash">
 <span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">Hash</span></span><a class="headerlink" href="#qsynthesis.types.Hash" title="Permalink to this definition"></a></dt>
-<dd><p>Hash abstract type used to performed lookup in tables. Given the HashType of the
-table a Hash value might be hashed before being used to perform the lookup.</p>
-<p>alias of <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tuple</span></code>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]]</p>
+<dd><p>Hash abstract type used to performed lookup in tables. As now the only hash
+type supported is MD5 the underlying value is bytes.</p>
 </dd></dl>
 
 <dl class="py data">
