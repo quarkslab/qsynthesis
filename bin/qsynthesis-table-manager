@@ -9,7 +9,7 @@ import time
 import sys
 
 import qsynthesis
-from qsynthesis import TritonGrammar, BvOp, HashType, InputOutputOracleLevelDB
+from qsynthesis import TritonGrammar, BvOp, InputOutputOracleLevelDB
 
 
 def biased_input_generator(bitsize: int, var_num: int, input_number: int, bs: int, random_level: int = 2):
@@ -46,11 +46,10 @@ def main():
 @click.option("-v", "--verbosity", default=0, count=True, help="increase output verbosity")
 @click.option('--ops', type=str, default='', help='specifying operators to uses')
 @click.option('--inputs', type=str, default='', help='specifying input vector to use')
-@click.option('--hash-mode', default=HashType.MD5.name, type=click.Choice([x.name for x in HashType]), help="Hash function for keys in table")
 @click.option('--watchdog', type=float, help="Activate RAM watchdog (percentage of load when to stop)")
 @click.option('-c', '--cst', type=str, help="Constant to add in the generation process", multiple=True)
 @click.option('--linearization', is_flag=True, type=bool, default=False, help="If set activate linearization of expressions")
-def generate_command(output_file, limit, bitsize, var_num, input_num, random_level, op_num, verbosity, ops, inputs, hash_mode, watchdog, cst, linearization):
+def generate_command(output_file, limit, bitsize, var_num, input_num, random_level, op_num, verbosity, ops, inputs, watchdog, cst, linearization):
     """ Table generation utility """
     logging.basicConfig(level=logging.DEBUG if verbosity else logging.INFO, format='%(message)s')
 
@@ -92,7 +91,7 @@ def generate_command(output_file, limit, bitsize, var_num, input_num, random_lev
     grammar = TritonGrammar([(x, bitsize) for x in vrs], operators)
 
     logging.info(f"Watchdog value: {watchdog}")
-    ltm = InputOutputOracleLevelDB.create(out_dir.absolute(), grammar, inputs, HashType[hash_mode], constants)
+    ltm = InputOutputOracleLevelDB.create(out_dir.absolute(), grammar, inputs, constants)
     try:
         if watchdog:
             ltm.generate(bitsize, constants=constants, do_watch=True, watchdog_threshold=watchdog, linearize=linearization, limit=limit)
@@ -117,7 +116,6 @@ def infos_command(table_file):
     table = InputOutputOracleLevelDB.load(table_file)
 
     logging.info(f"Bitsize: {table.bitsize}")
-    logging.info(f"Hash mode: {table.hash_mode.name}")
     logging.info(f"Size: {table.size}")
     logging.info(f"Variables: {table.grammar.vars}")
     logging.info(f"Operators: {[x.name for x in table.grammar.ops]}")
@@ -143,8 +141,8 @@ def check_command(table_file):
     for i, (h, expr) in enumerate(table):
         if i % 100 == 0:
             print(f"process {i}/{count} [KO:{bad}]\r", end="")
-        triton_exp = table.get_expr(expr)
-        outs = table.eval_expr_inputs(triton_exp)
+        triton_exp = table._get_expr(expr)
+        outs = table._eval_expr_inputs(triton_exp)
         if table.hash(outs) != h:
             logging.warning(f"Bad expression: {expr}  with [{outs}]")
         else:

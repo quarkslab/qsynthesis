@@ -1,6 +1,6 @@
 from qsynthesis.algorithms import TopDownSynthesizer, PlaceHolderSynthesizer
 from qsynthesis.grammar import TritonGrammar, BvOp
-from qsynthesis.tables import InputOutputOracleREST, InputOutputOracleLevelDB, HashType
+from qsynthesis.tables import InputOutputOracleREST, InputOutputOracleLevelDB
 from qsynthesis.utils.symexec import SimpleSymExec
 from qsynthesis.tritonast import TritonAst
 

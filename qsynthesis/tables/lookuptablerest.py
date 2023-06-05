@@ -7,8 +7,8 @@ import requests
 
 # qsynthesis deps
 from qsynthesis.grammar import TritonGrammar
-from qsynthesis.tables.base import InputOutputOracle, HashType, Hash
-from qsynthesis.types import Input, Optional, List, Dict, Union, Tuple, Iterator
+from qsynthesis.tables.base import InputOutputOracle, Hash
+from qsynthesis.types import Input, Optional, List, Union, Tuple, Iterator
 
 
 class InputOutputOracleREST(InputOutputOracle):
@@ -17,7 +17,7 @@ class InputOutputOracleREST(InputOutputOracle):
     address serving the API (that can be served with qsynthesis-table-manager runserver)
     """
 
-    def __init__(self, grammar: TritonGrammar, inputs: List[Input], hash_mode: HashType = HashType.RAW, f_name: str = ""):
+    def __init__(self, grammar: TritonGrammar, inputs: List[Input], f_name: str = ""):
         """
         Constructor making a lookuptable from a grammar a set of inputs and an hash type.
 
@@ -26,12 +26,12 @@ class InputOutputOracleREST(InputOutputOracle):
         :param hash_mode: type of hash to be used as keys in tables
         :param f_name: file name of the table (when being loaded)
         """
-        super(InputOutputOracleREST, self).__init__(grammar, inputs, hash_mode, f_name)
+        super(InputOutputOracleREST, self).__init__(grammar, inputs, f_name)
         self.session = requests.Session()
         self._size = 0
 
     @staticmethod
-    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Input], hash_mode: HashType = HashType.RAW, constants: List[int] = []) -> 'InputOutputOracleREST':
+    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Input], constants: List[int] = []) -> 'InputOutputOracleREST':
         """
         Such tables cannot be created as they are read-only databases.
         """
@@ -48,7 +48,7 @@ class InputOutputOracleREST(InputOutputOracle):
         if res.status_code == 200:
             data = res.json()
             g = TritonGrammar.from_dict(data['grammar'])
-            lkp = InputOutputOracleREST(g, data['inputs'], HashType[data['hash_mode']], file)
+            lkp = InputOutputOracleREST(g, data['inputs'], file)
             lkp._size = data["size"]
             lkp.session.headers['Host'] = file
             lkp._name = file
@@ -63,7 +63,7 @@ class InputOutputOracleREST(InputOutputOracle):
         """
         raise NotImplementedError("REST Lookup Table are read-only at the moment")
 
-    def add_entries(self, entries: List[Tuple[Hash, str]], calc_hash: bool = False, chunk_size: int = 10000) -> None:
+    def add_entries(self, entries: List[Tuple[Hash, str]], chunk_size: int = 10000) -> None:
         """
         Function not implemented at the moment. REST tables are read-only.
         """
@@ -94,4 +94,4 @@ class InputOutputOracleREST(InputOutputOracle):
             data = res.json()
             return data['expression'] if data else None
         else:
-            raise ConnectionError("REST query did not suceeded correctly")
+            raise ConnectionError("REST query did not succeeded correctly")

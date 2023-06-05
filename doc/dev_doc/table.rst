@@ -64,8 +64,6 @@ The help message is the following:
       -v, --verbosity                 increase output verbosity
       --ops TEXT                      specifying operators to uses
       --inputs TEXT                   specifying input vector to use
-      --hash-mode [RAW|FNV1A_128|MD5]
-                                      Hash function for keys in table
       --watchdog FLOAT                Activate RAM watchdog (percentage of load
                                       when to stop)
 
@@ -86,7 +84,6 @@ The parameters are the following:
 * ``ops``: takes comma separated operators to use for generation (if not provided they are selected randomly)
 * ``inputs``: Should be given as a1,b1,c1,a2,b2,c2 where a,b,c are the variable. (a1,b1,c1) is the first input etc.
   If not provided inputs are selected randomly using the ``random-level``.
-* ``hash-mode``: Hashing function to apply on output vectors. **(use MD5)**
 * ``watchdog``: Generation is highly RAM consuming *(exponential algorithm)*. That enable a watchdog and
   the value is the percentage of RAM above which the generation should be stopped.
 * ``cst``: Additional constants to introduce in the generation process.

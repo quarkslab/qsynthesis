@@ -22,16 +22,6 @@ from qsynthesis.types import AstNode, Hash, Optional, List, Dict, Union, Tuple, 
 logger = logging.getLogger("qsynthesis")
 
 
-class HashType(IntEnum):
-    """
-    Hash types supported by the Lookup table database. In practice solely md5
-    is used, has it is the fastest of all
-    """
-    RAW = 1
-    FNV1A_128 = 2
-    MD5 = 3
-
-
 class _EvalCtx(object):
     """
     Small debugging Triton evaluation context. It is used when manipulating
@@ -75,13 +65,12 @@ class InputOutputOracle:
     Base Lookup table class. Specify the interface that child class have to
     implement to be interoperable with other the synthesizer.
     """
-    def __init__(self, gr: TritonGrammar, inputs: List[Input], hash_mode: HashType = HashType.RAW, f_name: Union[Path, str] = ""):
+    def __init__(self, gr: TritonGrammar, inputs: List[Input], f_name: Union[Path, str] = ""):
         """
-        Constructor making a I/O oracle from a grammar a set of inputs and an hash type.
+        Constructor making a I/O oracle from a grammar a set of inputs and a hash type.
 
         :param gr: triton grammar
         :param inputs: List of inputs
-        :param hash_mode: type of hash to be used as keys in tables
         :param f_name: file name of the table (when being loaded)
         """
         self._name = Path(f_name)
@@ -91,7 +80,6 @@ class InputOutputOracle:
         self.lookup_count = 0
         self.lookup_found = 0
         self.cache_hit = 0
-        self.hash_mode = hash_mode
         self._ectx = None
         # generation related fields
         self.watchdog = None
@@ -99,6 +87,7 @@ class InputOutputOracle:
         self.stop = False
 
         self.inputs = inputs
+
 
     @property
     def size(self) -> int:
@@ -229,66 +218,20 @@ class InputOutputOracle:
         """
         return len(self.inputs)
 
-    @staticmethod
-    def _fnv1a_128(outs: List[Output]) -> Hash:
-        """
-        Hash the outputs using fnv1a_128 algorithm
-
-        :param outs: list of outputs to hash
-        :type outs: List[:py:obj:`qsynthesis.types.Output`]
-        :returns: Hash value (int) corresponding to the fnv1a of outputs
-        :rtype: :py:obj:`qsynthesis.types.Hash`
-        """
-        a = array.array('Q', outs)
-        FNV1A_128_OFFSET = 0x6c62272e07bb014262b821756295c58d
-        FNV1A_128_PRIME = 0x1000000000000000000013b  # 2^88 + 2^8 + 0x3b
-
-        # Set the offset basis
-        hash = FNV1A_128_OFFSET
-
-        # For each character
-        for byte in a.tobytes():
-            # Xor with the current character
-            hash ^= byte
-            # Multiply by prime
-            hash *= FNV1A_128_PRIME
-            # Clamp
-            hash &= 0xffffffffffffffffffffffffffffffff
-        # Return the final hash as a number
-        return hash
-
-    @staticmethod
-    def _md5(outs: List[Output]) -> Hash:
-        """
-        Hash the outputs using MD5 algorithm. Outputs are transformed into an array.
-        That means the final bytes hashed are the concatenation of uint64 in little
-        endian.
-
-        :param outs: list of outputs to hash
-        :type outs: List[:py:obj:`qsynthesis.types.Output`]
-        :returns: Bytes corresponding to MD5 hash
-        :type: :py:obj:`qsynthesis.types.Hash`
-        """
-        a = array.array('Q', outs)
-        h = hashlib.md5(a.tobytes())
-        return h.digest()
-
     def hash(self, outs: List[Output]) -> Hash:
         """
-        Main hashing method that dispatch the outputs to the appropriate hashing
-        function depending on the ``hash_mode`` of the table.
+        Main hashing method that convert outputs to an hash.
+        The hash used is MD5. Note that hashed values are systematically
+        casted in an array of 64bit integers.
 
         :param outs: list of outputs to hash
         :type outs: List[:py:obj:`qsynthesis.types.Output`]
         :returns: Hash type (bytes, int ..) of the outputs
         :rtype: :py:obj:`qsynthesis.types.Hash`
         """
-        if self.hash_mode == HashType.RAW:
-            return tuple(outs)
-        elif self.hash_mode == HashType.FNV1A_128:
-            return self._fnv1a_128(outs)
-        elif self.hash_mode == HashType.MD5:
-            return self._md5(outs)
+        a = array.array('Q', outs)
+        h = hashlib.md5(a.tobytes())
+        return h.digest()
 
     def __iter__(self) -> Iterable[Tuple[Hash, str]]:
         """ Iterator of all the entries as an iterator of pair, hash, expression as string
@@ -448,8 +391,6 @@ class InputOutputOracle:
         N = self.input_number
         ArTy = jitting.get_native_array_type(bitsize, N)
 
-        hash_fun = lambda x: hashlib.md5(bytes(x)).digest() if self.hash_mode == HashType.MD5 else self.hash
-
         # Initialize worklist with variables
         worklist = [(ArTy(), k) for k in self.grammar.vars]
         for i, inp in enumerate(self.inputs):
@@ -463,7 +404,7 @@ class InputOutputOracle:
         worklist.extend(csts)
 
         # initialize set of hash
-        hash_set = set(hash_fun(x[0]) for x in worklist)
+        hash_set = set(self.hash(x[0]) for x in worklist)
 
         ops = sorted(self.grammar.non_terminal_operators, key=lambda x: x.arity == 1)  # sort operators to iterate on unary first
         cur_depth = 2
@@ -499,7 +440,7 @@ class InputOutputOracle:
                             new_vals = ArTy()
                             op_eval(new_vals, vals1, N)
 
-                            h = hash_fun(new_vals)
+                            h = self.hash(new_vals)
                             if h not in hash_set:
                                 if name1_cst:
                                     fmt = str(self._to_signed(new_vals[0]))  # any value is the new constant value
@@ -533,7 +474,7 @@ class InputOutputOracle:
                             if is_both_constant:  # if both were constant use the constant as repr instead
                                 fmt = str(self._to_signed(new_vals[0]))
 
-                            h = hash_fun(new_vals)
+                            h = self.hash(new_vals)
                             if h not in hash_set:
                                 if linearize:
                                     fmt = self._try_linearize(fmt, symbols) if linearize else fmt
@@ -560,7 +501,7 @@ class InputOutputOracle:
         self.stop = True
         t = time() - t0
         print(f"Depth {cur_depth} (size:{len(worklist)}) (Time:{int(t/60)}m{t%60:.5f}s) [RAM:{self.__size_to_str(self.max_mem)}]")
-        self.add_entries(worklist, calc_hash=True)
+        self.add_entries(worklist)
         if do_watch:
             self.watchdog.join()
 
@@ -575,21 +516,18 @@ class InputOutputOracle:
         """
         raise NotImplementedError("Should be implemented by child class")
 
-    def add_entries(self, worklist: List[Tuple[Hash, str]], calc_hash: bool = False) -> None:
+    def add_entries(self, worklist: List[Tuple[Hash, str]]) -> None:
         """
-        Add the given list of entries in the database. The boolean ``calc_hash`` indicates
-        whether hashes are already computed or not. If false the function should hash the
-        hash first.
+        Add the given list of entries in the database.
 
         :param worklist: list of entries to add
         :type worklist: List[Tuple[:py:obj:`qsynthesis.types.Hash`, str]]
-        :param calc_hash: whether or not hash should be performed on entries keys
         :returns: None
         """
         raise NotImplementedError("Should be implemented by child class")
 
     @staticmethod
-    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Input], hash_mode: HashType = HashType.RAW, constants: List[int] = []) -> 'InputOutputOracle':
+    def create(filename: Union[str, Path], grammar: TritonGrammar, inputs: List[Input], constants: List[int] = []) -> 'InputOutputOracle':
         """
         Create a new empty lookup table with the given initial parameters, grammars, inputs
         and hash_mode.
@@ -598,7 +536,6 @@ class InputOutputOracle:
         :param grammar: TritonGrammar object representing variables and operators
         :param inputs: list of inputs on which to perform evaluation
         :type inputs: List[:py:obj:`qsynthesis.types.Input`]
-        :param hash_mode: Hashing mode for keys
         :param constants: list of constants used
         :returns: lookuptable instance object
         """

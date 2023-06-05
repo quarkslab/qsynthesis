@@ -37,9 +37,9 @@ SymVarMap = Dict[str, SymbolicVariable]
 
 
 # Synthesis types
-Hash = Union[bytes, int, Tuple[int]]
-"""Hash abstract type used to performed lookup in tables. Given the HashType of the
-table a Hash value might be hashed before being used to perform the lookup."""
+Hash = bytes
+"""Hash abstract type used to performed lookup in tables. As now the only hash
+type supported is MD5 the underlying value is bytes."""
 
 Char = str
 """String of size one. Used to represent normalized variables names"""
