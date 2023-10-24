@@ -54,16 +54,6 @@
 % couleur de fond pour les extraits de code
 \definecolor{VerbatimColor}{rgb}{0.95,0.95,1.0}
 
-% definition de la mention confidentiel en fonction de la langue du document
-\iflanguage{francais}{
-  \newcommand{\confidential}{\chead{\textcolor{red}{[DIFFUSION RESTREINTE]}}}
-}{
-  %\newcommand{\confidential}{\chead{\textcolor{mahogany}{CONFIDENTIAL -- NOT FOR PUBLIC RELEASE}}}
-  \newcommand{\confidential}{\chead{\textcolor{mahogany}{Public}}}
-  %\newcommand{\confidential}{\chead{\textcolor{mahogany}{Draft}}}
-}
-%% la façon la plus sale d'enlever Confidential : l'effacer...
-
 \fancypagestyle{plain}{
   \fancyhf{}
   \fancyfoot{}
@@ -75,7 +65,6 @@
   \cfoot{Quarkslab SAS}                 % pied de page centre
   \rfoot{\thepage}                       % pied de page droite
 
-  \confidential                          % sans mention confidentiel : publication sur blog.quarkslab.com
 }
 
 \fancypagestyle{normal}{
@@ -89,7 +78,6 @@
   \cfoot{Quarkslab SAS}                 % pied de page centre
   \rfoot{\thepage}                       % pied de page droite
   
-  \confidential                          % sans mention confidentiel : publication sur blog.quarkslab.com
 }
 
 % redefinit la table des matieres pour avoir une page sans footer, et ne pas
@@ -112,7 +100,6 @@
   \cfoot{Quarkslab SAS}                 % pied de page centre
   \rfoot{\thepage}                       % pied de page droite
   
-  % \confidential                          % mention confidentiel
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
