@@ -6,7 +6,7 @@ from qsynthesis.tritonast import TritonAst
 
 import logging
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 # Simple object used to retrieve the plugin in IDA
 qsynthesis_plugin = None
