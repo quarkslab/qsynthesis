@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import List, Set, Iterable, Union, Optional
 
 # third-party libs
-from triton import ARCH, CALLBACK, MODE, MemoryAccess, Instruction, AST_REPRESENTATION, OPERAND
+from triton import ARCH, CALLBACK, MODE, MemoryAccess, Instruction, AST_REPRESENTATION, OPERAND, EXCEPTION
 from triton import TritonContext
 
 # qsynthesis deps
@@ -418,8 +418,11 @@ class SimpleSymExec:
         pc = addr
 
         while addr <= pc < (addr + len(data)):  # while we remain in the blob
-            opcode = self.ctx.getConcreteMemoryAreaValue(pc, 16) 
-            if not self.execute(opcode, pc):
+            opcode = self.ctx.getConcreteMemoryAreaValue(pc, 16)
+
+            i = self.disassemble(opcode, pc)
+
+            if not self.execute_instruction(i):
                 return False
             pc =  self.ctx.getConcreteRegisterValue(self.ins_ptr_reg)
             
@@ -439,12 +442,13 @@ class SimpleSymExec:
         :rtype: bool
         """
         blob = data[:]
+        cur_addr = addr
         while blob:
-            i = self.disassemble(blob, addr)
-            addr = None  # reset to None if it was provided
+            i = self.disassemble(blob, cur_addr)
             if not self.execute_instruction(i):
                 return False
             blob = blob[i.getSize():]
+            cur_addr += i.getSize()
         return True
 
     def execute(self, opcode: bytes, addr: Optional[Addr] = None) -> bool:
@@ -490,7 +494,7 @@ class SimpleSymExec:
             e.setComment(self._fmt_comment())
 
         self._turn_off()
-        return r
+        return r == EXCEPTION.NO_FAULT
 
     def _fmt_comment(self) -> str:
         """Return a string identifying a SymbolicExpression in a unique manner"""
