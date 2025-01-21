@@ -1,20 +1,20 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qsynthesis.algorithms.synthesizer_plhld &mdash; QSynthesis 0.1 documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d75fae25" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
   
-        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=e031e9a9"></script>
-        <script src="../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -91,14 +91,16 @@
              
   <h1>Source code for qsynthesis.algorithms.synthesizer_plhld</h1><div class="highlight"><pre>
 <span></span><span class="c1"># built-in modules</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span>
 
 <span class="c1"># qsynthesis modules</span>
-<span class="kn">from</span> <span class="nn">qsynthesis.tritonast</span> <span class="kn">import</span> <span class="n">TritonAst</span>
-<span class="kn">from</span> <span class="nn">qsynthesis.algorithms.synthesizer_tdbu</span> <span class="kn">import</span> <span class="n">TopDownBottomUpSynthesizer</span><span class="p">,</span> <span class="n">YieldT</span><span class="p">,</span> <span class="n">logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsynthesis.tritonast</span><span class="w"> </span><span class="kn">import</span> <span class="n">TritonAst</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsynthesis.algorithms.synthesizer_tdbu</span><span class="w"> </span><span class="kn">import</span> <span class="n">TopDownBottomUpSynthesizer</span><span class="p">,</span> <span class="n">YieldT</span><span class="p">,</span> <span class="n">logger</span>
 
 
-<div class="viewcode-block" id="PlaceHolderSynthesizer"><a class="viewcode-back" href="../../../api/synthesis.html#qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer">[docs]</a><span class="k">class</span> <span class="nc">PlaceHolderSynthesizer</span><span class="p">(</span><span class="n">TopDownBottomUpSynthesizer</span><span class="p">):</span>
+<div class="viewcode-block" id="PlaceHolderSynthesizer">
+<a class="viewcode-back" href="../../../api/synthesis.html#qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PlaceHolderSynthesizer</span><span class="p">(</span><span class="n">TopDownBottomUpSynthesizer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Synthesizer inherited from TopDownBottomUpSynthesizer which thus</span>
 <span class="sd">    form the search in that manner. The specificity of this synthesizer</span>
@@ -109,7 +111,9 @@
 <span class="sd">    variables are substituted by their associated synthesized expression.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="PlaceHolderSynthesizer.synthesize"><a class="viewcode-back" href="../../../api/synthesis.html#qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer.synthesize">[docs]</a>    <span class="k">def</span> <span class="nf">synthesize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ioast</span><span class="p">:</span> <span class="n">TritonAst</span><span class="p">,</span> <span class="n">check_sem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TritonAst</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+<div class="viewcode-block" id="PlaceHolderSynthesizer.synthesize">
+<a class="viewcode-back" href="../../../api/synthesis.html#qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer.synthesize">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">synthesize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ioast</span><span class="p">:</span> <span class="n">TritonAst</span><span class="p">,</span> <span class="n">check_sem</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TritonAst</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Performs the placeholder based top-down and then bottom-up search for synthesizing</span>
 <span class="sd">        the given TritonAst.</span>
@@ -187,8 +191,9 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Final AST: </span><span class="si">{</span><span class="n">final_ast</span><span class="o">.</span><span class="n">pp_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">final_ast</span><span class="p">,</span> <span class="n">expr_modified</span></div>
 
+
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_ast_binop_with_cst</span><span class="p">(</span><span class="n">ast</span><span class="p">:</span> <span class="n">TritonAst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_ast_binop_with_cst</span><span class="p">(</span><span class="n">ast</span><span class="p">:</span> <span class="n">TritonAst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find if either the left or right branch of an AST is a constant.</span>
 <span class="sd">        That enable replacing them with placeholder variable to help the</span>
@@ -199,7 +204,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">is_constant</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ast</span><span class="o">.</span><span class="n">get_children</span><span class="p">())</span> <span class="o">!=</span> <span class="mi">0</span>
 
-<div class="viewcode-block" id="PlaceHolderSynthesizer.replace_all"><a class="viewcode-back" href="../../../api/synthesis.html#qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer.replace_all">[docs]</a>    <span class="k">def</span> <span class="nf">replace_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ast</span><span class="p">:</span> <span class="n">TritonAst</span><span class="p">,</span> <span class="n">replacement</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TritonAst</span><span class="p">,</span> <span class="n">TritonAst</span><span class="p">],</span> <span class="n">recursive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="PlaceHolderSynthesizer.replace_all">
+<a class="viewcode-back" href="../../../api/synthesis.html#qsynthesis.algorithms.synthesizer_plhld.PlaceHolderSynthesizer.replace_all">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">replace_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ast</span><span class="p">:</span> <span class="n">TritonAst</span><span class="p">,</span> <span class="n">replacement</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TritonAst</span><span class="p">,</span> <span class="n">TritonAst</span><span class="p">],</span> <span class="n">recursive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Performs the final replacement of Placeholder variable with their synthesized expression equivalence</span>
 <span class="sd">        in `ast` provided in parameter.</span>
@@ -239,7 +246,9 @@
                     <span class="k">if</span> <span class="n">recursive</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">replace_all</span><span class="p">(</span><span class="n">new_expr_to_send</span><span class="p">,</span> <span class="n">replacement</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="n">recursive</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
-            <span class="k">pass</span></div></div>
+            <span class="k">pass</span></div>
+</div>
+
 </pre></div>
 
            </div>

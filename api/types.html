@@ -1,21 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Types &mdash; QSynthesis 0.1 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d75fae25" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
   
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=e031e9a9"></script>
-        <script src="../_static/doctools.js?v=888ff710"></script>
-        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -111,109 +111,109 @@
            <div itemprop="articleBody">
              
   <section id="module-qsynthesis.types">
-<span id="types"></span><h1>Types<a class="headerlink" href="#module-qsynthesis.types" title="Permalink to this heading"></a></h1>
+<span id="types"></span><h1>Types<a class="headerlink" href="#module-qsynthesis.types" title="Link to this heading"></a></h1>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qsynthesis.types.Addr">
-<span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">Addr</span></span><a class="headerlink" href="#qsynthesis.types.Addr" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">Addr</span></span><a class="headerlink" href="#qsynthesis.types.Addr" title="Link to this definition"></a></dt>
 <dd><p>Integer representing an address</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qsynthesis.types.AstNode">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">AstNode</span></span><a class="headerlink" href="#qsynthesis.types.AstNode" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">AstNode</span></span><a class="headerlink" href="#qsynthesis.types.AstNode" title="Link to this definition"></a></dt>
 <dd><p><a class="reference external" href="https://triton.quarkslab.com/documentation/doxygen/py_AstNode_page.html">AstNode</a> SMT logic formula as returned by Triton</p>
 <p>alias of TypeVar(‘AstNode’)</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qsynthesis.types.AstType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">AstType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsynthesis.types.AstType" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">AstType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=&lt;not</span> <span class="pre">given&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsynthesis.types.AstType" title="Link to this definition"></a></dt>
 <dd><p>Enum of all AstNode possible types as defined by the <a class="reference external" href="https://triton.quarkslab.com/documentation/doxygen/py_AST_NODE_page.html">AST_NODE</a> object of Triton</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qsynthesis.types.BitSize">
-<span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">BitSize</span></span><a class="headerlink" href="#qsynthesis.types.BitSize" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">BitSize</span></span><a class="headerlink" href="#qsynthesis.types.BitSize" title="Link to this definition"></a></dt>
 <dd><p>Integer representing a size in bits</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qsynthesis.types.ByteSize">
-<span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">ByteSize</span></span><a class="headerlink" href="#qsynthesis.types.ByteSize" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">ByteSize</span></span><a class="headerlink" href="#qsynthesis.types.ByteSize" title="Link to this definition"></a></dt>
 <dd><p>Integer representing a size in bytes</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qsynthesis.types.Char">
-<span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">Char</span></span><a class="headerlink" href="#qsynthesis.types.Char" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">Char</span></span><a class="headerlink" href="#qsynthesis.types.Char" title="Link to this definition"></a></dt>
 <dd><p>String of size one. Used to represent normalized variables names</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qsynthesis.types.Expr">
-<span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">Expr</span></span><a class="headerlink" href="#qsynthesis.types.Expr" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">Expr</span></span><a class="headerlink" href="#qsynthesis.types.Expr" title="Link to this definition"></a></dt>
 <dd><p>Alias for <a class="reference internal" href="#qsynthesis.types.AstNode" title="qsynthesis.types.AstNode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AstNode</span></code></a>, to abstract to Triton type</p>
 <p>alias of TypeVar(‘AstNode’)</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qsynthesis.types.Hash">
-<span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">Hash</span></span><a class="headerlink" href="#qsynthesis.types.Hash" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">Hash</span></span><a class="headerlink" href="#qsynthesis.types.Hash" title="Link to this definition"></a></dt>
 <dd><p>Hash abstract type used to performed lookup in tables. As now the only hash
 type supported is MD5 the underlying value is bytes.</p>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="qsynthesis.types.IOPair">
-<span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">IOPair</span></span><a class="headerlink" href="#qsynthesis.types.IOPair" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">IOPair</span></span><a class="headerlink" href="#qsynthesis.types.IOPair" title="Link to this definition"></a></dt>
 <dd><p>Represent a given input valuation and the resulting output integer</p>
-<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">Tuple</span></code>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</p>
+<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">Tuple</span></code>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</p>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="qsynthesis.types.IOVector">
-<span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">IOVector</span></span><a class="headerlink" href="#qsynthesis.types.IOVector" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">IOVector</span></span><a class="headerlink" href="#qsynthesis.types.IOVector" title="Link to this definition"></a></dt>
 <dd><p>List of input-outputs pairs</p>
-<p>alias of <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tuple</span></code>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]]</p>
+<p>alias of <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tuple</span></code>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]]</p>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="qsynthesis.types.Input">
-<span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">Input</span></span><a class="headerlink" href="#qsynthesis.types.Input" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">Input</span></span><a class="headerlink" href="#qsynthesis.types.Input" title="Link to this definition"></a></dt>
 <dd><p>An Input is a valuation of all inputs variables of an expression</p>
-<p>alias of <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</p>
+<p>alias of <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qsynthesis.types.Output">
-<span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">Output</span></span><a class="headerlink" href="#qsynthesis.types.Output" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">Output</span></span><a class="headerlink" href="#qsynthesis.types.Output" title="Link to this definition"></a></dt>
 <dd><p>Value resulting of evaluating an Input on a given expression</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qsynthesis.types.Register">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">Register</span></span><a class="headerlink" href="#qsynthesis.types.Register" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">Register</span></span><a class="headerlink" href="#qsynthesis.types.Register" title="Link to this definition"></a></dt>
 <dd><p>“<a class="reference external" href="https://triton.quarkslab.com/documentation/doxygen/py_Register_page.html">Register</a> object as returned by Triton</p>
 <p>alias of TypeVar(‘Register’)</p>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="qsynthesis.types.SymVarMap">
-<span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">SymVarMap</span></span><a class="headerlink" href="#qsynthesis.types.SymVarMap" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">SymVarMap</span></span><a class="headerlink" href="#qsynthesis.types.SymVarMap" title="Link to this definition"></a></dt>
 <dd><p>Dictionnary of symbolic variables names to theirs Triton object instance</p>
-<p>alias of <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference internal" href="#qsynthesis.types.SymbolicVariable" title="qsynthesis.types.SymbolicVariable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SymbolicVariable</span></code></a>]</p>
+<p>alias of <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference internal" href="#qsynthesis.types.SymbolicVariable" title="qsynthesis.types.SymbolicVariable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SymbolicVariable</span></code></a>]</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qsynthesis.types.SymbolicExpression">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">SymbolicExpression</span></span><a class="headerlink" href="#qsynthesis.types.SymbolicExpression" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">SymbolicExpression</span></span><a class="headerlink" href="#qsynthesis.types.SymbolicExpression" title="Link to this definition"></a></dt>
 <dd><p><a class="reference external" href="https://triton.quarkslab.com/documentation/doxygen/py_SymbolicExpression_page.html">SymbolicExpression</a> object as used by Triton</p>
 <p>alias of TypeVar(‘SymbolicExpression’)</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qsynthesis.types.SymbolicVariable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">SymbolicVariable</span></span><a class="headerlink" href="#qsynthesis.types.SymbolicVariable" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsynthesis.types.</span></span><span class="sig-name descname"><span class="pre">SymbolicVariable</span></span><a class="headerlink" href="#qsynthesis.types.SymbolicVariable" title="Link to this definition"></a></dt>
 <dd><p><a class="reference external" href="https://triton.quarkslab.com/documentation/doxygen/py_SymbolicVariable_page.html">SymbolicVariable</a> object as generated by Triton</p>
 <p>alias of TypeVar(‘SymbolicVariable’)</p>
 </dd></dl>
