@@ -35,7 +35,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           path: dist/
-          pattern: *.tar.gz
+          pattern: qsynthesis*.tar.gz
 
   upload_pypi:
     needs: [build_wheels, build_sdist]
