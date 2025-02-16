@@ -6,54 +6,50 @@ on:
   workflow_dispatch:
 
 jobs:
-  build_wheels:
+  build_wheel_and_sdist:
     name: Build wheel
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.10", "3.11", "3.12", "3.13" ]
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: ${{ matrix.python-version }}
+      - name: Install LevelDB dependencies # for python 3.13
+        run: apt install libleveldb-dev
       - name: Install dependencies
-        run: pip install wheel
-      - name: Build wheel
-        run: pip wheel -w wheels .
+        run: pip install build
+      - name: Build wheel and sdist
+        run: python -m build
       - uses: actions/upload-artifact@v4
         with:
-          path: ./wheels/
-          pattern: qsynthesis*.whl
-
-  build_sdist:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-      - name: Build sdist
-        run: python setup.py sdist
-      - uses: actions/upload-artifact@v4
-        with:
-          path: dist/
-          pattern: qsynthesis*.tar.gz
+          name: artifact_${{ matrix.python-version }}
+          path: |
+            dist/qsynthesis*.whl
+            dist/qsynthesis*.tar.gz
 
   upload_pypi:
-    needs: [build_wheels, build_sdist]
+    needs: build_wheel_and_sdist
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          # unpacks default artifact into dist/
-          # if `name: artifact` is omitted, the action will create extra parent dir
-          name: artifact
+          pattern: artifact_*
+          merge-multiple: true
           path: dist
 
       - name: Publish a Python distribution to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.8.2
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_DEPLOY_TOKEN }}
 
+  upload_artifacts_release:
+    needs: build_wheel_and_sdist
+    runs-on: ubuntu-latest
+    steps:
       - name: Upload Python packages for release notes
         uses: softprops/action-gh-release@v0.1.15
         with:
