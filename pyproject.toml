@@ -8,7 +8,7 @@ description = "Python API to synthesize Triton AST's"
 authors = [{ name = "Robin David", email = "rdavid@quarkslab.com" }]
 license = { text = "AGPL-3.0" }
 readme = { file = "README.md", content-type = "text/markdown" }
-version = '0.2.1'
+version = '0.2.2'
 requires-python = ">=3.8"
 dependencies = [
     "triton-library",
