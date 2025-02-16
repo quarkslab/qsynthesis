@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qsynthesis"
+description = "Python API to synthesize Triton AST's"
+authors = [{ name = "Robin David", email = "rdavid@quarkslab.com" }]
+license = { text = "AGPL-3.0" }
+readme = { file = "README.md", content-type = "text/markdown" }
+version = '0.2.1'
+requires-python = ">=3.8"
+dependencies = [
+    "triton-library",
+    "ordered_set",
+    "psutil",
+    "click",
+    "plyvel",
+    "requests",
+    "capstone",
+    "pydffi>=0.9.1"
+]
+
+#[tool.setuptools]
+#packages = ["qsynthesis"]
+
+#[tool.setuptools.packages.find]
+#where = ["."]
+#include = ["qsynthesis*"]  # alternatively: `exclude = ["additional*"]`
+#namespaces = false
+
+#[tool.setuptools.packages.find]
+#where = ["qsynthesis"]
+
+[project.optional-dependencies]
+reassembly = [
+    "arybo",
+    "llvmlite"
+]
+generator = [
+    "sympy"
+]
+server = [
+    "fastapi",
+    "uvicorn"
+]
+all = [
+    "qsynthesis[server,generator,reassembly]",
+]
+
+#classifiers = [
+#    'Topic :: Security',
+#    'Environment :: Console',
+#    'Operating System :: OS Independent',
+#]
+
+[project.urls]
+Homepage = "https://github.com/quarkslab/qsynthesis"
+Repository = "https://github.com/quarkslab/qsynthesis"
+Documentation = "https://quarkslab.github.io/qsynthesis/"
+"Bug Tracker" = "https://github.com/quarkslab/qsynthesis/issues"
+
+[project.scripts]
+qsynthesis-table-manager = "qsynthesis.bin.qsynthesis_table_manager:main"
+qsynthesis-table-server = "qsynthesis.bin.qsynthesis_table_server:main"
