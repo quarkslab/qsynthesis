@@ -19,7 +19,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install LevelDB dependencies # for python 3.13
-        run: apt install libleveldb-dev
+        run: sudo apt install libleveldb-dev
       - name: Install dependencies
         run: pip install build
       - name: Build wheel and sdist
